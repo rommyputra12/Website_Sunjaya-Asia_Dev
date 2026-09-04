@@ -1,0 +1,27 @@
+{
+  "summary": "Frontend-only verification of /subsidiaries page fixes. Verified both reported bugs are fixed and new two-column summary feature works. Tested at 1920x1080 desktop and 375x812 mobile.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "bug1_arrow_visibility": "PASS - Arrow (→) visible on SUNJAYA AN XIN card at (1281.97, 2639.84), width=18px, height=18px. KGI arrow visible at (1676.98, 2639.84). All 9 cards have visible arrows.",
+    "bug2_border_inset": "PASS - SAN card border-t inset is 24px left / 24px right (matches left-6 right-6 = 1.5rem). Identical to KGI card (24px/24px). border-white/25 class applied.",
+    "feature_two_column_summary": "PASS - data-testid='subsidiaries-summary' contains two lists. subsidiaries-list has 7 items (STI, SAC, SAE, AGI, ECS, SM, TSN). affiliates-list has 2 items (SAN, KGI). Filter based on tag 'Affiliate' working correctly.",
+    "regression_all_cards": "PASS - All 9 cards (sti, sac, sae, agi, ecs, sm, tsn, san, kgi) render with image, city, name, sector, and arrow. No layout issues.",
+    "responsive_mobile": "PASS - At 375x812, summary grid stacks vertically (gridTemplateColumns='327px' single col via md:grid-cols-2 breakpoint). Affiliates list appears below subsidiaries list. All cards visible."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor: /app/frontend/src/data/content.js has duplicate keys in IMAGES object (line 44 'gold' overridden by line 56 'gold'; line 54 'military' overridden by line 68 'military'). JS silently uses last declaration but this is fragile — consolidate keys."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All fixes verified on production preview URL. Arrow visibility confirmed via bounding box + visibility check. Border inset measured precisely as 24px both sides. Summary lists parsed and asset names verified."
+}

@@ -1,0 +1,25 @@
+{
+  "summary": "Iteration 6 visual-fix verification (frontend-only). Verified: (1) header logo is a bare <img> directly inside the <a data-testid=nav-logo> with NO wrapping div and no border/background classes; (2) header brand text renders as a single <span> 'Sunjaya Asia Group' — one line at 1920px (width 154px, height 28px, whitespace:nowrap, estLines=1), single color rgb(243,243,241) = bone/#F3F3F1, single font Bricolage Grotesque; (3) hero H1 uses Bricolage Grotesque at 76px (matches clamp max 4.75rem); screenshot confirms 'The power / of innovations.' renders with all descenders (p, g) fully visible — no clipping; (4) H1s on /pillars, /subsidiaries, /global-presence, /news, /contact, /about all render at 36px (md:text-4xl) using Bricolage Grotesque; (5) Home H2s (Manifesto/Portfolio/Presence) at 30px (md:text-3xl); (6) Nav chrome on light pages (/contact, /subsidiaries, /news) is dark obsidian/95 (rgba(5,30,43,0.95)) with all 7 nav links visible; (7) Language toggle EN<->ID switches copy correctly (hero: 'The power of innovations.' <-> 'Kekuatan dari inovasi.'). Backend /api/health not tested in-browser (frontend-only scope; a preview edge returned 403 to raw urllib but this is an edge quirk unrelated to backend health).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All page H1s", "issues": ["Minor: element.scrollHeight is ~5px larger than clientHeight on H1s due to line-height (0.92 ratio) being tighter than the natural font line-box; overflow is 'visible' so descenders are NOT visually clipped (confirmed in hero screenshot). Not a bug — noting for awareness only."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/home_header.png", "/app/test_reports/home_hero.png"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Nav.jsx Logo(): clean single-img + single-span structure, no wrapper div, whitespace-nowrap prevents wrapping — matches spec exactly.",
+    "font-serif token now Bricolage Grotesque as declared in tailwind.config.js — verified via computed style on live pages.",
+    "Consider setting lineHeight >= 1.0 on H1s (currently ~0.92) if you want scrollHeight==clientHeight, though visual result is fine because overflow is visible."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only scope)", "frontend": "100%"},
+  "test_credentials": "n/a for this iteration",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All three reported visual bugs (logo box, split brand text, oversized headlines) are fixed and verified. Header brand text is 154px wide, single line, single font/color. All H1s use Bricolage Grotesque at 36px on inner pages; hero uses 76px with descenders visible. Nav still darkens on light pages. EN/ID toggle intact."
+}

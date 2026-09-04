@@ -1,0 +1,133 @@
+{
+  "theme": "dark",
+  "art_direction": "Bold-Dark Corporate & Modern Editorial",
+  "vibe": "Serious, sovereign-scale, government-facing brand. Editorial gravitas + engineering precision + defense-tech mystique. Avoid generic startup tech looks.",
+  "typography": {
+    "headings": {
+      "family": "EB Garamond",
+      "import": "@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap');",
+      "style": "font-family: 'EB Garamond', serif;",
+      "usage": "Use for large titles, chapter markers, and 'THE POWER OF INNOVATIONS'. tracking-tight, leading-none. Unapologetic editorial feel.",
+      "sizes": "Fluid scaling. H1 clamp(3rem, 8vw, 6rem)."
+    },
+    "body": {
+      "family": "IBM Plex Mono",
+      "import": "@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');",
+      "style": "font-family: 'IBM Plex Mono', monospace;",
+      "usage": "Use for paragraphs, overlines, technical data, subsidiary names, buttons. Enhances engineering/defense-tech precision."
+    }
+  },
+  "colors": {
+    "background": {
+      "primary": "#050505",
+      "secondary": "#0A0A0A",
+      "surface": "#121212"
+    },
+    "text": {
+      "primary": "#F3F3F1",
+      "secondary": "#A0A09B",
+      "muted": "#666661"
+    },
+    "accent": {
+      "primary": "#C86230",
+      "hover": "#E07B48",
+      "border": "rgba(200, 98, 48, 0.3)"
+    },
+    "forbidden": ["purple", "violet", "teal", "bright generic startup gradients", "pure #000000 without texture", "pure white backgrounds"]
+  },
+  "visual_enhancers": {
+    "surfaces": "No glassmorphism unless strictly needed for readable sticky navs (use #050505/80 with backdrop-blur-xl). Prefer matte surfaces with 1px borders (border-white/10).",
+    "borders": "Expose the skeleton using 1px grid borders in data-heavy sections. Use sharp corners (rounded-none or max rounded-sm) to feel industrial and rigid.",
+    "overlays": "Spotlight masking, clipped frames. Real industrial photography treated deliberately with dark duotones or heavy contrast, overlaid with bg-black/40.",
+    "textures": "Subtle digital noise or grain overlay (pointer-events-none) across the entire application to kill digital flatness."
+  },
+  "layouts_and_grids": {
+    "general": "Commit to left-aligned/asymmetric editorial layout. NO centered equal-spaced cards. Generous negative space (py-24, py-32).",
+    "the_bento": "Use Mode A (The 'Tetris' Grid). 12-column span logic mixing 1x1, 2x1, and tall 1x2 elements to create visual tension.",
+    "markers": "Numbered manifesto chapters. Enormous '01', '02', '03' using EB Garamond. Positioned asymmetrically to overlap or break the grid."
+  },
+  "motion": {
+    "engine": "framer-motion + @studio-freight/react-lenis (for smooth momentum scrolling).",
+    "hero_load": "Kinetic masked line-by-line reveal of 'THE POWER OF INNOVATIONS' tagline (staggered translate-y with overflow-hidden mask).",
+    "parallax": "Scroll-linked parallax on the primary hero image or a 3D structural background.",
+    "section_reveals": "opacity: 0, filter: 'blur(10px)', y: 40 -> opacity: 1, filter: 'blur(0px)', y: 0 with slow easeOut.",
+    "marquee": "One slow editorial marquee (~40s duration) repeating 'THE POWER OF INNOVATIONS · SINGAPORE · JAKARTA · DELAWARE · DUBAI · BEIJING ·'. Uses react-fast-marquee.",
+    "interactions": "Hover micro-interactions on subsidiary cards (image zooms inside a clipped frame, border color shift to burnt copper, subtle x-translation on arrow icons)."
+  },
+  "components": {
+    "navigation": "Sticky nav. Brand left, minimal text links center/right. Language toggle (EN / ID). Solid dark bg or very dark glass. No transparency over images.",
+    "cards": "Cardless UI or completely sharp-edged cards. Left-aligned content. High contrast borders. No soft drop shadows.",
+    "buttons": "Sharp edges, IBM Plex Mono uppercase, 1px border. Hover fills background with accent color.",
+    "forms": "Use Shadcn customized inputs. Dark matte background, square corners, focus state adds burnt copper border. Connect to Resend.",
+    "cms_table": "Shadcn tables for Admin News management. Dense, precise grid layout."
+  },
+  "pages": [
+    "Home: Kinetic Hero -> Slow Marquee -> Numbered Manifesto Pillars -> Global Presence Map -> Subsidiaries -> Achievements Ticker -> ISO Strip -> Footer",
+    "About: Deep dive into the sovereign-scale holding co history, board room imagery, abstract metal.",
+    "Business Pillars: 3 Manifesto Chapters (The Foundation, The Core, The Future) explaining all 13 industries with clipped photography.",
+    "Subsidiaries: Asymmetric grid of 8+ companies with hover states.",
+    "Global Presence: Visual list/map of locations (Singapore, Indonesia, USA, UAE, China).",
+    "News: List of CMS-driven insights.",
+    "Contact: Form with real Resend integration emailed to info@sunjayaasia.com."
+  ],
+  "image_urls": {
+    "ports_shipping": [
+      {"url": "https://images.pexels.com/photos/6379248/pexels-photo-6379248.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Drone view cargo ship"},
+      {"url": "https://images.unsplash.com/photo-1606185540834-d6e7483ee1a4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwxfHxzaGlwcGluZyUyMHBvcnQlMjBhZXJpYWx8ZW58MHx8fHwxNzg0NDc4Mzc0fDA&ixlib=rb-4.1.0&q=85", "desc": "Shipping port aerial"}
+    ],
+    "industrial_sparks": [
+      {"url": "https://images.pexels.com/photos/17156135/pexels-photo-17156135.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Grinding machine sparks"},
+      {"url": "https://images.pexels.com/photos/17245900/pexels-photo-17245900.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Dramatic sparks"}
+    ],
+    "solar_energy": [
+      {"url": "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMGZhcm0lMjBlbmVyZ3l8ZW58MHx8fHwxNzg0NDc4Mzc0fDA&ixlib=rb-4.1.0&q=85", "desc": "Solar panels"},
+      {"url": "https://images.unsplash.com/photo-1768839727824-28d6f0dcd1d1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHwyfHxzb2xhciUyMGZhcm0lMjBlbmVyZ3l8ZW58MHx8fHwxNzg0NDc4Mzc0fDA&ixlib=rb-4.1.0&q=85", "desc": "Solar field"}
+    ],
+    "defense_drones": [
+      {"url": "https://images.unsplash.com/photo-1495764506633-93d4dfed7c6b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMG5pZ2h0JTIwZmxpZ2h0fGVufDB8fHx8MTc4NDQ3ODM3NHww&ixlib=rb-4.1.0&q=85", "desc": "Drone hover silhouette"}
+    ],
+    "data_center": [
+      {"url": "https://images.pexels.com/photos/37730212/pexels-photo-37730212.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Server racks dark"}
+    ],
+    "corporate_boardroom": [
+      {"url": "https://images.pexels.com/photos/260689/pexels-photo-260689.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Sleek glass conference room"}
+    ],
+    "abstract_metal": [
+      {"url": "https://images.unsplash.com/photo-1626362073981-75205f952cf3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMG1vbHRlbiUyMG1ldGFsfGVufDB8fHx8MTc4NDQ3ODM3NXww&ixlib=rb-4.1.0&q=85", "desc": "Abstract molten metal"}
+    ],
+    "gold_bars": [
+      {"url": "https://images.pexels.com/photos/29336321/pexels-photo-29336321.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Gold bars wealth"}
+    ],
+    "plantation": [
+      {"url": "https://images.pexels.com/photos/2673552/pexels-photo-2673552.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Green plantation aerial"}
+    ],
+    "cityscape": [
+      {"url": "https://images.pexels.com/photos/164536/pexels-photo-164536.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "desc": "Singapore skyline night"}
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install required libraries: framer-motion, @studio-freight/react-lenis, react-fast-marquee, @phosphor-icons/react",
+    "Configure Tailwind with the exact color hex codes provided (obsidian, burnt copper).",
+    "Implement the kinetic line-by-line reveal on the Home Hero exactly as requested (use framer-motion with overflow:hidden wrappers on text lines).",
+    "Build out multi-page structure via React Router (Home, About, Pillars, Subsidiaries, Global Presence, News, Contact).",
+    "Create the contact form and set up a basic Resend API call in the backend.",
+    "Implement the News CMS module (simple CRUD UI).",
+    "Ensure dark mode is forced. No toggle required since art direction is firmly committed to Bold-Dark Corporate.",
+    "All interactive elements MUST have `data-testid` attributes."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Do not converge toward generic outputs. Use creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "You MUST NOT apply universal transition (e.g., transition: all). Add transitions to specific properties.",
+    "You MUST NOT center align the app container in CSS.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations.",
+    "NEVER use AI assistant Emoji characters.",
+    "Every interaction needs micro-animations (hover states, transitions).",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations separate good from extraordinary.",
+    "Missing image categories = you use placeholder text, which is FORBIDDEN. Always use the provided image URLs.",
+    "Prioritize using pre-existing Shadcn components, modify them for sharp edges and dark themes."
+  ]
+}

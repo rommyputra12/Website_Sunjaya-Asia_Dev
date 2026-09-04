@@ -1,0 +1,17 @@
+{
+  "summary": "Iteration 8 (frontend-only): Verified StaticWorldMap fix on Home page /global-presence teaser. Map SVG (viewBox 0 0 1600 900) fills 16:9 container edge-to-edge (1518x854 within 1518x854 container), 178 geography paths rendered, exactly 7 city <text> labels present (Singapore, Jakarta, Batam, Balikpapan, Dubai, Delaware, Beijing). Label offsets applied correctly (Singapore x=-10 y=-8 end; Batam x=-10 y=5 end; Jakarta x=0 y=18 middle; Balikpapan x=10 y=10 start) so the SG/Batam/Jakarta/Balikpapan cluster no longer overlaps. Visual screenshot confirms continents span left-to-right, pins staggered cleanly. Regressions all pass: /global-presence page still exposes 7 pin-* data-testids; Home stats show 360+, 100+, 16+, USD 750M with 'Regional Investment for Development Program' label; /contact nav shows dark chrome with all 7 nav links (HOME, ABOUT, PILLARS, SUBSIDIARIES, GLOBAL PRESENCE, NEWS, CONTACT); /api/health returns 200 {ok:true}.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/test_reports/home_map_view.png"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "StaticWorldMap.jsx: 'absolute inset-0' inside a non-positioned parent could still position off — verified in Home.jsx it lives inside a relatively positioned aspect-[16/9] block, so OK.",
+    "The teaser is a Link with pointer-events:none on the SVG which is fine; ensure entire link surface still navigates on click (Home teaser text 'Explore all locations →' present)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 8 verified only the StaticWorldMap fix. Map now uses geoEqualEarth, scale 270, center [55,22], 1600x900 viewBox. 7 text labels are staggered via LABEL dict for SG/Batam/Jakarta/Balikpapan. No further work needed on this component."
+}

@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 3 regression. Backend: 23/23 pytest tests PASS — health, contact (POST/validation/admin GET/sort desc), admin/verify auth, News full CRUD + language/published filters, and NEW Locations CRUD with lat/lng schema including out-of-range validation (lat=91 -> 422, lng=-181 -> 422) and auth guards. Frontend: 51/53 checks pass — Home renders with phoenix logo <img> in nav, kinetic hero 'The power of...', all 4 stats (360+, 100+, 16+, USD 65M), all 7 nav testids, EN→ID toggle switches hero copy to 'Grup' Bahasa. Pillars page shows chapters 01/02/03 with Hyperione and Military entries. Subsidiaries: all 9 sub-card-* present (sti,sac,sae,agi,ecs,sm,tsn,san,kgi). Global Presence /global-presence renders interactive react-simple-maps ComposableMap with data-testid=presence-map; all 7 pins (pin-singapore, pin-jakarta, pin-batam, pin-balikpapan, pin-dubai, pin-delaware, pin-beijing) confirmed in DOM; country cards below map show grouped locations (Singapore, Indonesia [Jakarta/Batam/Balikpapan], UAE, USA, China). Contact form submits successfully and shows success banner. Admin login rejects wrong token ('Invalid admin token'), accepts correct token, exposes 3 tabs (news/locations/inquiries). BUT: Admin Locations tab STILL uses old x/y form fields (data-testid=admin-x, admin-y) instead of admin-lat, admin-lng as required by review spec — Admin.jsx was not migrated when backend schema changed. Submitting the locations form via UI results in backend 422 which cascades into an Uncaught React runtime error because the sonner toast tries to render Pydantic's detail array of objects as a React child.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/contact", "issue": "No admin DELETE endpoint — TEST_* rows accumulate across test runs (7+ TEST rows present)"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Admin.jsx > LocationsPanel", "issue": "Form still uses x/y percentage fields — emptyLoc has x:50, y:50 and Field ids are 'x' and 'y', producing data-testid=admin-x / admin-y instead of the required data-testid=admin-lat / admin-lng. List renderer references l.x, l.y, which will be undefined for new lat/lng docs.", "selector": "[data-testid=admin-x], [data-testid=admin-y]", "priority": "CRITICAL"},
+      {"component": "Admin.jsx save() error handler", "issue": "toast.error(err?.response?.data?.detail || 'Save failed') passes Pydantic 422 detail array (array of objects: {type, loc, msg, input, url}) directly to sonner's toast, causing an Uncaught React error 'Objects are not valid as a React child' that white-screens the admin page.", "selector": "N/A", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [
+      {"flow": "Admin CMS -> Create Location", "issue": "Creating a location via admin UI is impossible — the form sends {x,y} which Pydantic drops (extra='ignore'), then lat/lng required-field validation returns 422 and the toast crash prevents any recovery.", "affected_selectors": ["[data-testid=admin-tab-locations]", "form submit inside LocationsPanel"]}
+    ],
+    "design_issues": [
+      {"screen": "Global Presence map", "issues": ["Legend text 'INTERACTIVE MAP · HOVER ANY PIN' is quite small (10px) but acceptable.", "Map viewport is fine on desktop; not verified on mobile."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Migrate Admin.jsx LocationsPanel to lat/lng: change emptyLoc to { city, country, role, lat: 1.29, lng: 103.85, color, order, published }; replace the two Field id='x' / id='y' inputs with id='lat' (min=-90 max=90) and id='lng' (min=-180 max=180) so their data-testids become admin-lat / admin-lng as required by the review spec.",
+    "Fix the list-row renderer inside LocationsPanel — currently shows 'x: {l.x}% · y: {l.y}%'; change to 'lat: {l.lat}° · lng: {l.lng}° · order: {l.order}'.",
+    "Fix the toast error handler in Admin.jsx: coerce error detail to a string before passing to toast.error(). E.g. `const msg = Array.isArray(err?.response?.data?.detail) ? err.response.data.detail.map(d => d.msg).join(', ') : (err?.response?.data?.detail || 'Save failed'); toast.error(msg);` — this prevents the React 'Objects are not valid as a React child' crash for all 422 responses across News and Location panels.",
+    "(Nice-to-have) Add data-testid=news-back-link on the news detail 'ALL ARTICLES' link.",
+    "(Nice-to-have) Add DELETE /api/contact/{id} to clean up TEST_ inquiries."
+  ],
+  "critical_code_review_comments": [
+    "Admin.jsx LocationsPanel is functionally broken — schema mismatch between frontend form (x/y) and backend model (lat/lng). This is the same class of bug that iteration 3 was supposed to fix.",
+    "The 422 -> React child crash is a category bug: any Pydantic validation error in News or Locations panels will white-screen /admin. Add a defensive detail formatter once and reuse.",
+    "server.py still uses deprecated @app.on_event('shutdown'); migrate to lifespan handler.",
+    "CORS_ORIGINS='*' with allow_credentials=True is invalid per browser spec; harmless in current preview but should be tightened before production.",
+    "Consider adding a startup migration/cleanup that drops legacy Location docs containing 'x'/'y' keys (mentioned in the review context) — otherwise a future GET /api/locations could 500 if such docs exist."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (23/23)", "frontend": "96% (51/53 checks)"},
+  "test_credentials": "Admin token: sunjaya-admin-2026-secret via header X-Admin-Token. /app/memory/test_credentials.md not present — flag: main agent should create it. Confirmed token loads from /app/backend/.env ADMIN_TOKEN.",
+  "seed_data_creation": "backend_test.py creates TEST_* Contact, News and Location rows and self-cleans (Location and News rows deleted in finally blocks). Contacts remain because there is no admin DELETE endpoint (see minor issue).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend is fully green with 23 tests including the new lat/lng Locations CRUD. Frontend Global Presence is fully working (interactive map + 7 pin testids). Only failing spec items are the two frontend testids on the Admin Locations form (admin-lat, admin-lng) — main agent must migrate Admin.jsx LocationsPanel from x/y to lat/lng AND fix the toast.error 422 array crash. Once fixed, re-verify by opening /admin -> locations tab, creating a new location, and confirming it appears on /global-presence. The pytest suite in /app/backend/tests/backend_test.py is idempotent and can be reused.",
+  "rca of the issue": "When the backend Location schema was migrated from x/y percentage to lat/lng float degrees for the react-simple-maps integration, only server.py and the public GlobalPresence.jsx page were updated. Admin.jsx LocationsPanel was missed: it still declares emptyLoc = {city, country, role, x: 50, y: 50, ...} and its two coordinate <Field id='x'/> and <Field id='y'/> inputs generate data-testid=admin-x / admin-y instead of admin-lat / admin-lng. On submit the POST body carries {x, y} which Pydantic silently drops (ConfigDict extra='ignore'), then rejects the request with 422 because lat and lng are required. That 422 response body is {detail:[{type, loc, msg, input, url}, ...]} (a list of objects); the client passes it directly to sonner's toast.error(), which tries to render it as a React child, throwing 'Objects are not valid as a React child' and white-screening /admin. Reproduction: /admin -> login -> Locations tab -> fill city/country/role -> Add Location -> observe red 'Uncaught runtime errors' overlay. Mitigation is described in action_items 1–3."
+}
