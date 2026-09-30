@@ -8,7 +8,7 @@ import uuid
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://enterprise-portal-98.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://code-sync-145.preview.emergentagent.com").rstrip("/")
 ADMIN_TOKEN = "sunjaya-admin-2026-secret"
 API = f"{BASE_URL}/api"
 
