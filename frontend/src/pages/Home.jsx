@@ -86,13 +86,13 @@ export default function Home() {
         {/* Above-the-fold — white line sits just below the hero content */}
         <div className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full flex flex-col">
           {/* Top spacer — small proportional gap below the navbar */}
-          <div className="h-[4vh] md:h-[5vh] shrink-0" />
+          <div className="h-[2vh] md:h-[3vh] shrink-0" />
           {/* Top row */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.6, duration: 0.8 }}
-            className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mb-8 md:mb-10"
+            className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mb-6 md:mb-8"
           >
             <span className="hero-overline-glow font-mono text-[10px] tracking-[0.24em] uppercase text-white text-center md:text-left">
               <CharReveal text={t("hero.overline")} delay={0.2} />
@@ -125,7 +125,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.7, duration: 0.9 }}
-            className="mt-10 md:mt-12 flex flex-wrap gap-3"
+            className="mt-8 md:mt-10 flex flex-wrap gap-3"
           >
             <Link
               to="/pillars#pillar-01"
@@ -147,7 +147,7 @@ export default function Home() {
           </motion.div>
 
           {/* Gap so the white line sits below the Discover button, stats start just under it */}
-          <div className="mt-14 md:mt-20" />
+          <div className="mt-8 md:mt-12" />
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
@@ -158,7 +158,7 @@ export default function Home() {
 
         {/* Stats 01–04 — fade up into view on scroll */}
         <div
-          className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-8 md:pt-10 pb-10 md:pb-14 grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-8 items-start justify-items-center"
+          className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 pb-8 md:pb-10 grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-8 items-start justify-items-center"
         >
           {STATS.map((s, i) => (
             <motion.div
@@ -184,8 +184,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BUSINESS PILLAR INTRO — full viewport, 1 screen including fixed nav */}
-      <section className="snap-section relative h-screen overflow-hidden bg-azure border-t border-copper/40">
+      {/* BUSINESS PILLAR INTRO — min full viewport, grows if content is taller */}
+      <section className="snap-section relative min-h-screen overflow-hidden bg-azure border-t border-copper/40">
         <img
           src="/images/bg_business_pillars.jpg"
           alt="Business pillars background"
@@ -214,7 +214,7 @@ export default function Home() {
         const flip = i % 2 === 1;
         const TextCol = (
           <Reveal className="md:col-span-6" delay={0}>
-            <div className="flex items-start gap-4 md:gap-6 mt-6 md:mt-10">
+            <div className="flex items-start gap-4 md:gap-6 mt-2 md:mt-6">
               <span className="chapter-num text-[clamp(2.5rem,5vw,4.5rem)]">{p.num}</span>
               <div className="pt-1 flex-1 min-w-0">
                 <div className="border-b-2 border-copper pb-3 mb-4">
@@ -238,7 +238,7 @@ export default function Home() {
           <Reveal className="md:col-span-6" delay={0.15}>
             <div className="w-full flex flex-col items-center">
               {/* Full image visible — no cropping, chapter + button sit below */}
-              <div className="relative w-full h-[calc(100vh-10.5rem)] max-w-full overflow-hidden flex items-center justify-center">
+              <div className="relative w-full h-[36vh] md:h-[calc(100vh-11.5rem)] max-w-full overflow-hidden flex items-center justify-center">
                 <img
                   src={IMAGES[p.image]}
                   alt={p.title}
@@ -277,7 +277,7 @@ export default function Home() {
           </Reveal>
         );
         return (
-          <section key={p.num} id={`pillar-${p.num}`} className="snap-section section-light relative h-screen pt-20 md:pt-24 flex items-center overflow-hidden border-t border-copper/40">
+          <section key={p.num} id={`pillar-${p.num}`} className="snap-section section-light relative min-h-screen pt-20 md:pt-24 pb-8 md:pb-0 flex items-center overflow-hidden border-t border-copper/40">
             {(p.num === "01" || p.num === "02" || p.num === "03") && (
               <>
                 <img
@@ -303,8 +303,8 @@ export default function Home() {
         );
       })}
 
-      {/* SUBSIDIARIES TEASER — snap section, all content fits one screen */}
-      <section className="snap-section section-light border-t border-copper/40 h-screen pt-20 md:pt-24 flex flex-col overflow-hidden">
+      {/* SUBSIDIARIES TEASER — snap section, content fits at least one screen */}
+      <section className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-6 flex flex-col overflow-hidden">
         <div className="max-w-[1600px] mx-auto px-6 md:px-10 w-full flex-1 flex flex-col justify-center py-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-4 md:mb-5">
             <Reveal className="max-w-4xl">
@@ -368,7 +368,7 @@ export default function Home() {
         <div className="absolute inset-0 pointer-events-none bg-bone" />
 
         {/* Headline + stats row */}
-        <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 z-10">
+        <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 w-full pt-4 md:pt-6 z-10">
           {/* Kicker — heading position at the top */}
           <Reveal>
             <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("presence.kicker")}</span>
@@ -408,22 +408,22 @@ export default function Home() {
         </div>
 
         {/* 3D Globe centerpiece — transparent background, globe overflows without affecting content */}
-        <Reveal className="relative flex-1 min-h-[55vh] md:min-h-0 px-4 md:px-6 pt-2 md:pt-4 pb-6 md:pb-8" delay={0.12}>
-          <div className="relative w-full h-full max-w-[1600px] mx-auto" style={{ minHeight: 420 }}>
+        <Reveal className="relative flex-1 min-h-[44vh] md:min-h-0 px-4 md:px-6 pt-2 md:pt-4 pb-4 md:pb-6" delay={0.12}>
+          <div className="relative w-full h-full max-w-[1600px] mx-auto min-h-[320px] md:min-h-[400px]">
             <Globe3D />
 
               {/* Locations panel — adapted from Subsidiaries map legend, restyled for light bg */}
-              <div className="absolute bottom-32 md:bottom-40 left-6 md:left-10 z-10 border border-copper/30 bg-white/80 backdrop-blur-md px-5 py-4 shadow-md rounded-lg">
-                <div className="font-mono text-xs tracking-[0.22em] uppercase text-copper mb-2.5 font-bold">Locations</div>
-                <div className="flex flex-col gap-1.5">
+              <div className="absolute bottom-24 md:bottom-40 left-4 md:left-10 z-10 border border-copper/30 bg-white/80 backdrop-blur-md px-4 py-3 md:px-5 md:py-4 shadow-md rounded-lg max-w-[70vw] md:max-w-none">
+                <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-copper mb-2 md:mb-2.5 font-bold">Locations</div>
+                <div className="flex flex-col gap-1 md:gap-1.5">
                   {DEFAULT_LOCATIONS.map((l) => (
-                    <div key={l.city} className="flex items-center gap-2.5 font-mono text-sm text-obsidian">
+                    <div key={l.city} className="flex items-center gap-2 md:gap-2.5 font-mono text-xs md:text-sm text-obsidian">
                       <span className="w-2 h-2 rounded-full" style={{ background: l.color }} />
                       {l.city}
                     </div>
                   ))}
                   {INFRA_HUBS.map((h) => (
-                    <div key={h.city} className="flex items-center gap-2.5 font-mono text-sm text-obsidian">
+                    <div key={h.city} className="flex items-center gap-2 md:gap-2.5 font-mono text-xs md:text-sm text-obsidian">
                       <span className="w-2 h-2 rotate-45" style={{ background: h.color }} />
                       {h.city}
                       <span className="text-[10px] tracking-[0.18em] text-obsidian/50">· INFRA</span>
@@ -433,7 +433,7 @@ export default function Home() {
               </div>
 
               {/* Bottom-left hub label + CTA */}
-              <div className="absolute bottom-5 left-6 md:left-10 z-10 flex flex-col gap-2">
+              <div className="absolute bottom-4 md:bottom-5 left-4 md:left-10 z-10 flex flex-col gap-2">
                 <div className="font-mono text-xs md:text-sm tracking-[0.2em] uppercase text-copper font-bold">
                   {t("presence.hub")}
                 </div>
