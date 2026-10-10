@@ -142,13 +142,11 @@
 ## metadata:
 ##   created_by: "main_agent"
 ##   version: "1.0"
-##   test_sequence: 2
+##   test_sequence: 3
 ##   run_ui: true
 ##
 ## test_plan:
-##   current_focus:
-##     - "Fix truncated/missing images (pillar 01-02 backgrounds, Sunjaya Teknologi & Allwyn subsidiary cards)"
-##     - "Home page section sizing responsive fit"
+##   current_focus: []
 ##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"
@@ -157,4 +155,29 @@
 ##     -agent: "main"
 ##     -message: "Please verify on the home page (http://localhost:3000): (1) Pillar 01 and Pillar 02 sections show full background imagery with NO gray band at the bottom (previously truncated JPEGs); (2) Subsidiaries & Affiliates teaser cards 'Sunjaya Teknologi Indonesia' and 'Allwyn Group Indonesia' now display photos (previously blank gray); (3) sections are not clipped - all content incl. 'CHAPTER 0X / EXPLORE OUR ...' buttons fully visible, no horizontal overflow. Test at desktop 1920x800 AND mobile 390x844. Also quickly check /subsidiaries page cards for the same two companies. The 3D globe may not render in headless (WebGL) - ignore that."
 ##     -agent: "testing"
-##     -message: "✅ ALL TESTS PASSED. Comprehensive testing completed at desktop (1920x800) and mobile (390x844) viewports. Image fixes verified: (1) Pillar 01 & 02 backgrounds display full imagery with NO gray bands - cropping fix successful. (2) Sunjaya Teknologi Indonesia and Allwyn Group Indonesia cards show actual photos (data-center and port images) on both home page teaser and /subsidiaries page - no blank/gray areas. (3) Responsive sizing verified: all sections use min-h-screen, all 'CHAPTER' labels and 'EXPLORE OUR...' buttons fully visible, content accessible by scrolling on mobile, no horizontal overflow. Both reported bugs are RESOLVED. Ready for user acceptance."
+##     -message: "VERIFIED: pillar 01/02 backgrounds full (no gray band), both subsidiary cards show photos on home and /subsidiaries, no clipped content, no horizontal overflow at both viewports."
+##     -agent: "user"
+##     -message: "User reported: globe di section Global Presence hilang (blank putih)."
+##     -agent: "main"
+##     -message: "Root cause: dua instance three.js — /app/frontend/node_modules/three@0.185.1 (app) vs /app/node_modules/three@0.186.1 (react-globe.gl/three-globe). three-globe memanggil Object3D.intersectsFrustum() (API 0.186) pada objek yang dibuat app dengan 0.185 -> 'PAGE ERROR: object.intersectsFrustum is not a function' -> render loop crash -> globe blank. Fix: frontend/package.json three ^0.185.1 -> ^0.186.1 (dedupe ke satu instance), tambah resolve.dedupe ['three'] di vite.config.js, clear .vite cache, restart frontend. Globe confirmed rendering (benua, atmosphere, arcs, kartu lokasi aktif). Needs retesting per protocol."
+##     -agent: "testing"
+##     -message: "✅ GLOBE FIX VERIFIED. Comprehensive testing at desktop (1920x800) and mobile (390x844) confirms: (1) Globe is VISIBLE and rendering correctly - 3D Earth with continents, atmosphere, location dots, arcs, and info card all present. (2) NO 'intersectsFrustum' error in console. (3) NO 'Multiple instances of Three.js' warning. (4) Globe auto-rotates as expected. (5) Regression check passed - all other sections (Hero, Business Pillars, CHAPTER 01/02/03, Subsidiaries) render correctly. Three.js version conflict fix is SUCCESSFUL. All three reported bugs (responsive sizing, truncated images, missing globe) are now RESOLVED. Website is ready for production."
+##
+## frontend_globe_fix:
+##   - task: "Fix globe hilang di Global Presence (three.js version conflict)"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/package.json, /app/frontend/vite.config.js"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "user"
+##         -comment: "User reported: globe di section Global Presence hilang (blank putih)."
+##         -working: true
+##         -agent: "main"
+##         -comment: "Root cause: dua instance three.js — /app/frontend/node_modules/three@0.185.1 (app) vs /app/node_modules/three@0.186.1 (react-globe.gl/three-globe). three-globe memanggil Object3D.intersectsFrustum() (API 0.186) pada objek yang dibuat app dengan 0.185 -> 'PAGE ERROR: object.intersectsFrustum is not a function' -> render loop crash -> globe blank. Fix: frontend/package.json three ^0.185.1 -> ^0.186.1 (dedupe ke satu instance), tambah resolve.dedupe ['three'] di vite.config.js, clear .vite cache, restart frontend. Globe confirmed rendering (benua, atmosphere, arcs, kartu lokasi aktif). Needs retesting per protocol."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED at desktop (1920x800) and mobile (390x844). Globe is VISIBLE and rendering correctly in Global Presence section. Desktop: canvas 1600x400px visible, shows 3D Earth with light blue-gray continents, blue atmosphere glow, colored location dots, dashed copper arcs, and white info card (Panama/Infrastructure Hub) floating near globe. Navigation dots (10) at bottom working. Mobile: canvas 358x320px visible, same globe elements rendering correctly. Console verification: NO 'intersectsFrustum' error, NO 'Multiple instances of Three.js' warning. Only harmless warnings: WebGL GPU stall (normal performance), Vite HMR, ipapi.co 429 rate limit (non-critical timezone API). Regression check: all sections (Hero, Business Pillars, CHAPTER 01/02/03, Subsidiaries) render correctly, no blank sections, no horizontal overflow. Globe auto-rotation confirmed via screenshots 4s apart showing position change. Three.js version conflict fix SUCCESSFUL. Bug RESOLVED."
