@@ -181,3 +181,28 @@
 ##         -working: true
 ##         -agent: "testing"
 ##         -comment: "✅ VERIFIED at desktop (1920x800) and mobile (390x844). Globe is VISIBLE and rendering correctly in Global Presence section. Desktop: canvas 1600x400px visible, shows 3D Earth with light blue-gray continents, blue atmosphere glow, colored location dots, dashed copper arcs, and white info card (Panama/Infrastructure Hub) floating near globe. Navigation dots (10) at bottom working. Mobile: canvas 358x320px visible, same globe elements rendering correctly. Console verification: NO 'intersectsFrustum' error, NO 'Multiple instances of Three.js' warning. Only harmless warnings: WebGL GPU stall (normal performance), Vite HMR, ipapi.co 429 rate limit (non-critical timezone API). Regression check: all sections (Hero, Business Pillars, CHAPTER 01/02/03, Subsidiaries) render correctly, no blank sections, no horizontal overflow. Globe auto-rotation confirmed via screenshots 4s apart showing position change. Three.js version conflict fix SUCCESSFUL. Bug RESOLVED."
+##
+## frontend_original_backgrounds:
+##   - task: "Pillar 01 & 02 backgrounds diganti file ORIGINAL dari repo (commit a7030e5, stock foto ukuran asli)"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/public/images/Home_Pillar_01_The_Foundation_Background.jpeg, /app/frontend/public/images/Home_Pillar_02_The_Core_Background.jpeg"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "user"
+##         -comment: "User: background Foundation 01 dan 02 diedit dengan stock foto dan ukuran asli di repository - cek dan pakai untuk update semua gambar yang diperlukan."
+##         -working: true
+##         -agent: "main"
+##         -comment: "User pushed original images to repo with NEW filenames containing spaces: 'Home_Pillar 01_The Foundation_Background.jpeg' (1376x768, 1.3MB, valid) and 'Home_Pillar 02_The Core_Background.jpeg' (1376x768, 1.5MB, valid). Copied both into /app/frontend/public/images using the underscore filenames referenced by Home.jsx, replacing the earlier cropped repairs. No crop - full original image. All other repo images validated OK; subsidiary images already imported previously."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED at desktop (1920x800) and mobile (390x844). Pillar 01 background: FULL original image (1376x768) displays correctly with complete collage showing plantations/fields, office interior, city skyline, industrial equipment, airplane - NO gray band anywhere (top, bottom, or sides). Pillar 02 background: FULL original image (1376x768) displays correctly with complete collage showing mining trucks, cargo ship, airplane, cows/livestock barn, commodity sacks - NO gray band anywhere. Both images load with HTTP 200. All 'CHAPTER 01/02' labels and 'Explore Our...' buttons fully visible. Regression checks PASSED: Pillar 03 background intact (3848x2147), Globe rendering correctly (canvas visible, 3D Earth with continents, atmosphere, dots, arcs), Subsidiaries grid images all loaded (including Sunjaya Teknologi Indonesia and Allwyn Group Indonesia). No horizontal overflow at either viewport. No critical console errors. Direct image URL verification: both /images/Home_Pillar_01_The_Foundation_Background.jpeg and /images/Home_Pillar_02_The_Core_Background.jpeg return HTTP 200. Original background images fix CONFIRMED WORKING."
+##
+## agent_communication_latest:
+##     -agent: "main"
+##     -message: "Please verify the task 'Pillar 01 & 02 backgrounds diganti file ORIGINAL dari repo' (needs_retesting: true). On home page, pillar 01 (The Foundation) and pillar 02 (The Core) sections must show the FULL original background collages (no gray band, no bottom cut). Pillar 01 collage: plantations, office, city skyline, industrial equipment, airplane. Pillar 02 collage: mining trucks, ship, airplane, livestock/cows, commodity sacks. Test desktop 1920x800 and mobile 390x844. Quick regression: globe in Global Presence must still render."
+##     -agent: "testing"
+##     -message: "✅ VERIFICATION COMPLETE. Task 'Pillar 01 & 02 backgrounds diganti file ORIGINAL dari repo' is WORKING correctly. Both pillar backgrounds display FULL original images (1376x768) with NO gray bands at desktop and mobile viewports. All regression checks passed (Pillar 03 intact, Globe rendering, Subsidiaries images loaded, no horizontal overflow). No critical issues found. Ready for user acceptance."
