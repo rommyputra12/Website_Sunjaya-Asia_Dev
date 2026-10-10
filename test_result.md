@@ -199,6 +199,26 @@
 ##         -comment: "User pushed original images to repo with NEW filenames containing spaces: 'Home_Pillar 01_The Foundation_Background.jpeg' (1376x768, 1.3MB, valid) and 'Home_Pillar 02_The Core_Background.jpeg' (1376x768, 1.5MB, valid). Copied both into /app/frontend/public/images using the underscore filenames referenced by Home.jsx, replacing the earlier cropped repairs. No crop - full original image. All other repo images validated OK; subsidiary images already imported previously."
 ##         -working: true
 ##         -agent: "testing"
+##     -agent: "user"
+##     -message: "User reported: section subsidiaries kurang fit - tulisan 'View all subsidiaries' menimpa foto, harusnya di bawah foto-foto. Resize dan layouting, tulisan atas boleh geser sedikit agar fit dan estetik."
+##     -agent: "main"
+##     -message: "Fix: grid tidak lagi flex-1 min-h-0 (yang membuat kartu ter-squeeze dan layout tidak stabil), diganti grid-auto-rows clamp() - mobile clamp(140px,20vh,220px), desktop clamp(170px,24vh,280px) - kartu punya tinggi natural, tombol selalu di bawah foto. Header di-align items-start, paragraf max-w-40rem, spacing dirapikan. Terukur: gap grid->tombol 32px desktop / 24px mobile, ruang bawah tombol 88-135px, tanpa overlap di semua ukuran viewport."
+##
+## frontend_subsidiaries_layout:
+##   - task: "Subsidiaries section - tombol View All di bawah foto, layout fit & estetik"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/src/pages/Home.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "user"
+##         -comment: "User: tombol view all subsidiaries menimpa foto, harus di bawah; resize & layouting agar fit dan estetik."
+##         -working: true
+##         -agent: "main"
+##         -comment: "Grid diganti dari flex-1 min-h-0 ke grid-auto-rows clamp() agar kartu punya tinggi natural dan tombol selalu berada di bawah grid dengan jarak jelas. Header items-start, spacing dirapikan."
 ##         -comment: "✅ VERIFIED at desktop (1920x800) and mobile (390x844). Pillar 01 background: FULL original image (1376x768) displays correctly with complete collage showing plantations/fields, office interior, city skyline, industrial equipment, airplane - NO gray band anywhere (top, bottom, or sides). Pillar 02 background: FULL original image (1376x768) displays correctly with complete collage showing mining trucks, cargo ship, airplane, cows/livestock barn, commodity sacks - NO gray band anywhere. Both images load with HTTP 200. All 'CHAPTER 01/02' labels and 'Explore Our...' buttons fully visible. Regression checks PASSED: Pillar 03 background intact (3848x2147), Globe rendering correctly (canvas visible, 3D Earth with continents, atmosphere, dots, arcs), Subsidiaries grid images all loaded (including Sunjaya Teknologi Indonesia and Allwyn Group Indonesia). No horizontal overflow at either viewport. No critical console errors. Direct image URL verification: both /images/Home_Pillar_01_The_Foundation_Background.jpeg and /images/Home_Pillar_02_The_Core_Background.jpeg return HTTP 200. Original background images fix CONFIRMED WORKING."
 ##
 ## agent_communication_latest:
@@ -206,3 +226,53 @@
 ##     -message: "Please verify the task 'Pillar 01 & 02 backgrounds diganti file ORIGINAL dari repo' (needs_retesting: true). On home page, pillar 01 (The Foundation) and pillar 02 (The Core) sections must show the FULL original background collages (no gray band, no bottom cut). Pillar 01 collage: plantations, office, city skyline, industrial equipment, airplane. Pillar 02 collage: mining trucks, ship, airplane, livestock/cows, commodity sacks. Test desktop 1920x800 and mobile 390x844. Quick regression: globe in Global Presence must still render."
 ##     -agent: "testing"
 ##     -message: "✅ VERIFICATION COMPLETE. Task 'Pillar 01 & 02 backgrounds diganti file ORIGINAL dari repo' is WORKING correctly. Both pillar backgrounds display FULL original images (1376x768) with NO gray bands at desktop and mobile viewports. All regression checks passed (Pillar 03 intact, Globe rendering, Subsidiaries images loaded, no horizontal overflow). No critical issues found. Ready for user acceptance."
+##     -agent: "user"
+##     -message: "Iterasi 2: ukuran foto terlalu kecil, terlalu naik ke atas, ada space kosong agak lebar di bagian bawah."
+##     -agent: "main"
+##     -message: "Fix v2: grid kembali flex-1 (foto besar mengisi frame sampai tombol) + lantai min-height (min-h-[320px] md:min-h-[360px]) + grid-auto-rows:1fr, TANPA min-h-0 — kartu tidak pernah ter-squeeze dan tidak spill ke tombol; section memanjang otomatis di layar pendek. Padding dirapatkan (py-4/6, pb-12/16, mb-5/6, mt-5/6) agar tidak ada ruang kosong berlebih. Terukur: d800 rows 213px section pas 800; d1080 rows 353px; short620 section tumbuh 718 rows tetap 172px; m844 rows 142px. gap grid->tombol 20-24px, tidak ada overlap di semua ukuran."
+##
+## frontend_subsidiaries_layout_v2:
+##   - task: "Subsidiaries section v2 - foto besar mengisi frame, tombol di bawah, tanpa ruang kosong berlebih"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/src/pages/Home.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "user"
+##         -comment: "User iterasi 2: foto terlalu kecil & naik ke atas, space kosong lebar di bawah."
+##         -working: true
+##         -agent: "main"
+##         -comment: "Grid flex-1 + min-h floor + grid-auto-rows:1fr; padding dirapatkan. Foto besar mengisi ruang, tombol selalu di bawah grid."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED at 5 viewports (1920x800, 1920x1080, 1366x768, 1280x620, 390x844). ALL REQUIREMENTS MET: (1) Photos are LARGE filling frame - desktop cards 172-353px tall (all >= 170px requirement), mobile 142px; (2) Button sits clearly BELOW grid with positive gap 20-24px, NO overlap at any viewport; (3) Space below button is modest 64-88px (within ~50-120px target), NO wide empty space; (4) Cards NEVER squished even on short 1280x620 screen (172px tall, section grows to 718px vs 620px viewport); (5) All 6 cards visible, grid layout correct (2x3 desktop, 3x2 mobile), all photos render including Sunjaya Teknologi Indonesia and Allwyn Group Indonesia. Regression PASSED: Hero, Pillar 01/02/03 backgrounds intact, Globe rendering (canvas visible 2560x640px desktop, 573x512px mobile), no horizontal overflow. Subsidiaries section v2 layout fix CONFIRMED WORKING."
+##
+##     -agent: "user"
+##     -message: "Iterasi 3: section subsidiaries masih kurang bagus - perbaiki ukuran foto dan perbesar, sehingga space kosong di bawah jadi fit dan penuh."
+##     -agent: "main"
+##     -message: "Fix v3: grid min-h floor dinaikkan (min-h-[340px] md:min-h-[480px]), container diperlebar max-w-[1700px] px-4/8, padding bawah dipangkas (pb-6 md:pb-10, py-3/4, mt-4/5). Hasil terukur: d800 rows 235px (was 213) section pas 800 belowBtn 56px (was 88); d1080 rows 375px; m844 rows 159px belowBtn 36px. Tidak ada overlap."
+##
+## frontend_subsidiaries_layout_v3:
+##   - task: "Subsidiaries section v3 - foto diperbesar, section fit & penuh tanpa ruang kosong bawah"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/src/pages/Home.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "user"
+##         -comment: "User iterasi 3: perbesar foto agar space kosong bawah jadi fit dan penuh."
+##         -working: true
+##         -agent: "main"
+##         -comment: "Grid floor 480px desktop, container lebih lebar, padding bawah dipangkas. Foto lebih besar, void bawah hilang."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED at 4 viewports (1920x800, 1920x1080, 1366x768, 390x844). ALL REQUIREMENTS MET: (1) Photos are BIGGER - card rows 235px at 800px height (target >=230px ✓), 375px at 1080px height (target >=350px ✓), 232px at 768px, 159px mobile; (2) Button sits clearly BELOW grid with positive gap 20px desktop / 16px mobile, NO overlap; (3) Space below button is small and appropriate 56px desktop / 36px mobile (within ~30-90px target ✓), NO large void; (4) Section looks fit and full - section height matches viewport at 800/1080/mobile, extends only 26px at 768px (acceptable); (5) All 6 cards visible in correct grid layout (2x3 desktop, 3x2 mobile), all photos loaded including Sunjaya Teknologi Indonesia and Allwyn Group Indonesia, button centered. Regression PASSED: Hero section intact, Pillar 01/02/03 backgrounds loaded (1376x768 each), Globe rendering correctly (canvas 2560x640 visible with continents/arcs), no horizontal overflow. Subsidiaries section v3 layout fix CONFIRMED WORKING - photos are bigger, empty space at bottom eliminated, section fits viewport perfectly."
+## agent_communication_latest:
+##     -agent: "testing"
+##     -message: "✅ VERIFICATION COMPLETE. Task 'Subsidiaries section v3 - foto diperbesar, section fit & penuh tanpa ruang kosong bawah' is WORKING correctly at all tested viewports (1920x800, 1920x1080, 1366x768, 390x844). User requirement satisfied: photos are BIGGER (235px/375px vs previous 213px/353px), empty space at bottom eliminated (56px desktop / 36px mobile within target), section looks fit and full. Button clearly below grid with no overlap. All regression checks passed (Hero, Pillar backgrounds, Globe rendering, no overflow). Ready for user acceptance."

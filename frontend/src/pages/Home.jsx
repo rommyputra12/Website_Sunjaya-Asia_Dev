@@ -303,25 +303,25 @@ export default function Home() {
         );
       })}
 
-      {/* SUBSIDIARIES TEASER — snap section, content fits at least one screen */}
-      <section className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-14 md:pb-20 flex flex-col overflow-hidden">
-        <div className="max-w-[1600px] mx-auto px-6 md:px-10 w-full flex-1 flex flex-col justify-center py-6 md:py-8">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-4 mb-6 md:mb-8">
+      {/* SUBSIDIARIES TEASER — grid fills available space (big photos) with a min-height floor so cards never squash or spill over the button */}
+      <section className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-6 md:pb-10 flex flex-col overflow-hidden">
+        <div className="max-w-[1700px] mx-auto px-4 md:px-8 w-full flex-1 flex flex-col justify-center py-3 md:py-4">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4 mb-5 md:mb-6">
             <Reveal className="max-w-4xl">
               <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">Subsidiaries & Affiliates</span>
               <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">A group of specialised companies driving every pillar.</h2>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className="text-[#1d538f] text-xs md:text-sm leading-[1.35] md:text-right md:max-w-[44rem]">
+              <p className="text-[#1d538f] text-xs md:text-sm leading-[1.35] md:text-right md:max-w-[40rem]">
                 Our subsidiaries and strategic affiliates operate across waste technology, energy storage, capital markets, distribution, IT, defense and media.
               </p>
             </Reveal>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 flex-1 min-h-0">
+          <div className="grid flex-1 min-h-[340px] md:min-h-[480px] grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 [grid-auto-rows:1fr]">
             {SUBSIDIARIES.slice(0, 6).map((s, i) => (
-              <Reveal key={s.id} delay={i * 0.05} className="min-h-0">
-                <div className="on-photo group relative block bg-obsidian h-full min-h-0 overflow-hidden rounded-sm">
+              <Reveal key={s.id} delay={i * 0.05} className="h-full">
+                <div className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm">
                   <img
                     src={IMAGES[s.image]}
                     alt={s.name}
@@ -346,7 +346,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-6 md:mt-8 flex justify-center shrink-0">
+          <div className="mt-4 md:mt-5 flex justify-center shrink-0">
             <Link
               to="/subsidiaries"
               data-testid="home-subs-link"
