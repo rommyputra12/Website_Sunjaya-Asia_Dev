@@ -275,4 +275,29 @@
 ##         -comment: "✅ VERIFIED at 4 viewports (1920x800, 1920x1080, 1366x768, 390x844). ALL REQUIREMENTS MET: (1) Photos are BIGGER - card rows 235px at 800px height (target >=230px ✓), 375px at 1080px height (target >=350px ✓), 232px at 768px, 159px mobile; (2) Button sits clearly BELOW grid with positive gap 20px desktop / 16px mobile, NO overlap; (3) Space below button is small and appropriate 56px desktop / 36px mobile (within ~30-90px target ✓), NO large void; (4) Section looks fit and full - section height matches viewport at 800/1080/mobile, extends only 26px at 768px (acceptable); (5) All 6 cards visible in correct grid layout (2x3 desktop, 3x2 mobile), all photos loaded including Sunjaya Teknologi Indonesia and Allwyn Group Indonesia, button centered. Regression PASSED: Hero section intact, Pillar 01/02/03 backgrounds loaded (1376x768 each), Globe rendering correctly (canvas 2560x640 visible with continents/arcs), no horizontal overflow. Subsidiaries section v3 layout fix CONFIRMED WORKING - photos are bigger, empty space at bottom eliminated, section fits viewport perfectly."
 ## agent_communication_latest:
 ##     -agent: "testing"
+##     -agent: "user"
+##     -message: "Iterasi 4: masih kurang turun, tulisan dan fotonya - turunkan lagi karena space kosong bagian bawah masih banyak."
+##     -agent: "main"
+##     -message: "Fix v4: padding bawah dipangkas habis (section pb-0, container pt-4/6 pb-2/4) sehingga blok konten turun dan grid menyerap sisa ruang (foto ikut membesar). Terukur: d1080 rows 391px belowBtn 16px; d800 rows 251px belowBtn 16px; m844 rows 167px belowBtn 8px. Tidak ada overlap."
+##
+## frontend_subsidiaries_layout_v4:
+##   - task: "Subsidiaries section v4 - konten diturunkan, space kosong bawah dihilangkan, foto membesar"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/src/pages/Home.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "user"
+##         -comment: "User iterasi 4: turunkan tulisan dan foto, space kosong bawah masih banyak."
+##         -working: true
+##         -agent: "main"
+##         -comment: "Section pb-0, container pt-4 md:pt-6 pb-2 md:pb-4. Konten turun, grid menyerap ruang (foto lebih besar), ruang kosong bawah ~16px desktop / 8px mobile."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED at 4 viewports (1920x1080, 1920x800, 1366x768, 390x844). ALL REQUIREMENTS MET: (1) Header 'SUBSIDIARIES & AFFILIATES' NOT hidden under navbar - clearance 119px/118.6px/118.9px desktop (>= 95px ✓), 95.6px mobile (>= 75px ✓); (2) Card rows are LARGE - 399.2px at 1080px height (>= 380px ✓), 259.2px at 800px height (>= 250px ✓), 243.2px at 768px, 175px mobile; (3) Button 'VIEW ALL SUBSIDIARIES' sits clearly BELOW grid with positive gap 20px desktop / 16px mobile, NO overlap; (4) Space below button is SMALL 16px desktop / 8px mobile (within 5-25px target ✓), empty space at bottom eliminated; (5) Button fully visible and clickable, not clipped by section bottom edge; (6) Visual: all 6 cards visible in correct grid layout (2x3 desktop, 3x2 mobile), all photos loaded including Sunjaya Teknologi Indonesia and Allwyn Group Indonesia, text readable. Regression PASSED: Hero section intact, Pillar 01/02/03 background images loaded (1376x768 each for 01/02, 3848x2147 for 03), Globe rendering correctly (canvas 2560x640px visible with continents/arcs), no horizontal overflow at any viewport. Subsidiaries section v4 layout fix CONFIRMED WORKING - content shifted down, photos bigger (grid absorbs leftover space), empty space at bottom nearly gone."
 ##     -message: "✅ VERIFICATION COMPLETE. Task 'Subsidiaries section v3 - foto diperbesar, section fit & penuh tanpa ruang kosong bawah' is WORKING correctly at all tested viewports (1920x800, 1920x1080, 1366x768, 390x844). User requirement satisfied: photos are BIGGER (235px/375px vs previous 213px/353px), empty space at bottom eliminated (56px desktop / 36px mobile within target), section looks fit and full. Button clearly below grid with no overlap. All regression checks passed (Hero, Pillar backgrounds, Globe rendering, no overflow). Ready for user acceptance."
+##     -agent: "testing"
+##     -message: "✅ VERIFICATION COMPLETE for v4. Task 'Subsidiaries section v4 - konten diturunkan, space kosong bawah dihilangkan, foto membesar' is WORKING correctly. Tested at 4 viewports (1920x1080, 1920x800, 1366x768, 390x844). User requirement satisfied: header text and photos shifted LOWER (header clearance 95-119px, not hidden under navbar), photos BIGGER (card rows 399px at 1080px, 259px at 800px, both exceeding requirements), empty space at bottom NEARLY GONE (16px desktop / 8px mobile, within 5-25px target). Button sits clearly below grid with 16-20px gap, no overlap, fully visible and clickable. All 6 cards visible, all photos loaded. Regression passed: Hero, Pillar 01/02/03 backgrounds (1376x768 each), Globe rendering (2560x640px canvas), no horizontal overflow. Ready for user acceptance."
