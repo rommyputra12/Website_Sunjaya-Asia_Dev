@@ -304,9 +304,9 @@ export default function Home() {
       })}
 
       {/* SUBSIDIARIES TEASER — snap section, content fits at least one screen */}
-      <section className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-6 flex flex-col overflow-hidden">
-        <div className="max-w-[1600px] mx-auto px-6 md:px-10 w-full flex-1 flex flex-col justify-center py-4">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-4 md:mb-5">
+      <section className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-14 md:pb-20 flex flex-col overflow-hidden">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-10 w-full flex-1 flex flex-col justify-center py-6 md:py-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-4 mb-6 md:mb-8">
             <Reveal className="max-w-4xl">
               <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">Subsidiaries & Affiliates</span>
               <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">A group of specialised companies driving every pillar.</h2>
@@ -318,7 +318,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 flex-1 min-h-0">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 flex-1 min-h-0">
             {SUBSIDIARIES.slice(0, 6).map((s, i) => (
               <Reveal key={s.id} delay={i * 0.05} className="min-h-0">
                 <div className="on-photo group relative block bg-obsidian h-full min-h-0 overflow-hidden rounded-sm">
@@ -346,7 +346,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-3 md:mt-4 flex justify-center shrink-0">
+          <div className="mt-6 md:mt-8 flex justify-center shrink-0">
             <Link
               to="/subsidiaries"
               data-testid="home-subs-link"
