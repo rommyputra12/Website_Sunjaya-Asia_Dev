@@ -1,0 +1,43 @@
+{
+  "summary": "Tested backend endpoints (locations with type field, geo/search auth, content value_id) and full admin UI flows (Locations CMS with Nominatim city autocomplete + coords paste; Home locations list + dynamic stats; Subsidiaries map legend; Pillars '+ Tambah Pointer' add/remove). All targeted features in review request work. One pre-existing issue: superadmin login (admin@sunjayaasia.com / sunjaya-superadmin-2026) returns 401 — editor login works and was used for all admin UI tests.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "/api/auth/login", "issue": "Super admin login fails with 'Invalid email or password' using documented credentials (admin@sunjayaasia.com / sunjaya-superadmin-2026). admin_users row exists but stored password_hash doesn't match env SUPER_ADMIN_PASSWORD. Likely the DB row was seeded earlier with a different password and _seed_superadmin_if_empty() only seeds when the table is empty, so .env changes don't propagate. Editor (editorpass123) works. This blocks /auth/users (Users tab) which requires superadmin.", "priority": "HIGH"}
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "backend_pytest": "5/5 PASS — test_locations_has_9_with_types, test_geo_search_requires_auth (401 w/o token), test_geo_search_with_bearer (returns Surabaya lat~-7.26, lng~112.74), test_geo_search_with_legacy_token, test_content_value_id_create_and_update (POST+PUT+GET persistence verified)",
+    "locations_types": "9 items: Singapore=hq, Panama=infra, Switzerland=infra, Jakarta/Batam/Balikpapan/Dubai/Beijing+other=branch — matches spec",
+    "admin_locations_e2e": "PASS — logged in as editor, loc-type-select / loc-country-select (country list incl Japan+UAE+USA...) / loc-city-input with Nominatim results (loc-city-option-0 fills admin-lat=34.6938 admin-lng=135.5015 for Osaka,JP) / loc-coords-paste '-6.2, 106.8' fills lat/lng / loc-role-select (dropdown w/ existing roles) / loc-save creates Osaka. After save: Home home-locations-list contains Osaka, stats stat-branches=8 stat-infra=2 stat-countries=8 (baseline 7/2/7 confirmed after cleanup); /subsidiaries map-legend-list contains Osaka. loc-delete-Osaka removes it.",
+    "home_subsidiary_cards": "PASS — home-sub-card-* elements render as <A> tags with href='/subsidiaries'",
+    "content_bilingual_fields": "PASS — content-input-nav.home (EN) and content-input-nav.home-id (ID) both present. Switching lang to ID renders 'Beranda | Tentang | Pilar | Anak Perusahaan…' confirming ID language context works. Backend POST/PUT content with value_id persistence verified via pytest.",
+    "pillars_add_remove_pointer": "PASS — add-pointer-pillar_01 adds pillar.01.div.06.name + .desc blocks (5→6). /pillars page then shows 'New pointer'. remove-pointer-pillar.01.div.06.name (confirm dialog accepted) removes it (6→5). Full roundtrip clean."
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_review_request.py",
+    "/app/test_reports/pytest/review_results.xml"
+  ],
+  "action_items": [
+    "Re-sync super admin password: either DELETE the admin@sunjayaasia.com row in admin_users so _seed_superadmin_if_empty re-seeds from env, OR change _seed_superadmin_if_empty to upsert the super admin password on every startup when SUPER_ADMIN_* env is set."
+  ],
+  "critical_code_review_comments": [
+    "server.py _seed_superadmin_if_empty() only runs when admin_users is entirely empty. If the super admin password rotates in .env, the DB is never updated, leaving documented credentials non-functional. Consider: on startup, upsert the SUPER_ADMIN_EMAIL row with the current hashed SUPER_ADMIN_PASSWORD when env is set.",
+    "server.py:666 /geo/search uses limit=8 (int) but Nominatim 'params' expects strings via httpx — works but silently; also no caching, every keystroke hits Nominatim (OK for admin only but add client debounce).",
+    "/subsidiaries page shows map-legend-list correctly reflecting live DB locations — good single-source-of-truth design."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_review_request.py (new)"
+  ],
+  "success_rate": {"backend": "100% (5/5 review-request tests)", "frontend": "100% of review-request UI flows"},
+  "test_credentials": "Admin login documented in /app/memory/test_credentials.md is BROKEN for superadmin. Editor (editor@sunjayaasia.com / editorpass123) works and has access to all tabs except Users.",
+  "seed_data_creation": "None persisted — all test data (Osaka location, pillar.01.div.06 pointer, nav.home-id value) cleaned up.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All review-request features (locations w/ type, geo/search, content value_id, Nominatim-powered admin city autocomplete, dynamic Home stats + locations list, subsidiary cards as links, pillar pointer add/remove, bilingual CMS inputs) are functional. The only outstanding issue is super admin login — use the editor account for Admin UI tests until main agent re-syncs the super admin password in DB. When testing with editor, Users tab is hidden (expected). To verify super admin login fix: POST /api/auth/login {email: admin@sunjayaasia.com, password: sunjaya-superadmin-2026} should return 200 with token."
+}

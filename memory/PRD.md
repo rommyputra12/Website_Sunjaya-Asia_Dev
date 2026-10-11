@@ -56,3 +56,15 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - P2: Sitemap.xml, structured data (schema.org Organization), analytics
 - P2: OG images / Twitter cards
 - P2: Leadership team page (photos + bios) when user provides content
+
+## Update 2026-06 (fork session)
+- Locations CMS v2: `type` column (hq/branch/infra) di Supabase; Panama & Switzerland dipindah ke DB sebagai infra. Form: dropdown Type, Country (semua negara + Custom), City autocomplete (OpenStreetMap Nominatim via `GET /api/geo/search`, admin-only) auto lat/lng, paste koordinat Google Maps, Role dropdown + Custom. File: components/admin/LocationsPanel.jsx
+- Hook bersama `hooks/useLocations.js` → Globe3D (pins + arcs), panel lokasi Home (scrollable, stats dinamis), InteractiveWorldMap Subsidiaries (legend scrollable)
+- Bilingual CMS: kolom `content_blocks.value_id`; LanguageContext override per bahasa; ContentPanel input EN + ID
+- Pillar repeater: "+ Tambah Pointer" / "del pointer" per section pillar_NN
+- Home subsidiary cards → Link ke /subsidiaries + hover zoom
+- Testing iteration_10: 100% backend & frontend
+
+## Backlog
+- P2: Image compression di CMS; Safe-delete flag "used in site" untuk Images
+- P2: Refactor Admin.jsx (Users/Content/Images panel ke file terpisah)
