@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
 import { LocationsPanel } from "../components/admin/LocationsPanel";
+import { SUBSIDIARIES } from "../data/content";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const TOKEN_KEY = "sunjaya_admin_token";
@@ -607,6 +608,51 @@ const sectionIndex = (id) => {
 };
 const sectionLabel = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.label || id;
 
+// Editable overlay texts for subsidiary cards (stored in asset.meta)
+const CARD_TEXT_FIELDS = [
+  ["tag", "Tag kecil (atas)"],
+  ["city", "Kota"],
+  ["country", "Negara"],
+  ["role", "Role / Fungsi"],
+  ["name", "Nama Perusahaan"],
+  ["sector", "Bidang / Sector (bawah)"],
+];
+
+const SubCardTextForm = ({ asset, inputCls, onSave }) => {
+  const [showId, setShowId] = useState(() => Object.values(asset.meta || {}).some((v) => v?.id));
+  const meta = asset.meta || {};
+  const def = SUBSIDIARIES.find((x) => x.id === asset.key) || {};
+  const cityParts = (def.city || "").split(",");
+  const defaults = { tag: def.tag, city: (cityParts[0] || "").trim(), country: (cityParts[1] || "").trim(), role: def.role, name: def.name, sector: def.sector };
+  const saveField = (f, lang, value) => {
+    const next = { ...meta, [f]: { ...meta[f], [lang]: value } };
+    if (!next[f].en && !next[f].id) delete next[f];
+    onSave(next);
+  };
+  return (
+    <div data-testid={`subcard-form-${asset.key}`} className="border-t border-white/10 mt-1 pt-2 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper">Teks kartu</span>
+        <button onClick={() => setShowId(!showId)} data-testid={`subcard-id-toggle-${asset.key}`}
+          className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper transition-colors">
+          {showId ? "− Sembunyikan ID" : "+ Terjemahan ID"}
+        </button>
+      </div>
+      {CARD_TEXT_FIELDS.map(([f, label]) => (
+        <div key={f}>
+          <label className="block font-mono text-[8px] tracking-[0.2em] uppercase text-ash/70 mb-1">{label}</label>
+          <input defaultValue={meta[f]?.en || ""} placeholder={defaults[f] || ""} onBlur={(e) => saveField(f, "en", e.target.value)}
+            data-testid={`subcard-input-${asset.key}-${f}`} className={inputCls} />
+          {showId && (
+            <input defaultValue={meta[f]?.id || ""} placeholder={`${defaults[f] || ""} (ID)`} onBlur={(e) => saveField(f, "id", e.target.value)}
+              data-testid={`subcard-input-${asset.key}-${f}-id`} className={`${inputCls} mt-1 border-copper/30`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const ImagesPanel = ({ client }) => {
   const [items, setItems] = useState([]);
   const [busyKey, setBusyKey] = useState(null);
@@ -792,6 +838,9 @@ const ImagesPanel = ({ client }) => {
                     className={inputCls}>
                     {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                   </select>
+                  {(a.section || "other") === "home_subsidiaries" && (
+                    <SubCardTextForm asset={a} inputCls={inputCls} onSave={(meta) => saveMeta({ ...a }, { meta }, "Teks kartu tersimpan")} />
+                  )}
                   <div className="flex gap-2 mt-auto pt-1">
                     <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>
                       {busyKey === a.key ? "…" : "Replace"}

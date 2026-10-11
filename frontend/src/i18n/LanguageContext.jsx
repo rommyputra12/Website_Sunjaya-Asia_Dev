@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { translations } from "./translations";
+import { useAssets } from "../context/AssetContext";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
@@ -11,6 +12,7 @@ export const LanguageProvider = ({ children }) => {
   // CMS text overrides: { "hero.line1": "...", ... } (EN-first; ID overrides come in a later phase)
   const [overrides, setOverrides] = useState({ en: {}, id: {} });
   const [blocks, setBlocks] = useState([]);
+  const { byKey } = useAssets();
 
   useEffect(() => {
     localStorage.setItem("sunjaya_lang", lang);
@@ -39,7 +41,19 @@ export const LanguageProvider = ({ children }) => {
   }, []);
 
   const t = (path, fallback) => {
-    // CMS override applies to the default (EN) copy
+    // Asset-bound texts (e.g. subsidiary cards) are edited in the Images tab
+    const parts0 = path.split(".");
+    if (parts0.length === 3 && parts0[0] === "subsidiary") {
+      const meta = byKey[parts0[1]]?.meta?.[parts0[2]];
+      if (meta) {
+        let v = lang === "id" ? (meta.id || meta.en) : meta.en;
+        if (v && (parts0[2] === "city" || parts0[2] === "country") && v.includes(",")) {
+          const c = v.split(",");
+          v = (parts0[2] === "city" ? c[0] : c.slice(1).join(",")).trim();
+        }
+        if (v) return v;
+      }
+    }
     const ov = overrides[lang]?.[path];
     if (ov) return ov;
     const parts = path.split(".");

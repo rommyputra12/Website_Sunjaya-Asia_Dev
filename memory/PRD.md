@@ -74,3 +74,10 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Location form: peta mini Leaflet (OSM tiles) — klik peta / drag pin untuk set koordinat (components/admin/LocationMapPicker.jsx)
 - Upload gambar: kompresi server (Pillow) → resize max 2560px, WebP q82 (q90 untuk gambar transparan); gambar ≤300KB & ≤2560px tidak diubah; hasil tidak lebih besar dari asli
 - Images tab: `in_use` (key dipakai situs / URL dipakai News cover / Location photo) → label "Used on site", DELETE diblokir (409)
+
+## Update 2026-06 (teks kartu pindah ke tab Images)
+- Teks kartu subsidiary (tag, kota, negara, role, nama, sector) kini diedit di tab Images per gambar, tersimpan di kolom `assets.meta` (jsonb, {field: {en, id}}). Kolom `meta` butuh SQL: ALTER TABLE assets ADD COLUMN meta jsonb DEFAULT '{}'
+- Blok `subsidiary.*` di tabel content_blocks sudah dimigrasikan ke assets.meta lalu dihapus dari tab Content
+- LanguageContext.t('subsidiary.x.f') membaca meta via useAssets, split city/country otomatis, fallback ID→EN→default
+- Kartu di Home & /subsidiaries kini menampilkan baris "Negara · Role"
+- Toggle "+ Terjemahan ID" per kartu untuk kolom Bahasa Indonesia

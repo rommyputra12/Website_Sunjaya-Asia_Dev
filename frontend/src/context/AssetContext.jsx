@@ -69,6 +69,7 @@ export const AssetProvider = ({ children }) => {
         focal_y: a?.focal_y ?? 50,
         zoom: a?.zoom ?? 1,
         alt: a?.alt || camelKey,
+        meta: a?.meta || {},
       };
     });
     return map;

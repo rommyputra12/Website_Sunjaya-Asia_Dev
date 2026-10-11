@@ -337,6 +337,9 @@ export default function Home() {
                     <div className="text-photo-shadow">
                       <div className="font-mono text-[8px] md:text-[9px] tracking-[0.22em] uppercase text-copper mb-0.5">{t(`subsidiary.${s.id}.city`, s.city)}</div>
                       <h3 className="font-mono text-[10px] md:text-xs tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
+                      <div className="mt-1 font-mono text-[7px] md:text-[8px] tracking-[0.16em] uppercase text-bone/70">
+                        {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
+                      </div>
                     </div>
                   </div>
                 </Link>

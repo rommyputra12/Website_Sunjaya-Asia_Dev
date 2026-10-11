@@ -761,6 +761,7 @@ class AssetOut(BaseModel):
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
     in_use: bool = False
+    meta: Optional[dict] = {}
 
 
 class AssetMetaIn(BaseModel):
@@ -771,6 +772,7 @@ class AssetMetaIn(BaseModel):
     focal_x: Optional[float] = None
     focal_y: Optional[float] = None
     zoom: Optional[float] = None
+    meta: Optional[dict] = None
 
 
 def _asset_public_url(object_name: str) -> str:
@@ -780,6 +782,7 @@ def _asset_public_url(object_name: str) -> str:
 def _asset_row_to_out(it: dict, used_urls: set | None = None) -> AssetOut:
     return AssetOut(
         in_use=it["key"] in SITE_ASSET_KEYS or it.get("url") in (used_urls or set()),
+        meta=it.get("meta") or {},
         id=str(it["id"]), key=it["key"], url=it["url"], alt=it.get("alt"),
         width=it.get("width"), height=it.get("height"),
         section=it.get("section") or "other",
@@ -875,6 +878,8 @@ async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
         update["section"] = payload.section
     if payload.sort_order is not None:
         update["sort_order"] = payload.sort_order
+    if payload.meta is not None:
+        update["meta"] = payload.meta
     focal = {}
     for f in ("focal_x", "focal_y", "zoom"):
         v = getattr(payload, f, None)
