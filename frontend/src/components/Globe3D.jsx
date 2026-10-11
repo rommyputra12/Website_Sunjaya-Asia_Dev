@@ -2,9 +2,8 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import Globe from "react-globe.gl";
 import * as THREE from "three";
 import { feature } from "topojson-client";
-import { DEFAULT_LOCATIONS, SUBSIDIARIES } from "../data/content";
-
-const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
+import { SUBSIDIARIES } from "../data/content";
+import { useLocations } from "../hooks/useLocations";
 
 const COLORS = {
   atmosphere: "#4A90D9",
@@ -12,11 +11,6 @@ const COLORS = {
   land: "#c8d6e5",
   landStroke: "#a0b8cc",
 };
-
-export const INFRA_HUBS = [
-  { city: "Panama", country: "Panama", role: "Infrastructure Hub", lat: 8.9824, lng: -79.5199, color: "#B892FF" },
-  { city: "Switzerland", country: "Switzerland", role: "Infrastructure Hub", lat: 47.3769, lng: 8.5417, color: "#B892FF" },
-];
 
 const COMPANIES_BY_CITY = SUBSIDIARIES.reduce((acc, s) => {
   const city = s.city.split(",")[0].trim();
@@ -31,14 +25,14 @@ const HOLD_DURATION = 3500;
 const globeLayout = (w) => (w < 768 ? { scale: 1.25, offsetY: -15 } : { scale: 1.68, offsetY: -25 });
 const ROTATE_SPEED = 1.4;
 
-export const Globe3D = ({ locations: propLocations }) => {
+export const Globe3D = () => {
   const globeEl = useRef();
   const containerRef = useRef(null);
   const cardRef = useRef(null);
   const [dims, setDims] = useState({ width: 800, height: 800 });
   const [mounted, setMounted] = useState(false);
   const [countries, setCountries] = useState([]);
-  const [locations, setLocations] = useState(propLocations || DEFAULT_LOCATIONS);
+  const allPoints = useLocations();
   const [activeIdx, setActiveIdx] = useState(0);
   const [inView, setInView] = useState(false);
 
@@ -65,13 +59,6 @@ export const Globe3D = ({ locations: propLocations }) => {
   }, []);
 
   useEffect(() => { setMounted(true); }, []);
-
-  useEffect(() => {
-    fetch(`${API}/locations?published_only=true`)
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data) && data.length > 0) setLocations(data); })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     fetch("/geo/countries-110m.json")
@@ -198,18 +185,13 @@ export const Globe3D = ({ locations: propLocations }) => {
     }
   }, [clearResumeTimeout, resumeAuto]);
 
-  const allPoints = useMemo(
-    () => [...locations, ...INFRA_HUBS],
-    [locations]
-  );
-
   const pointsData = useMemo(
     () =>
       allPoints.map((l, i) => ({
         ...l,
         _id: l.id || `loc-${i}`,
-        isHQ: l.city.toLowerCase() === "singapore",
-        isInfra: INFRA_HUBS.some((h) => h.city === l.city),
+        isHQ: l.type === "hq",
+        isInfra: l.type === "infra",
       })),
     [allPoints]
   );
@@ -295,10 +277,10 @@ export const Globe3D = ({ locations: propLocations }) => {
   };
 
   const arcsData = useMemo(() => {
-    const hq = locations.find((l) => l.city.toLowerCase() === "singapore");
+    const hq = allPoints.find((l) => l.type === "hq");
     if (!hq) return [];
     return allPoints
-      .filter((l) => l.city.toLowerCase() !== "singapore")
+      .filter((l) => l !== hq)
       .map((l) => {
         let startLat = hq.lat;
         let startLng = hq.lng;
@@ -316,7 +298,7 @@ export const Globe3D = ({ locations: propLocations }) => {
           color: l.color || "#FFA765",
         };
       });
-  }, [allPoints, locations]);
+  }, [allPoints]);
 
   // 3D pin: visible sphere + halo + invisible larger hit area for clicking
   const objectThreeObject = useCallback((d) => {
@@ -470,8 +452,8 @@ export const Globe3D = ({ locations: propLocations }) => {
       )}
 
       {/* Bottom dots — click to spin globe to that location */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/75 backdrop-blur-md px-3 py-2 rounded-full shadow-sm border border-copper/20">
-        {pointsData.slice(0, Math.min(pointsData.length, 9)).map((p, i) => (
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex flex-wrap justify-center max-w-[90%] items-center gap-1.5 bg-white/75 backdrop-blur-md px-3 py-2 rounded-full shadow-sm border border-copper/20">
+        {pointsData.map((p, i) => (
           <button
             key={p._id}
             onClick={() => seekToPoint(i)}

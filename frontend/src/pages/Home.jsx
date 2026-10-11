@@ -4,10 +4,11 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Marquee from "react-fast-marquee";
 import { useLang } from "../i18n/LanguageContext";
 import { LineReveal, Reveal, CharReveal } from "../components/motion/Reveal";
-import { STATS, PILLARS, SUBSIDIARIES, DEFAULT_LOCATIONS } from "../data/content";
+import { STATS, PILLARS, SUBSIDIARIES } from "../data/content";
+import { useLocations } from "../hooks/useLocations";
 import AssetImg from "../components/AssetImg";
 import { StaticWorldMap } from "../components/StaticWorldMap";
-import Globe3D, { INFRA_HUBS } from "../components/Globe3D";
+import Globe3D from "../components/Globe3D";
 import { tzAbbrev } from "../lib/timezones";
 import { Star } from "lucide-react";
 
@@ -58,6 +59,9 @@ const HeroClock = () => {
 
 export default function Home() {
   const { t } = useLang();
+  const locations = useLocations();
+  const infraCount = locations.filter((l) => l.type === "infra").length;
+  const countryCount = new Set(locations.map((l) => l.country.trim().toLowerCase())).size;
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 240]);
@@ -315,11 +319,11 @@ export default function Home() {
           <div className="grid flex-1 min-h-[340px] md:min-h-[480px] grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 [grid-auto-rows:1fr]">
             {SUBSIDIARIES.slice(0, 6).map((s, i) => (
               <Reveal key={s.id} delay={i * 0.05} className="h-full">
-                <div className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm">
+                <Link to="/subsidiaries" data-testid={`home-sub-card-${s.id}`} className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm cursor-pointer ring-0 hover:ring-2 hover:ring-copper/70 transition-shadow duration-300">
                   <AssetImg
                     k={s.image}
                     alt={s.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-obsidian/90 via-obsidian/40 to-transparent" />
                   <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-obsidian/70 to-transparent" />
@@ -335,7 +339,7 @@ export default function Home() {
                       <h3 className="font-mono text-[10px] md:text-xs tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
                     </div>
                   </div>
-                </div>
+                </Link>
               </Reveal>
             ))}
           </div>
@@ -380,21 +384,21 @@ export default function Home() {
             <Reveal delay={0.16} className="flex flex-col items-end shrink-0">
               <div className="flex gap-6 md:gap-10">
                 <div className="flex flex-col">
-                  <span className="font-serif text-3xl md:text-4xl lg:text-5xl text-copper leading-none">7</span>
+                  <span className="font-serif text-3xl md:text-4xl lg:text-5xl text-copper leading-none" data-testid="stat-branches">{locations.length - infraCount}</span>
                   <span className="font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-obsidian/50 mt-1.5 max-w-[7rem] leading-tight">{t("presence.stats.branches")}</span>
                 </div>
                 <div className="flex flex-col border-l border-copper/30 pl-6 md:pl-10">
-                  <span className="font-serif text-3xl md:text-4xl lg:text-5xl text-copper leading-none">2</span>
+                  <span className="font-serif text-3xl md:text-4xl lg:text-5xl text-copper leading-none" data-testid="stat-infra">{infraCount}</span>
                   <span className="font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-obsidian/50 mt-1.5 max-w-[7rem] leading-tight">{t("presence.stats.clients")}</span>
                 </div>
                 <div className="flex flex-col border-l border-copper/30 pl-6 md:pl-10">
-                  <span className="font-serif text-3xl md:text-4xl lg:text-5xl text-copper leading-none">7</span>
+                  <span className="font-serif text-3xl md:text-4xl lg:text-5xl text-copper leading-none" data-testid="stat-countries">{countryCount}</span>
                   <span className="font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-obsidian/50 mt-1.5 max-w-[7rem] leading-tight">{t("presence.stats.countries")}</span>
                 </div>
               </div>
               <Reveal delay={0.2} className="mt-2 md:mt-3">
                 <div className="font-mono text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-azure-hi">
-                  9 cities · 7 countries
+                  {locations.length} cities · {countryCount} countries
                 </div>
               </Reveal>
             </Reveal>
@@ -409,18 +413,12 @@ export default function Home() {
               {/* Locations panel — adapted from Subsidiaries map legend, restyled for light bg */}
               <div className="absolute bottom-28 md:bottom-32 left-4 md:left-10 z-10 border border-copper/30 bg-white/80 backdrop-blur-md px-4 py-3 md:px-5 md:py-4 shadow-md rounded-lg max-w-[70vw] md:max-w-none">
                 <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-copper mb-2 md:mb-2.5 font-bold">Locations</div>
-                <div className="flex flex-col gap-1 md:gap-1.5">
-                  {DEFAULT_LOCATIONS.map((l) => (
-                    <div key={l.city} className="flex items-center gap-2 md:gap-2.5 font-mono text-xs md:text-sm text-obsidian">
-                      <span className="w-2 h-2 rounded-full" style={{ background: l.color }} />
+                <div data-testid="home-locations-list" className="flex flex-col gap-1 md:gap-1.5 max-h-[22vh] md:max-h-[34vh] overflow-y-auto overscroll-contain pr-2">
+                  {locations.map((l) => (
+                    <div key={l.id || l.city} className="flex items-center gap-2 md:gap-2.5 font-mono text-xs md:text-sm text-obsidian shrink-0">
+                      <span className={`w-2 h-2 ${l.type === "infra" ? "rotate-45" : "rounded-full"}`} style={{ background: l.color }} />
                       {l.city}
-                    </div>
-                  ))}
-                  {INFRA_HUBS.map((h) => (
-                    <div key={h.city} className="flex items-center gap-2 md:gap-2.5 font-mono text-xs md:text-sm text-obsidian">
-                      <span className="w-2 h-2 rotate-45" style={{ background: h.color }} />
-                      {h.city}
-                      <span className="text-[10px] tracking-[0.18em] text-obsidian/50">· INFRA</span>
+                      {l.type === "infra" && <span className="text-[10px] tracking-[0.18em] text-obsidian/50">· INFRA</span>}
                     </div>
                   ))}
                 </div>

@@ -3,7 +3,7 @@ import axios from "axios";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
 import { SUBSIDIARIES, DEFAULT_LOCATIONS, CERTS } from "../data/content";
 import AssetImg from "../components/AssetImg";
-import { INFRA_HUBS, InteractiveWorldMap } from "../components/InteractiveWorldMap";
+import { InteractiveWorldMap } from "../components/InteractiveWorldMap";
 import { useLang } from "../i18n/LanguageContext";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
@@ -43,16 +43,6 @@ const AFFILIATE_GROUPS = groupByCountry(affiliateCards);
 
 export default function Subsidiaries() {
   const { t } = useLang();
-  const [locations, setLocations] = useState(DEFAULT_LOCATIONS);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await axios.get(`${API}/locations`);
-        if (Array.isArray(r.data) && r.data.length > 0) setLocations(r.data);
-      } catch { /* keep defaults */ }
-    })();
-  }, []);
 
 
   return (

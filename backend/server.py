@@ -178,6 +178,7 @@ class LocationIn(BaseModel):
     published: bool = True
     photo_url: Optional[str] = None
     description: Optional[str] = None
+    type: Optional[str] = "branch"
 
 
 class LocationOut(BaseModel):
@@ -193,6 +194,17 @@ class LocationOut(BaseModel):
     created_at: str
     photo_url: Optional[str] = None
     description: Optional[str] = None
+    type: str = "branch"
+
+
+def _loc_out(it: dict) -> "LocationOut":
+    return LocationOut(
+        id=str(it["id"]), city=it["city"], country=it["country"], role=it["role"],
+        lat=it["lat"], lng=it["lng"], color=it.get("color") or "#C86230",
+        order=it.get("order", 100), published=it.get("published", True),
+        created_at=fmt_ts(it.get("created_at")), photo_url=it.get("photo_url"),
+        description=it.get("description"), type=it.get("type") or "branch",
+    )
 
 
 # ============ HELPERS ============
@@ -615,23 +627,7 @@ async def list_locations(published_only: bool = True):
     if published_only:
         filters["published"] = "true"
     items = await sb_select("locations", filters=filters, order="order.asc", limit=200)
-    result = []
-    for it in items:
-        result.append(LocationOut(
-            id=str(it["id"]),
-            city=it["city"],
-            country=it["country"],
-            role=it["role"],
-            lat=it["lat"],
-            lng=it["lng"],
-            color=it.get("color", "#C86230"),
-            order=it.get("order", 100),
-            published=it.get("published", True),
-            created_at=fmt_ts(it.get("created_at")),
-            photo_url=it.get("photo_url"),
-            description=it.get("description"),
-        ))
-    return result
+    return [_loc_out(it) for it in items]
 
 
 @api_router.post("/locations", response_model=LocationOut, dependencies=[Depends(require_admin)])
@@ -647,22 +643,10 @@ async def create_location(payload: LocationIn):
         "published": payload.published,
         "photo_url": payload.photo_url,
         "description": payload.description,
+        "type": payload.type or "branch",
     }
     inserted = await sb_insert("locations", row)
-    return LocationOut(
-        id=str(inserted["id"]),
-        city=inserted["city"],
-        country=inserted["country"],
-        role=inserted["role"],
-        lat=inserted["lat"],
-        lng=inserted["lng"],
-        color=inserted.get("color", "#C86230"),
-        order=inserted.get("order", 100),
-        published=inserted.get("published", True),
-        created_at=fmt_ts(inserted.get("created_at")),
-        photo_url=inserted.get("photo_url"),
-        description=inserted.get("description"),
-    )
+    return _loc_out(inserted)
 
 
 @api_router.put("/locations/{loc_id}", response_model=LocationOut, dependencies=[Depends(require_admin)])
@@ -674,20 +658,27 @@ async def update_location(loc_id: str, payload: LocationIn):
     updated = await sb_update("locations", loc_id, update)
     if not updated:
         raise HTTPException(404, "Not found")
-    return LocationOut(
-        id=str(updated["id"]),
-        city=updated["city"],
-        country=updated["country"],
-        role=updated["role"],
-        lat=updated["lat"],
-        lng=updated["lng"],
-        color=updated.get("color", "#C86230"),
-        order=updated.get("order", 100),
-        published=updated.get("published", True),
-        created_at=fmt_ts(updated.get("created_at")),
-        photo_url=updated.get("photo_url"),
-        description=updated.get("description"),
-    )
+    return _loc_out(updated)
+
+
+@api_router.get("/geo/search", dependencies=[Depends(require_admin)])
+async def geo_search(q: str, country: Optional[str] = None):
+    params = {"q": q, "format": "jsonv2", "limit": 8, "addressdetails": 1, "accept-language": "en"}
+    if country:
+        params["countrycodes"] = country.lower()
+    async with httpx.AsyncClient(timeout=10) as c:
+        r = await c.get("https://nominatim.openstreetmap.org/search", params=params,
+                        headers={"User-Agent": "SunjayaAsiaCMS/1.0 (admin@sunjayaasia.com)"})
+    if r.status_code != 200:
+        raise HTTPException(502, "Geocoding service unavailable")
+    out = []
+    for it in r.json():
+        addr = it.get("address", {})
+        city = addr.get("city") or addr.get("town") or addr.get("municipality") or addr.get("county") or addr.get("state") or it.get("name")
+        out.append({"name": it.get("name") or city, "city": city, "country": addr.get("country"),
+                    "country_code": (addr.get("country_code") or "").upper(),
+                    "display": it.get("display_name"), "lat": float(it["lat"]), "lng": float(it["lon"])})
+    return out
 
 
 @api_router.delete("/locations/{loc_id}", dependencies=[Depends(require_admin)])
@@ -884,6 +875,7 @@ class ContentOut(BaseModel):
     id: str
     key: str
     value: Optional[str] = ""
+    value_id: Optional[str] = ""
     page: Optional[str] = "other"
     section: Optional[str] = "general"
     sort_order: Optional[int] = 100
@@ -896,6 +888,7 @@ class ContentIn(BaseModel):
     model_config = ConfigDict(extra="ignore")
     key: str = Field(min_length=1, max_length=200)
     value: Optional[str] = ""
+    value_id: Optional[str] = ""
     page: Optional[str] = "other"
     section: Optional[str] = "general"
     sort_order: Optional[int] = 100
@@ -906,6 +899,7 @@ class ContentIn(BaseModel):
 class ContentUpdate(BaseModel):
     model_config = ConfigDict(extra="ignore")
     value: Optional[str] = None
+    value_id: Optional[str] = None
     label: Optional[str] = None
     page: Optional[str] = None
     section: Optional[str] = None
@@ -915,7 +909,7 @@ class ContentUpdate(BaseModel):
 
 def _content_to_out(it: dict) -> ContentOut:
     return ContentOut(
-        id=str(it["id"]), key=it["key"], value=it.get("value") or "",
+        id=str(it["id"]), key=it["key"], value=it.get("value") or "", value_id=it.get("value_id") or "",
         page=it.get("page") or "other", section=it.get("section") or "general",
         sort_order=it.get("sort_order") if it.get("sort_order") is not None else 100,
         label=it.get("label"), type=it.get("type") or "text",
@@ -935,7 +929,7 @@ async def create_content(payload: ContentIn):
     key = payload.key.strip()
     existing = await sb_select_one("content_blocks", {"key": key})
     row = {
-        "key": key, "value": payload.value or "", "page": payload.page or "other",
+        "key": key, "value": payload.value or "", "value_id": payload.value_id or "", "page": payload.page or "other",
         "section": payload.section or "general",
         "sort_order": payload.sort_order if payload.sort_order is not None else 100,
         "label": payload.label, "type": payload.type or "text", "updated_at": now_iso(),
@@ -953,7 +947,7 @@ async def update_content(content_id: str, payload: ContentUpdate):
     if not existing:
         raise HTTPException(404, "Content block not found")
     update = {"updated_at": now_iso()}
-    for f in ("value", "label", "page", "section", "sort_order", "type"):
+    for f in ("value", "value_id", "label", "page", "section", "sort_order", "type"):
         v = getattr(payload, f, None)
         if v is not None:
             update[f] = v

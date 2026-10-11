@@ -9,7 +9,7 @@ const LanguageContext = createContext({ lang: "en", setLang: () => {}, t: (k) =>
 export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState(() => localStorage.getItem("sunjaya_lang") || "en");
   // CMS text overrides: { "hero.line1": "...", ... } (EN-first; ID overrides come in a later phase)
-  const [overrides, setOverrides] = useState({});
+  const [overrides, setOverrides] = useState({ en: {}, id: {} });
   const [blocks, setBlocks] = useState([]);
 
   useEffect(() => {
@@ -23,9 +23,11 @@ export const LanguageProvider = ({ children }) => {
       try {
         const r = await axios.get(`${API}/content`);
         if (cancelled) return;
-        const map = {};
+        const map = { en: {}, id: {} };
         (r.data || []).forEach((b) => {
-          if (b.key && (b.value ?? "") !== "") map[b.key] = b.value;
+          if (!b.key) return;
+          if ((b.value ?? "") !== "") map.en[b.key] = b.value;
+          if ((b.value_id ?? "") !== "") map.id[b.key] = b.value_id;
         });
         setOverrides(map);
         setBlocks(r.data || []);
@@ -38,9 +40,8 @@ export const LanguageProvider = ({ children }) => {
 
   const t = (path, fallback) => {
     // CMS override applies to the default (EN) copy
-    if (lang === "en" && overrides[path] !== undefined && overrides[path] !== "") {
-      return overrides[path];
-    }
+    const ov = overrides[lang]?.[path];
+    if (ov) return ov;
     const parts = path.split(".");
     let cur = translations[lang];
     for (const p of parts) {

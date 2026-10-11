@@ -1,14 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { geoEqualEarth, geoPath } from "d3-geo";
 import { feature as topoFeature } from "topojson-client";
-import { DEFAULT_LOCATIONS, SUBSIDIARIES } from "../data/content";
+import { SUBSIDIARIES } from "../data/content";
+import { useLocations } from "../hooks/useLocations";
 
 const GEO_URL = "/geo/countries-110m.json";
-
-export const INFRA_HUBS = [
-  { city: "Panama", country: "Panama", role: "Infrastructure Hub", lat: 8.9824, lng: -79.5199, color: "#B892FF" },
-  { city: "Switzerland", country: "Switzerland", role: "Infrastructure Hub", lat: 47.3769, lng: 8.5417, color: "#B892FF" },
-];
 
 const COMPANIES_BY_CITY = SUBSIDIARIES.reduce((acc, s) => {
   const city = s.city.split(",")[0].trim();
@@ -16,8 +12,6 @@ const COMPANIES_BY_CITY = SUBSIDIARIES.reduce((acc, s) => {
   acc[city].push(s.name);
   return acc;
 }, {});
-
-const ALL_PINS = [...DEFAULT_LOCATIONS, ...INFRA_HUBS];
 
 // Pre-computed label offsets to prevent overlap
 const LABEL_OFFSET = {
@@ -35,6 +29,7 @@ const LABEL_OFFSET = {
 export const InteractiveWorldMap = () => {
   const [geographies, setGeographies] = useState(null);
   const [selected, setSelected] = useState(null);
+  const ALL_PINS = useLocations();
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +56,7 @@ export const InteractiveWorldMap = () => {
     [projection],
   );
 
-  const hq = DEFAULT_LOCATIONS.find((l) => l.city.toLowerCase() === "singapore");
+  const hq = ALL_PINS.find((l) => l.type === "hq");
 
   const handlePinClick = useCallback((pin) => {
     setSelected((prev) => (prev && prev.city === pin.city ? null : pin));
@@ -75,7 +70,7 @@ export const InteractiveWorldMap = () => {
     );
   }
 
-  const hqPt = projectPoint([hq.lng, hq.lat]);
+  const hqPt = hq ? projectPoint([hq.lng, hq.lat]) : null;
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -111,7 +106,7 @@ export const InteractiveWorldMap = () => {
         })}
 
         {/* Dashed connection lines from HQ to all other pins */}
-        {hq && ALL_PINS.filter((l) => l.city.toLowerCase() !== "singapore").map((l) => {
+        {hq && ALL_PINS.filter((l) => l !== hq).map((l) => {
           const from = hqPt;
           const to = projectPoint([l.lng, l.lat]);
           if (!from || !to) return null;
@@ -126,11 +121,10 @@ export const InteractiveWorldMap = () => {
           const cpX = midX + nx * curve;
           const cpY = midY + ny * curve;
           const arc = `M ${from[0]} ${from[1]} Q ${cpX} ${cpY} ${to[0]} ${to[1]}`;
-          const isInfra = INFRA_HUBS.some((h) => h.city === l.city);
-          const color = isInfra ? "#B892FF" : "#FFA765";
+          const color = l.type === "infra" ? "#B892FF" : "#FFA765";
           return (
             <path
-              key={`conn-${l.city}`}
+              key={`conn-${l.id || l.city}`}
               d={arc}
               fill="none"
               stroke={color}
@@ -148,14 +142,14 @@ export const InteractiveWorldMap = () => {
           const pt = projectPoint([loc.lng, loc.lat]);
           if (!pt) return null;
           const off = LABEL_OFFSET[loc.city] || { dx: 10, dy: -4, anchor: "start" };
-          const isHQ = loc.city.toLowerCase() === "singapore";
-          const isInfra = INFRA_HUBS.some((h) => h.city === loc.city);
+          const isHQ = loc.type === "hq";
+          const isInfra = loc.type === "infra";
           const isSelected = selected && selected.city === loc.city;
           const companies = COMPANIES_BY_CITY[loc.city];
 
           return (
             <g
-              key={loc.city}
+              key={loc.id || loc.city}
               transform={`translate(${pt[0]}, ${pt[1]})`}
               style={{ cursor: "pointer" }}
               onClick={() => handlePinClick(loc)}
@@ -232,18 +226,12 @@ export const InteractiveWorldMap = () => {
       {/* Legend — bottom right */}
       <div className="absolute bottom-3 right-3 border border-white/15 bg-obsidian/70 backdrop-blur-md px-3 py-2 hidden md:block z-20">
         <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper mb-1.5">Locations</div>
-        <div className="flex flex-col gap-0.5 text-[10px] font-mono text-bone">
-          {DEFAULT_LOCATIONS.map((l) => (
-            <div key={l.city} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: l.color }} />
+        <div data-testid="map-legend-list" className="flex flex-col gap-0.5 text-[10px] font-mono text-bone max-h-40 overflow-y-auto pr-1">
+          {ALL_PINS.map((l) => (
+            <div key={l.id || l.city} className="flex items-center gap-2">
+              <span className={`w-1.5 h-1.5 ${l.type === "infra" ? "rotate-45" : "rounded-full"}`} style={{ background: l.color }} />
               {l.city}
-            </div>
-          ))}
-          {INFRA_HUBS.map((h) => (
-            <div key={h.city} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rotate-45" style={{ background: h.color }} />
-              {h.city}
-              <span className="text-[8px] tracking-[0.18em] text-ash">· INFRA</span>
+              {l.type === "infra" && <span className="text-[8px] tracking-[0.18em] text-ash">· INFRA</span>}
             </div>
           ))}
         </div>

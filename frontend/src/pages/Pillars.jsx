@@ -35,8 +35,8 @@ export default function Pillars() {
     if (names.length === 0) return DIVISIONS[num] || [];
     return names.map((nb) => {
       const base = nb.key.replace(/\.name$/, "");
-      const desc = (listBlocks(base + ".desc")[0] || {}).value || "";
-      return { name: nb.value, desc };
+      const desc = t(base + ".desc", (listBlocks(base + ".desc")[0] || {}).value || "");
+      return { name: t(nb.key, nb.value), desc };
     });
   };
   return (

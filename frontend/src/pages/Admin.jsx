@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
+import { LocationsPanel } from "../components/admin/LocationsPanel";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const TOKEN_KEY = "sunjaya_admin_token";
@@ -14,7 +15,6 @@ const errMsg = (err, fallback = "Request failed") => {
 };
 
 const emptyNews = { title: "", excerpt: "", body: "", category: "Press Release", cover_image: "", published: true, language: "en" };
-const emptyLoc = { city: "", country: "", role: "", lat: 0, lng: 0, color: "#C86230", order: 100, published: true, photo_url: "", description: "" };
 
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
@@ -402,7 +402,7 @@ const ContentPanel = ({ client }) => {
   const [items, setItems] = useState([]);
   const [savingId, setSavingId] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ key: "", page: "other", section: "general", label: "", value: "", type: "text" });
+  const [form, setForm] = useState({ key: "", page: "other", section: "general", label: "", value: "", value_id: "", type: "text" });
 
   const refresh = async () => {
     try {
@@ -414,11 +414,11 @@ const ContentPanel = ({ client }) => {
   };
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
 
-  const saveValue = async (block, value) => {
-    if (value === (block.value || "")) return;
+  const saveValue = async (block, value, field = "value") => {
+    if (value === (block[field] || "")) return;
     setSavingId(block.id);
     try {
-      await client.put(`/content/${block.id}`, { value });
+      await client.put(`/content/${block.id}`, { [field]: value });
       toast.success(`Saved "${block.label || block.key}"`);
       await refresh();
     } catch (e) {
@@ -439,13 +439,37 @@ const ContentPanel = ({ client }) => {
     }
   };
 
+  const addPointer = async (num, blocks) => {
+    const nums = blocks.map((b) => b.key.match(/^pillar\.\d+\.div\.(\d+)\.name$/)).filter(Boolean).map((m) => Number(m[1]));
+    const next = (nums.length ? Math.max(...nums) : 0) + 1;
+    const nn = String(next).padStart(2, "0");
+    const maxSort = Math.max(0, ...blocks.map((b) => b.sort_order ?? 0));
+    const base = `pillar.${num}.div.${nn}`;
+    try {
+      await client.post("/content", { key: `${base}.name`, page: "pillars", section: `pillar_${num}`, sort_order: maxSort + 10, label: `Pillar ${num}.${next} — Name`, type: "text", value: "New pointer" });
+      await client.post("/content", { key: `${base}.desc`, page: "pillars", section: `pillar_${num}`, sort_order: maxSort + 20, label: `Pillar ${num}.${next} — Description`, type: "textarea", value: "" });
+      toast.success(`Pointer ${num}.${next} added`);
+      await refresh();
+    } catch (err) { toast.error(errMsg(err, "Failed to add pointer")); }
+  };
+
+  const removePointer = async (nameBlock, blocks) => {
+    const base = nameBlock.key.replace(/\.name$/, "");
+    if (!window.confirm(`Delete pointer "${nameBlock.value}" (name + description)?`)) return;
+    try {
+      for (const b of blocks.filter((x) => x.key === `${base}.name` || x.key === `${base}.desc`)) await client.delete(`/content/${b.id}`);
+      toast.success("Pointer deleted");
+      await refresh();
+    } catch (err) { toast.error(errMsg(err, "Delete failed")); }
+  };
+
   const addNew = async (e) => {
     e.preventDefault();
     if (!form.key.trim()) { toast.error("Key is required"); return; }
     try {
       await client.post("/content", { ...form, key: form.key.trim() });
       toast.success(`Added "${form.key.trim()}"`);
-      setForm({ key: "", page: "other", section: "general", label: "", value: "", type: "text" });
+      setForm({ key: "", page: "other", section: "general", label: "", value: "", value_id: "", type: "text" });
       setShowAdd(false);
       await refresh();
     } catch (err) {
@@ -471,7 +495,7 @@ const ContentPanel = ({ client }) => {
   return (
     <div data-testid="content-panel">
       <div className="flex items-center justify-between mb-6">
-        <p className="text-ash font-mono text-xs max-w-xl">Edit any website text. Changes go live immediately on the English site. Leave a field empty to fall back to the default text.</p>
+        <p className="text-ash font-mono text-xs max-w-xl">Edit any website text. Changes go live immediately. Fill EN for English and ID for Bahasa Indonesia. Leave a field empty to fall back to the default text.</p>
         <button onClick={() => setShowAdd(!showAdd)} data-testid="content-add-toggle"
           className="h-9 px-4 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors shrink-0">
           {showAdd ? "Close" : "+ Add text"}
@@ -494,9 +518,15 @@ const ContentPanel = ({ client }) => {
             <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Label</label>
             <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="Friendly name" className={inputCls} />
           </div>
-          <div className="md:col-span-3">
-            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Text</label>
-            <textarea rows={2} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} className={`${inputCls} resize-y`} />
+          <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Text — EN</label>
+              <textarea rows={2} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} data-testid="content-new-value" className={`${inputCls} resize-y`} />
+            </div>
+            <div>
+              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Text — ID</label>
+              <textarea rows={2} value={form.value_id} onChange={(e) => setForm({ ...form, value_id: e.target.value })} data-testid="content-new-value-id" className={`${inputCls} resize-y`} />
+            </div>
           </div>
           <div className="md:col-span-3">
             <button type="submit" data-testid="content-new-submit" className="h-10 px-6 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors">Add text block</button>
@@ -512,7 +542,13 @@ const ContentPanel = ({ client }) => {
           </div>
           {Object.keys(byPage[pageId]).map((secId) => (
             <div key={secId} className="mb-6">
-              <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash/70 mb-3">{prettySec(secId)}</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash/70">{prettySec(secId)}</p>
+                {pageId === "pillars" && /^pillar_\d+$/.test(secId) && (
+                  <button onClick={() => addPointer(secId.split("_")[1], byPage[pageId][secId])} data-testid={`add-pointer-${secId}`}
+                    className="h-8 px-3 border border-copper/60 text-copper font-mono text-[9px] tracking-[0.2em] uppercase hover:bg-copper hover:text-obsidian transition-colors">+ Tambah Pointer</button>
+                )}
+              </div>
               <div className="space-y-3">
                 {byPage[pageId][secId].map((b) => (
                   <div key={b.id} data-testid={`content-block-${b.key}`} className="bg-ink border border-white/10 p-3.5">
@@ -521,16 +557,26 @@ const ContentPanel = ({ client }) => {
                       <span className="flex items-center gap-3">
                         <span className="font-mono text-[9px] text-ash/60">{b.key}</span>
                         {savingId === b.id && <span className="font-mono text-[9px] text-copper">saving…</span>}
+                        {/^pillar\.\d+\.div\.\d+\.name$/.test(b.key) && (
+                          <button onClick={() => removePointer(b, byPage[pageId][secId])} data-testid={`remove-pointer-${b.key}`} className="font-mono text-[9px] text-red-400/70 hover:text-red-400 uppercase">del pointer</button>
+                        )}
                         <button onClick={() => remove(b)} title="Delete block" className="font-mono text-[9px] text-red-400/70 hover:text-red-400 uppercase">del</button>
                       </span>
                     </div>
-                    {b.type === "textarea" ? (
-                      <textarea rows={3} defaultValue={b.value || ""} onBlur={(e) => saveValue(b, e.target.value)}
-                        data-testid={`content-input-${b.key}`} className={`${inputCls} resize-y leading-relaxed`} />
-                    ) : (
-                      <input defaultValue={b.value || ""} onBlur={(e) => saveValue(b, e.target.value)}
-                        data-testid={`content-input-${b.key}`} className={inputCls} />
-                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[["value", "EN", ""], ["value_id", "ID", "-id"]].map(([field, tag, sfx]) => (
+                        <div key={field} className="relative">
+                          <span className="absolute top-1.5 right-2 font-mono text-[8px] tracking-[0.2em] text-copper/70 pointer-events-none">{tag}</span>
+                          {b.type === "textarea" ? (
+                            <textarea key={`${b.id}-${field}-${b[field] || ""}`} rows={3} defaultValue={b[field] || ""} onBlur={(e) => saveValue(b, e.target.value, field)}
+                              data-testid={`content-input-${b.key}${sfx}`} className={`${inputCls} resize-y leading-relaxed pr-8`} />
+                          ) : (
+                            <input key={`${b.id}-${field}-${b[field] || ""}`} defaultValue={b[field] || ""} onBlur={(e) => saveValue(b, e.target.value, field)}
+                              data-testid={`content-input-${b.key}${sfx}`} className={`${inputCls} pr-8`} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -616,6 +662,30 @@ const ImagesPanel = ({ client }) => {
     } catch (e) {
       toast.error(errMsg(e, "Delete failed"));
     }
+  };
+
+  const addPointer = async (num, blocks) => {
+    const nums = blocks.map((b) => b.key.match(/^pillar\.\d+\.div\.(\d+)\.name$/)).filter(Boolean).map((m) => Number(m[1]));
+    const next = (nums.length ? Math.max(...nums) : 0) + 1;
+    const nn = String(next).padStart(2, "0");
+    const maxSort = Math.max(0, ...blocks.map((b) => b.sort_order ?? 0));
+    const base = `pillar.${num}.div.${nn}`;
+    try {
+      await client.post("/content", { key: `${base}.name`, page: "pillars", section: `pillar_${num}`, sort_order: maxSort + 10, label: `Pillar ${num}.${next} — Name`, type: "text", value: "New pointer" });
+      await client.post("/content", { key: `${base}.desc`, page: "pillars", section: `pillar_${num}`, sort_order: maxSort + 20, label: `Pillar ${num}.${next} — Description`, type: "textarea", value: "" });
+      toast.success(`Pointer ${num}.${next} added`);
+      await refresh();
+    } catch (err) { toast.error(errMsg(err, "Failed to add pointer")); }
+  };
+
+  const removePointer = async (nameBlock, blocks) => {
+    const base = nameBlock.key.replace(/\.name$/, "");
+    if (!window.confirm(`Delete pointer "${nameBlock.value}" (name + description)?`)) return;
+    try {
+      for (const b of blocks.filter((x) => x.key === `${base}.name` || x.key === `${base}.desc`)) await client.delete(`/content/${b.id}`);
+      toast.success("Pointer deleted");
+      await refresh();
+    } catch (err) { toast.error(errMsg(err, "Delete failed")); }
   };
 
   const addNew = async (e) => {
@@ -843,96 +913,6 @@ const NewsPanel = ({ client }) => {
               <div className="col-span-4 flex justify-end gap-2">
                 <button onClick={() => edit(n)} className="h-9 px-3 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-bone hover:border-copper hover:text-copper transition-colors">Edit</button>
                 <button onClick={() => del(n.id)} className="h-9 px-3 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-bone hover:border-destructive hover:text-destructive transition-colors">Delete</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ================= LOCATIONS ================= */
-const LocationsPanel = ({ client }) => {
-  const [items, setItems] = useState([]);
-  const [form, setForm] = useState(emptyLoc);
-  const [editingId, setEditingId] = useState(null);
-  const [busy, setBusy] = useState(false);
-
-  const refresh = async () => {
-    const r = await axios.get(`${API}/locations`, { params: { published_only: false } });
-    setItems(r.data || []);
-  };
-  useEffect(() => { refresh(); }, []);
-
-  const upd = (k) => (e) => setForm({ ...form, [k]: e.target.type === "checkbox" ? e.target.checked : (e.target.type === "number" ? Number(e.target.value) : e.target.value) });
-
-  const save = async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      if (editingId) { await client.put(`/locations/${editingId}`, form); toast.success("Location updated"); }
-      else { await client.post("/locations", form); toast.success("Location added"); }
-      setForm(emptyLoc); setEditingId(null); await refresh();
-    } catch (err) { toast.error(err?.response?.data?.detail || "Save failed"); }
-    finally { setBusy(false); }
-  };
-
-  const edit = (l) => { setEditingId(l.id); setForm({ ...l }); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const del = async (id) => { if (!window.confirm("Delete?")) return; try { await client.delete(`/locations/${id}`); toast.success("Deleted"); await refresh(); } catch { toast.error("Delete failed"); } };
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <form onSubmit={save} className="lg:col-span-5 border border-white/10 p-8 bg-ink space-y-4 h-fit sticky top-24">
-        <div className="font-mono text-[10px] tracking-[0.24em] uppercase text-copper">{editingId ? "Edit Location" : "New Location"}</div>
-        <Field label="City" value={form.city} onChange={upd("city")} required id="city" />
-        <Field label="Country" value={form.country} onChange={upd("country")} required id="country" />
-        <Field label="Role / Description" value={form.role} onChange={upd("role")} required id="role" />
-        <div>
-          <label className="block font-mono text-[10px] tracking-[0.22em] uppercase text-ash mb-2">Popup Description (optional)</label>
-          <textarea value={form.description || ""} onChange={upd("description")} rows={3} id="description" className="w-full bg-obsidian border border-white/15 px-3 py-3 font-mono text-sm text-bone focus:border-copper focus:outline-none resize-none" placeholder="Longer description shown in the globe popup card" />
-        </div>
-        <Field label="Photo URL (optional)" value={form.photo_url || ""} onChange={upd("photo_url")} id="photo_url" />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Latitude" type="number" step="0.0001" min="-90" max="90" value={form.lat} onChange={upd("lat")} id="lat" required />
-          <Field label="Longitude" type="number" step="0.0001" min="-180" max="180" value={form.lng} onChange={upd("lng")} id="lng" required />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block font-mono text-[10px] tracking-[0.22em] uppercase text-ash mb-2">Pin color</label>
-            <input type="color" value={form.color} onChange={upd("color")} className="w-full h-11 bg-obsidian border border-white/15 cursor-pointer" />
-          </div>
-          <Field label="Sort order" type="number" value={form.order} onChange={upd("order")} id="order" />
-        </div>
-        <label className="flex items-center gap-3 font-mono text-xs text-bone">
-          <input type="checkbox" checked={form.published} onChange={upd("published")} /> Published
-        </label>
-        <div className="text-[10px] font-mono text-smoke leading-relaxed border-t border-white/10 pt-3">
-          Enter real geographic coordinates. Pins are placed on an interactive world map on the public page.
-        </div>
-        <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={busy} className="flex-1 h-12 bg-copper text-obsidian font-mono text-[11px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors disabled:opacity-50">{editingId ? "Update" : "Add Location"}</button>
-          {editingId && <button type="button" onClick={() => { setForm(emptyLoc); setEditingId(null); }} className="h-12 px-4 border border-white/15 font-mono text-[11px] tracking-[0.22em] uppercase text-ash">Cancel</button>}
-        </div>
-      </form>
-      <div className="lg:col-span-7">
-        <div className="border-t border-white/10">
-          {items.length === 0 && <p className="py-8 font-mono text-xs text-ash">No custom locations yet. The public site shows default locations from the corporate profile until you add your own.</p>}
-          {items.map((l) => (
-            <div key={l.id} className="py-6 border-b border-white/10 grid grid-cols-12 gap-4 items-center">
-              <div className="col-span-8">
-                <div className="flex gap-2 items-center mb-1">
-                  <span className="w-3 h-3 rounded-full" style={{ background: l.color }} />
-                  <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-ash">{l.country}</span>
-                  <span className={`font-mono text-[10px] px-2 py-0.5 tracking-[0.2em] ${l.published ? "bg-copper text-obsidian" : "border border-white/20 text-ash"}`}>{l.published ? "LIVE" : "HIDDEN"}</span>
-                </div>
-                <h3 className="font-serif text-2xl text-bone tracking-tight leading-tight">{l.city}</h3>
-                <p className="text-bone/70 text-sm mt-1">{l.role}</p>
-                <p className="font-mono text-[10px] text-smoke mt-1">lat: {l.lat}° · lng: {l.lng}° · order: {l.order}</p>
-              </div>
-              <div className="col-span-4 flex justify-end gap-2">
-                <button onClick={() => edit(l)} className="h-9 px-3 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-bone hover:border-copper hover:text-copper transition-colors">Edit</button>
-                <button onClick={() => del(l.id)} className="h-9 px-3 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-bone hover:border-destructive hover:text-destructive transition-colors">Delete</button>
               </div>
             </div>
           ))}
