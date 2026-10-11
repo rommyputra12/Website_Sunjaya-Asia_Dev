@@ -3,6 +3,9 @@ import axios from "axios";
 import { toast, Toaster } from "sonner";
 import { LocationsPanel } from "../components/admin/LocationsPanel";
 import { SUBSIDIARIES } from "../data/content";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const TOKEN_KEY = "sunjaya_admin_token";
@@ -667,6 +670,23 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
   );
 };
 
+const AssetCard = ({ a, draggable, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: a.id, disabled: !draggable });
+  return (
+    <div ref={setNodeRef} data-testid={`asset-card-${a.key}`}
+      style={{ transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 40 : undefined }}
+      className={`bg-ink border overflow-hidden flex flex-col relative ${isDragging ? "border-copper shadow-2xl" : "border-white/10"}`}>
+      {draggable && (
+        <button {...attributes} {...listeners} data-testid={`asset-drag-${a.key}`} title="Geser untuk mengubah urutan"
+          className="absolute top-2 right-2 z-20 w-7 h-7 grid place-items-center bg-obsidian/80 border border-white/20 text-ash hover:text-copper hover:border-copper cursor-grab active:cursor-grabbing transition-colors touch-none">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="3" cy="2.5" r="1.2"/><circle cx="9" cy="2.5" r="1.2"/><circle cx="3" cy="6" r="1.2"/><circle cx="9" cy="6" r="1.2"/><circle cx="3" cy="9.5" r="1.2"/><circle cx="9" cy="9.5" r="1.2"/></svg>
+        </button>
+      )}
+      {children}
+    </div>
+  );
+};
+
 const ImagesPanel = ({ client }) => {
   const [items, setItems] = useState([]);
   const [busyKey, setBusyKey] = useState(null);
@@ -724,6 +744,43 @@ const ImagesPanel = ({ client }) => {
     }
   };
 
+  const [reordered, setReordered] = useState(null); // optimistic order for home_subsidiaries
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  const persistOrder = async (ordered) => {
+    const updates = ordered.map((a, i) => ({ ...a, sort_order: i + 1 }));
+    setItems((prev) => prev.map((a) => updates.find((u) => u.id === a.id) || a));
+    setReordered(null);
+    try {
+      await Promise.all(updates.map((u) => client.put(`/assets/${u.id}`, { sort_order: u.sort_order })));
+      toast.success("Urutan kartu tersimpan");
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Gagal menyimpan urutan"));
+      await refresh();
+    }
+  };
+
+  const onDragEnd = (e) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) { setReordered(null); return; }
+    const grp = groups["home_subsidiaries"] || [];
+    const from = grp.findIndex((a) => a.id === active.id);
+    const to = grp.findIndex((a) => a.id === over.id);
+    if (from < 0 || to < 0) { setReordered(null); return; }
+    persistOrder(arrayMove(grp, from, to));
+  };
+
+  const onDragOver = (e) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const grp = (reordered || groups["home_subsidiaries"]) || [];
+    const from = grp.findIndex((a) => a.id === active.id);
+    const to = grp.findIndex((a) => a.id === over.id);
+    if (from < 0 || to < 0) return;
+    setReordered(arrayMove(grp, from, to));
+  };
+
   const addPointer = async (num, blocks) => {
     const nums = blocks.map((b) => b.key.match(/^pillar\.\d+\.div\.(\d+)\.name$/)).filter(Boolean).map((m) => Number(m[1]));
     const next = (nums.length ? Math.max(...nums) : 0) + 1;
@@ -778,6 +835,7 @@ const ImagesPanel = ({ client }) => {
     const s = a.section || "other";
     (groups[s] = groups[s] || []).push(a);
   });
+  if (reordered) groups["home_subsidiaries"] = reordered;
   Object.entries(groups).forEach(([sec, arr]) => arr.sort((a, b) =>
     sec === "home_subsidiaries"
       ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
@@ -814,6 +872,7 @@ const ImagesPanel = ({ client }) => {
       </form>
 
       {/* Grouped by section in page order */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} onDragOver={onDragOver}>
       {orderedSections.map((secId) => (
         <div key={secId} className="mb-10" data-testid={`image-section-${secId}`}>
           <div className="flex items-center gap-4 mb-4">
@@ -821,9 +880,10 @@ const ImagesPanel = ({ client }) => {
             <div className="flex-1 h-px bg-white/10" />
             <span className="font-mono text-[9px] text-ash">{groups[secId].length} image{groups[secId].length > 1 ? "s" : ""}</span>
           </div>
+          <SortableContext items={groups[secId].map((a) => a.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {groups[secId].map((a) => (
-              <div key={a.id} data-testid={`asset-card-${a.key}`} className="bg-ink border border-white/10 overflow-hidden flex flex-col">
+              <AssetCard key={a.id} a={a} draggable={secId === "home_subsidiaries"}>
                 <button
                   type="button"
                   onClick={() => setEditing(a)}
@@ -880,11 +940,13 @@ const ImagesPanel = ({ client }) => {
                     )}
                   </div>
                 </div>
-              </div>
+              </AssetCard>
             ))}
           </div>
+          </SortableContext>
         </div>
       ))}
+      </DndContext>
       {items.length === 0 && <p className="text-ash font-mono text-xs mt-6">No images yet.</p>}
 
       {editing && (
