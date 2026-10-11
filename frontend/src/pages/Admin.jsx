@@ -266,18 +266,37 @@ const UsersPanel = ({ client, me }) => {
   );
 };
 
-/* ================= IMAGES (asset manager) ================= */
+/* ================= IMAGES (asset manager, grouped by page section) ================= */
+const IMAGE_SECTIONS = [
+  { id: "nav", label: "Navbar & Brand" },
+  { id: "home_hero", label: "Home — Hero Cover" },
+  { id: "home_pillars_intro", label: "Home — Pillars Intro Background" },
+  { id: "home_pillar_sections", label: "Home — Pillar Sections (01–03)" },
+  { id: "home_subsidiaries", label: "Home — Subsidiaries Grid" },
+  { id: "pillars_page", label: "Pillars Page — Slides" },
+  { id: "about_page", label: "About Page" },
+  { id: "footer", label: "Footer" },
+  { id: "other", label: "Custom Uploads" },
+];
+const sectionIndex = (id) => {
+  const i = IMAGE_SECTIONS.findIndex((s) => s.id === id);
+  return i === -1 ? IMAGE_SECTIONS.length : i;
+};
+const sectionLabel = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.label || id;
+
 const ImagesPanel = ({ client }) => {
   const [items, setItems] = useState([]);
   const [busyKey, setBusyKey] = useState(null);
   const [newKey, setNewKey] = useState("");
   const [newFile, setNewFile] = useState(null);
+  const [newSection, setNewSection] = useState("other");
+  const [newOrder, setNewOrder] = useState(100);
   const [uploading, setUploading] = useState(false);
 
   const refresh = async () => {
     try {
       const r = await client.get("/assets");
-      setItems((r.data || []).sort((a, b) => a.key.localeCompare(b.key)));
+      setItems(r.data || []);
     } catch (e) {
       toast.error(errMsg(e, "Failed to load images"));
     }
@@ -301,10 +320,10 @@ const ImagesPanel = ({ client }) => {
     }
   };
 
-  const saveAlt = async (asset, alt) => {
+  const saveMeta = async (asset, patch, msg = "Saved") => {
     try {
-      await client.put(`/assets/${asset.id}`, { alt });
-      toast.success("Alt text saved");
+      await client.put(`/assets/${asset.id}`, { alt: asset.alt, ...patch });
+      toast.success(msg);
       await refresh();
     } catch (e) {
       toast.error(errMsg(e, "Save failed"));
@@ -330,9 +349,11 @@ const ImagesPanel = ({ client }) => {
       const fd = new FormData();
       fd.append("file", newFile);
       fd.append("key", newKey.trim());
+      fd.append("section", newSection);
+      fd.append("sort_order", String(newOrder));
       await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
       toast.success(`Added "${newKey.trim()}"`);
-      setNewKey(""); setNewFile(null);
+      setNewKey(""); setNewFile(null); setNewSection("other"); setNewOrder(100);
       e.target.reset();
       await refresh();
     } catch (err) {
@@ -342,17 +363,37 @@ const ImagesPanel = ({ client }) => {
     }
   };
 
+  // group by section, ordered by page order
+  const groups = {};
+  items.forEach((a) => {
+    const s = a.section || "other";
+    (groups[s] = groups[s] || []).push(a);
+  });
+  Object.values(groups).forEach((arr) => arr.sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
+  const orderedSections = Object.keys(groups).sort((a, b) => sectionIndex(a) - sectionIndex(b) || a.localeCompare(b));
+
+  const inputCls = "w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none";
+
   return (
     <div data-testid="images-panel">
       {/* Add new asset */}
-      <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-8 flex flex-col md:flex-row md:items-end gap-4">
-        <div className="flex-1">
+      <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">New asset key</label>
           <input value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="e.g. home_new_banner"
-            data-testid="new-asset-key"
-            className="w-full h-10 bg-obsidian border border-white/15 px-3 font-mono text-sm text-bone focus:border-copper focus:outline-none" />
+            data-testid="new-asset-key" className={`${inputCls} h-10`} />
         </div>
-        <div className="flex-1">
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Section</label>
+          <select value={newSection} onChange={(e) => setNewSection(e.target.value)} data-testid="new-asset-section" className={`${inputCls} h-10`}>
+            {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Order</label>
+          <input type="number" value={newOrder} onChange={(e) => setNewOrder(parseInt(e.target.value || "100", 10))} data-testid="new-asset-order" className={`${inputCls} h-10`} />
+        </div>
+        <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Image file</label>
           <input type="file" accept="image/*" onChange={(e) => setNewFile(e.target.files?.[0] || null)}
             data-testid="new-asset-file"
@@ -364,33 +405,57 @@ const ImagesPanel = ({ client }) => {
         </button>
       </form>
 
-      {/* Grid of existing assets */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {items.map((a) => (
-          <div key={a.id} data-testid={`asset-card-${a.key}`} className="bg-ink border border-white/10 overflow-hidden flex flex-col">
-            <div className="aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center">
-              <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <div className="p-3 flex flex-col gap-2 flex-1">
-              <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
-              <div className="font-mono text-[9px] text-ash">{a.width && a.height ? `${a.width}×${a.height}` : "—"}</div>
-              <input
-                defaultValue={a.alt || ""}
-                onBlur={(e) => { if (e.target.value !== (a.alt || "")) saveAlt(a, e.target.value); }}
-                placeholder="Alt text…"
-                className="w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none" />
-              <div className="flex gap-2 mt-auto pt-1">
-                <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>
-                  {busyKey === a.key ? "…" : "Replace"}
-                  <input type="file" accept="image/*" className="hidden" disabled={busyKey === a.key}
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) replaceImage(a.key, f); e.target.value = ""; }} />
-                </label>
-                <button onClick={() => remove(a)} className="h-8 px-3 border border-red-500/30 text-red-400 font-mono text-[9px] tracking-[0.18em] uppercase hover:bg-red-500/10 transition-colors">Del</button>
-              </div>
-            </div>
+      {/* Grouped by section in page order */}
+      {orderedSections.map((secId) => (
+        <div key={secId} className="mb-10" data-testid={`image-section-${secId}`}>
+          <div className="flex items-center gap-4 mb-4">
+            <h3 className="font-mono text-[11px] tracking-[0.24em] uppercase text-copper">{sectionLabel(secId)}</h3>
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="font-mono text-[9px] text-ash">{groups[secId].length} image{groups[secId].length > 1 ? "s" : ""}</span>
           </div>
-        ))}
-      </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {groups[secId].map((a) => (
+              <div key={a.id} data-testid={`asset-card-${a.key}`} className="bg-ink border border-white/10 overflow-hidden flex flex-col">
+                <div className="aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center">
+                  <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="p-3 flex flex-col gap-2 flex-1">
+                  <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
+                  <div className="font-mono text-[9px] text-ash">{a.width && a.height ? `${a.width}×${a.height}` : "—"}</div>
+                  <input
+                    defaultValue={a.alt || ""}
+                    onBlur={(e) => { if (e.target.value !== (a.alt || "")) saveMeta({ ...a }, { alt: e.target.value }, "Alt saved"); }}
+                    placeholder="Alt text…"
+                    className={inputCls} />
+                  <div className="flex gap-2">
+                    <select
+                      defaultValue={a.section || "other"}
+                      onChange={(e) => saveMeta({ ...a }, { section: e.target.value }, "Section updated")}
+                      title="Section"
+                      className={`${inputCls} flex-1`}>
+                      {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                    </select>
+                    <input
+                      type="number"
+                      defaultValue={a.sort_order ?? 100}
+                      onBlur={(e) => { const v = parseInt(e.target.value || "100", 10); if (v !== (a.sort_order ?? 100)) saveMeta({ ...a }, { sort_order: v }, "Order updated"); }}
+                      title="Order"
+                      className={`${inputCls} w-16`} />
+                  </div>
+                  <div className="flex gap-2 mt-auto pt-1">
+                    <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>
+                      {busyKey === a.key ? "…" : "Replace"}
+                      <input type="file" accept="image/*" className="hidden" disabled={busyKey === a.key}
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) replaceImage(a.key, f); e.target.value = ""; }} />
+                    </label>
+                    <button onClick={() => remove(a)} className="h-8 px-3 border border-red-500/30 text-red-400 font-mono text-[9px] tracking-[0.18em] uppercase hover:bg-red-500/10 transition-colors">Del</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
       {items.length === 0 && <p className="text-ash font-mono text-xs mt-6">No images yet.</p>}
     </div>
   );

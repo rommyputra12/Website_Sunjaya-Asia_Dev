@@ -714,6 +714,8 @@ class AssetOut(BaseModel):
     alt: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
+    section: Optional[str] = "other"
+    sort_order: Optional[int] = 100
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -721,6 +723,8 @@ class AssetOut(BaseModel):
 class AssetMetaIn(BaseModel):
     model_config = ConfigDict(extra="ignore")
     alt: Optional[str] = None
+    section: Optional[str] = None
+    sort_order: Optional[int] = None
 
 
 def _asset_public_url(object_name: str) -> str:
@@ -731,6 +735,8 @@ def _asset_row_to_out(it: dict) -> AssetOut:
     return AssetOut(
         id=str(it["id"]), key=it["key"], url=it["url"], alt=it.get("alt"),
         width=it.get("width"), height=it.get("height"),
+        section=it.get("section") or "other",
+        sort_order=it.get("sort_order") if it.get("sort_order") is not None else 100,
         created_at=fmt_ts(it.get("created_at")), updated_at=fmt_ts(it.get("updated_at")),
     )
 
@@ -738,7 +744,7 @@ def _asset_row_to_out(it: dict) -> AssetOut:
 @api_router.get("/assets", response_model=List[AssetOut])
 async def list_assets():
     """Public: all image assets as key -> url registry for the frontend."""
-    items = await sb_select("assets", order="key.asc", limit=500)
+    items = await sb_select("assets", order="sort_order.asc", limit=500)
     return [_asset_row_to_out(it) for it in items]
 
 
@@ -747,6 +753,8 @@ async def upload_asset(
     file: UploadFile = File(...),
     key: str = Form(...),
     alt: Optional[str] = Form(None),
+    section: Optional[str] = Form(None),
+    sort_order: Optional[int] = Form(None),
 ):
     """Admin: upload (or replace) an image for a given asset key."""
     key = (key or "").strip()
@@ -789,11 +797,17 @@ async def upload_asset(
 
     public_url = _asset_public_url(object_name)
     row = {"key": key, "url": public_url, "alt": alt, "width": width, "height": height,
+           "section": (section or "other"), "sort_order": sort_order if sort_order is not None else 100,
            "updated_at": now_iso()}
     url = f"{SUPABASE_URL}/rest/v1/assets?on_conflict=key"
     async with httpx.AsyncClient(timeout=30) as c:
         r = await c.post(url, headers={**SB_SERVICE_HEADERS,
                          "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
+        if r.status_code >= 300 and "PGRST204" in r.text:
+            # section/sort_order columns not migrated yet — retry without them
+            row.pop("section", None); row.pop("sort_order", None)
+            r = await c.post(url, headers={**SB_SERVICE_HEADERS,
+                             "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
         if r.status_code >= 300:
             raise HTTPException(502, f"Asset metadata save failed: {r.text[:200]}")
         return _asset_row_to_out(r.json()[0])
@@ -801,11 +815,15 @@ async def upload_asset(
 
 @api_router.put("/assets/{asset_id}", response_model=AssetOut, dependencies=[Depends(require_admin)])
 async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
-    """Admin: update the alt text of an asset."""
+    """Admin: update the metadata (alt text / section / order) of an asset."""
     existing = await sb_select_one("assets", {"id": asset_id})
     if not existing:
         raise HTTPException(404, "Asset not found")
     update = {"alt": payload.alt, "updated_at": now_iso()}
+    if payload.section is not None:
+        update["section"] = payload.section
+    if payload.sort_order is not None:
+        update["sort_order"] = payload.sort_order
     updated = await sb_update("assets", asset_id, update)
     if not updated:
         raise HTTPException(404, "Asset not found")
