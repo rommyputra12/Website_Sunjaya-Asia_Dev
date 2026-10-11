@@ -99,6 +99,7 @@ export default function Admin() {
             { k: "news", label: "News" },
             { k: "locations", label: "Locations" },
             { k: "images", label: "Images" },
+            { k: "content", label: "Content" },
             { k: "inquiries", label: "Inquiries" },
             ...(me?.role === "superadmin" ? [{ k: "users", label: "Users" }] : []),
           ].map((tb) => (
@@ -118,6 +119,7 @@ export default function Admin() {
         {tab === "news" && <NewsPanel client={client} />}
         {tab === "locations" && <LocationsPanel client={client} />}
         {tab === "images" && <ImagesPanel client={client} />}
+        {tab === "content" && <ContentPanel client={client} />}
         {tab === "inquiries" && <InquiriesPanel client={client} />}
         {tab === "users" && me?.role === "superadmin" && <UsersPanel client={client} me={me} />}
       </div>
@@ -373,6 +375,170 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+/* ================= CONTENT (editable text blocks) ================= */
+const CONTENT_PAGES = [
+  { id: "nav", label: "Navbar" },
+  { id: "home", label: "Home Page" },
+  { id: "pillars", label: "Pillars Page" },
+  { id: "subsidiaries", label: "Subsidiaries Page" },
+  { id: "about", label: "About Page" },
+  { id: "news", label: "News Page" },
+  { id: "contact", label: "Contact Page" },
+  { id: "footer", label: "Footer" },
+  { id: "other", label: "Other / Custom" },
+];
+const pageIndex = (id) => {
+  const i = CONTENT_PAGES.findIndex((p) => p.id === id);
+  return i === -1 ? CONTENT_PAGES.length : i;
+};
+const pageLabel = (id) => CONTENT_PAGES.find((p) => p.id === id)?.label || id;
+const prettySec = (s) => (s || "general").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+const ContentPanel = ({ client }) => {
+  const [items, setItems] = useState([]);
+  const [savingId, setSavingId] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ key: "", page: "other", section: "general", label: "", value: "", type: "text" });
+
+  const refresh = async () => {
+    try {
+      const r = await client.get("/content");
+      setItems(r.data || []);
+    } catch (e) {
+      toast.error(errMsg(e, "Failed to load content"));
+    }
+  };
+  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
+
+  const saveValue = async (block, value) => {
+    if (value === (block.value || "")) return;
+    setSavingId(block.id);
+    try {
+      await client.put(`/content/${block.id}`, { value });
+      toast.success(`Saved "${block.label || block.key}"`);
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Save failed"));
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const remove = async (block) => {
+    if (!window.confirm(`Delete text block "${block.key}"?`)) return;
+    try {
+      await client.delete(`/content/${block.id}`);
+      toast.success("Deleted");
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Delete failed"));
+    }
+  };
+
+  const addNew = async (e) => {
+    e.preventDefault();
+    if (!form.key.trim()) { toast.error("Key is required"); return; }
+    try {
+      await client.post("/content", { ...form, key: form.key.trim() });
+      toast.success(`Added "${form.key.trim()}"`);
+      setForm({ key: "", page: "other", section: "general", label: "", value: "", type: "text" });
+      setShowAdd(false);
+      await refresh();
+    } catch (err) {
+      toast.error(errMsg(err, "Failed to add"));
+    }
+  };
+
+  // group: page -> section -> blocks
+  const byPage = {};
+  items.forEach((b) => {
+    const p = b.page || "other";
+    const s = b.section || "general";
+    byPage[p] = byPage[p] || {};
+    (byPage[p][s] = byPage[p][s] || []).push(b);
+  });
+  Object.values(byPage).forEach((secs) =>
+    Object.values(secs).forEach((arr) => arr.sort((a, b2) => (a.sort_order ?? 100) - (b2.sort_order ?? 100)))
+  );
+  const orderedPages = Object.keys(byPage).sort((a, b) => pageIndex(a) - pageIndex(b) || a.localeCompare(b));
+
+  const inputCls = "w-full bg-obsidian border border-white/15 px-3 py-2 font-mono text-[12px] text-bone focus:border-copper focus:outline-none";
+
+  return (
+    <div data-testid="content-panel">
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-ash font-mono text-xs max-w-xl">Edit any website text. Changes go live immediately on the English site. Leave a field empty to fall back to the default text.</p>
+        <button onClick={() => setShowAdd(!showAdd)} data-testid="content-add-toggle"
+          className="h-9 px-4 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors shrink-0">
+          {showAdd ? "Close" : "+ Add text"}
+        </button>
+      </div>
+
+      {showAdd && (
+        <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Key (unique)</label>
+            <input required value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} placeholder="e.g. footer.hotline" data-testid="content-new-key" className={inputCls} />
+          </div>
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Page</label>
+            <select value={form.page} onChange={(e) => setForm({ ...form, page: e.target.value })} className={inputCls}>
+              {CONTENT_PAGES.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Label</label>
+            <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="Friendly name" className={inputCls} />
+          </div>
+          <div className="md:col-span-3">
+            <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Text</label>
+            <textarea rows={2} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} className={`${inputCls} resize-y`} />
+          </div>
+          <div className="md:col-span-3">
+            <button type="submit" data-testid="content-new-submit" className="h-10 px-6 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors">Add text block</button>
+          </div>
+        </form>
+      )}
+
+      {orderedPages.map((pageId) => (
+        <div key={pageId} className="mb-10" data-testid={`content-page-${pageId}`}>
+          <div className="flex items-center gap-4 mb-4">
+            <h3 className="font-mono text-[11px] tracking-[0.24em] uppercase text-copper">{pageLabel(pageId)}</h3>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+          {Object.keys(byPage[pageId]).map((secId) => (
+            <div key={secId} className="mb-6">
+              <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash/70 mb-3">{prettySec(secId)}</p>
+              <div className="space-y-3">
+                {byPage[pageId][secId].map((b) => (
+                  <div key={b.id} data-testid={`content-block-${b.key}`} className="bg-ink border border-white/10 p-3.5">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <span className="font-mono text-[11px] text-bone">{b.label || b.key}</span>
+                      <span className="flex items-center gap-3">
+                        <span className="font-mono text-[9px] text-ash/60">{b.key}</span>
+                        {savingId === b.id && <span className="font-mono text-[9px] text-copper">saving…</span>}
+                        <button onClick={() => remove(b)} title="Delete block" className="font-mono text-[9px] text-red-400/70 hover:text-red-400 uppercase">del</button>
+                      </span>
+                    </div>
+                    {b.type === "textarea" ? (
+                      <textarea rows={3} defaultValue={b.value || ""} onBlur={(e) => saveValue(b, e.target.value)}
+                        data-testid={`content-input-${b.key}`} className={`${inputCls} resize-y leading-relaxed`} />
+                    ) : (
+                      <input defaultValue={b.value || ""} onBlur={(e) => saveValue(b, e.target.value)}
+                        data-testid={`content-input-${b.key}`} className={inputCls} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+      {items.length === 0 && <p className="text-ash font-mono text-xs mt-6">No content blocks yet.</p>}
     </div>
   );
 };

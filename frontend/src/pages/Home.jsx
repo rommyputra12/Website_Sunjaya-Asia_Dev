@@ -172,7 +172,7 @@ export default function Home() {
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="shrink-0 text-[10px] md:text-xs leading-snug invisible">0{i + 1}</span>
                 <span className="shrink-0 text-[10px] md:text-xs leading-snug invisible">·</span>
-                <span className="font-serif text-2xl md:text-3xl text-white tracking-tight leading-none whitespace-nowrap drop-shadow-[0_2px_10px_rgba(5,30,43,0.9)]">{s.value}</span>
+                <span className="font-serif text-2xl md:text-3xl text-white tracking-tight leading-none whitespace-nowrap drop-shadow-[0_2px_10px_rgba(5,30,43,0.9)]">{t(`stats.value.${s.key}`, s.value)}</span>
               </div>
             </motion.div>
           ))}

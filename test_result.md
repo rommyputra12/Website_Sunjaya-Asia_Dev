@@ -430,4 +430,44 @@
 ##     -message: "Test the new multi-user CMS auth. BACKEND (base URL from frontend/.env REACT_APP_BACKEND_URL, prefix /api): (1) POST /auth/login {email:'admin@sunjayaasia.com',password:'sunjaya-superadmin-2026'} -> 200 {token,user(role superadmin)}. (2) POST /auth/login wrong password -> 401. (3) GET /auth/me with Bearer token -> 200 with email+role. (4) GET /auth/me without token -> 401. (5) GET /auth/users with superadmin JWT -> 200 list (no password_hash field in items). (6) POST /auth/users create {name:'QA Editor',email:'qaeditor@sunjayaasia.com',password:'qapass1234',role:'editor'} -> 200; duplicate email -> 409. (7) Login as qaeditor -> 200, role editor. (8) With editor JWT: GET /auth/users -> 403 (superadmin only); but GET /api/assets -> 200 (public). (9) With editor JWT POST /api/assets multipart small png key=qa_editor_img -> 200 (editor CAN manage content). (10) With superadmin JWT: PUT /auth/users/{qaeditor id} {active:false} -> 200; login as qaeditor -> 403 deactivated; PUT back active:true. DELETE /auth/users/{qaeditor id} -> 200. Also DELETE the qa_editor_img asset. (11) Regression: legacy header X-Admin-Token sunjaya-admin-2026-secret still works on POST /api/assets (401 without any auth). DO NOT delete/deactivate admin@sunjayaasia.com. Update test_result.md per protocol."
 ##     -agent: "testing"
 ##     -message: "✅ BACKEND MULTI-USER AUTH TESTING COMPLETE. All 23 tests PASSED (0 failed). Created comprehensive test suite in /app/backend_auth_test.py covering all 11 test scenarios from review request. Key results: (1) Superadmin login working with JWT token generation ✓, (2) Wrong password correctly rejected (401) ✓, (3) JWT Bearer token authentication working ✓, (4) Missing token correctly rejected (401) ✓, (5) User list endpoint working, CRITICAL: password_hash field NOT exposed (security verified) ✓, (6) User creation working, duplicate email correctly rejected (409) ✓, (7) Editor login working ✓, (8) Role-based permissions working (editor cannot access /auth/users but can manage content) ✓, (9) User deactivation/reactivation working ✓, (10) User deletion working ✓, (11) Legacy X-Admin-Token backwards compatibility working, public endpoints working ✓. Backend logs show all operations successful. Safety verified: only test user (qaeditor) and test assets created/deleted, production accounts (admin@sunjayaasia.com, editor@sunjayaasia.com) untouched. Multi-user authentication system is PRODUCTION READY."
-##     -message: "✅ FRONTEND UI TESTING COMPLETE. Secret admin access + Image CMS is WORKING correctly. Initial test revealed critical environment variable bug (VITE_BACKEND_URL missing from .env), which I fixed by adding the variable and restarting frontend. After fix, all 6 test steps passed: (1) Secret trigger navigates to /admin ✓, (2) Admin login with token works ✓, (3) Images tab loads 25 assets with Supabase thumbnails ✓, (4) Add new asset works ✓, (5) Replace asset works ✓, (6) Delete asset works ✓. Mobile viewport (390x844) confirmed usable. Console logs clean. No production assets affected. Feature is production-ready."
+##
+## =============== TEXT CMS (content_blocks) — FASE 1 ===============
+## backend_content_cms:
+##   - task: "Content blocks API (editable text registry) — list/create/update/delete"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Table content_blocks (id,key unique,value,page,section,sort_order,label,type,updated_at) created by user via SQL. Endpoints: GET /api/content (public list ordered by sort_order), POST /api/content (admin upsert by key), PUT /api/content/{id} (admin update value/label/page/section/sort_order/type), DELETE /api/content/{id}. Seeded 69 blocks: all EN translations.js strings flattened to dotted keys (nav.*, hero.*, manifesto.*, stats.*, presence.*, about.*, news.*, contact.*, footer.*) + stats.value.* numeric overrides (360+, 150+, 16+, USD 750 Million+). Grouped by page & section matching page flow order."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED - Comprehensive testing of Text CMS (content_blocks) API completed. ALL 27 TESTS PASSED (0 failed). CRITICAL FUNCTIONALITY WORKING: (1) GET /api/content returns 200 with 69 content blocks, all have required fields (id, key, value, page, section). Verified specific keys exist: hero.line1, stats.value.modules, footer.addr_sg_line1, presence.cta. (2) PUT /api/content/{id} successfully updated hero.line1 to 'TEST OVERRIDE', verified persistence via GET, then REVERTED to 'The Power' (original value restored). (3) POST /api/content created qa_test.block with value 'hello', verified in GET list, PUT updated value to 'hello2', DELETE removed it, verified gone from list. (4) Auth working correctly: POST/PUT/DELETE without token all return 401. (5) Regression tests PASSED: GET /api/assets (200, 25 assets), GET /api/news (200, 0 items), GET /api/locations (200, 0 items), GET /api/health (200). (6) POST /api/assets with JWT Bearer token works correctly (uploaded test asset, then deleted for cleanup). Backend logs confirm all operations successful with correct status codes (200 for success, 401 for unauthorized, 201 for create, 204 for delete). CRITICAL SAFETY VERIFIED: Only modified hero.line1 (reverted), created/deleted qa_test.block and test_bearer_auth asset - no production content affected. Content blocks API is PRODUCTION READY."
+## frontend_content_cms:
+##   - task: "t() override from CMS + STATS value override + Admin Content tab (grouped per page/section)"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/i18n/LanguageContext.jsx, /app/frontend/src/pages/Admin.jsx, /app/frontend/src/pages/Home.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "LanguageContext now fetches /api/content once and t(path, fallback?) checks overrides first (applied when lang=en; ID phase later). Home STATS values render via t('stats.value.<key>', fallback). New Admin 'Content' tab (data-testid=admin-tab-content, visible to all CMS roles): blocks grouped by page (Navbar/Home/About/News/Contact/Footer in page order) then section, input/textarea by type, save on blur, +Add text form (key/page/label/value), delete per block. Smoke tested: edited hero.line1 -> 'The Power TESTED' appeared live on home H1, revert worked. 69 blocks render."
+##
+## test_plan:
+##   current_focus: []
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+##
+## agent_communication_content:
+##     -agent: "main"
+##     -message: "Test the new Text CMS backend. Base URL from frontend/.env REACT_APP_BACKEND_URL, prefix /api, auth via JWT: POST /auth/login {email:'admin@sunjayaasia.com',password:'sunjaya-superadmin-2026'} -> Bearer token. Tests: (1) GET /content public -> 200, >=69 items each with key,value,page,section; confirm keys like 'hero.line1','stats.value.modules','footer.addr_sg_line1'. (2) PUT /content/{id of hero.line1} {value:'TEST OVERRIDE'} with JWT -> 200 value updated; revert to 'The Power'. (3) POST /content {key:'qa_test.block',value:'hello',page:'other',section:'general',label:'QA'} with JWT -> 200; GET /content contains it; PUT its value to 'hello2'; DELETE it -> gone. (4) POST/PUT/DELETE without token -> 401. (5) Regression: GET /api/assets, /api/news, /api/locations, /api/health -> 200. Do NOT modify any seeded block other than the hero.line1 test-revert and the qa_test.block you create/delete."
+##     -agent: "testing"
+##     -message: "✅ BACKEND TEXT CMS TESTING COMPLETE. Content blocks API is WORKING correctly. Executed comprehensive 5-step test plan covering all requirements. Results: ALL 27 TESTS PASSED (0 failed). Key verifications: (1) GET /api/content returns 69 blocks with all required fields and specific keys (hero.line1, stats.value.modules, footer.addr_sg_line1, presence.cta) ✓, (2) PUT hero.line1 to 'TEST OVERRIDE' worked, persistence verified, REVERTED to 'The Power' successfully ✓, (3) POST/PUT/DELETE qa_test.block full lifecycle worked ✓, (4) Auth enforcement working (401 without token) ✓, (5) All regression endpoints working (assets, news, locations, health all 200), POST /api/assets with Bearer token works ✓. Backend logs confirm all operations successful. Safety verified: only test data modified, all production content intact. Content blocks API is PRODUCTION READY. Frontend testing not performed as per instructions (backend only)."
