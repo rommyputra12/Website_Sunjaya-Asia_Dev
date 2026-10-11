@@ -5,7 +5,7 @@ import Marquee from "react-fast-marquee";
 import { useLang } from "../i18n/LanguageContext";
 import { LineReveal, Reveal, CharReveal } from "../components/motion/Reveal";
 import { STATS, PILLARS, SUBSIDIARIES } from "../data/content";
-const SUB_ORDER = [...SUBSIDIARIES].sort((a, b) => ({ branch: 0, subsidiary: 1, affiliate: 2 })[a.tier] - ({ branch: 0, subsidiary: 1, affiliate: 2 })[b.tier]);
+const SUB_ORDER = [...SUBSIDIARIES].sort((a, b) => (a.tier === "affiliate") - (b.tier === "affiliate"));
 import { useLocations } from "../hooks/useLocations";
 import { useAssets } from "../context/AssetContext";
 import AssetImg from "../components/AssetImg";

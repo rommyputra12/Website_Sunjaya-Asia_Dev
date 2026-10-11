@@ -612,7 +612,7 @@ const sectionIndex = (id) => {
 const sectionLabel = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.label || id;
 
 // Card slot titles: ordered by tier (branch -> subsidiary -> affiliate), then CMS sort order
-const TIER_RANK = { branch: 0, subsidiary: 1, affiliate: 2 };
+const TIER_RANK = { affiliate: 1 }; // branches & subsidiaries share one numbered group; affiliates always last
 const tierOf = (key) => SUBSIDIARIES.find((x) => x.id === key)?.tier;
 const slotLabel = (asset, groupAssets) => {
   const ordered = [...groupAssets].sort((a, b) =>
@@ -643,7 +643,7 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
   const saveField = (f, lang, value) => {
     const next = { ...meta, [f]: { ...meta[f], [lang]: value } };
     if (!next[f].en && !next[f].id) delete next[f];
-    onSave(next);
+    onSave(next, f === "name" ? { alt: value || defaults.name || asset.key } : undefined);
   };
   return (
     <div data-testid={`subcard-form-${asset.key}`} className="border-t border-white/10 mt-1 pt-2 space-y-2">
@@ -744,13 +744,11 @@ const ImagesPanel = ({ client }) => {
     }
   };
 
-  const [reordered, setReordered] = useState(null); // optimistic order for home_subsidiaries
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const persistOrder = async (ordered) => {
     const updates = ordered.map((a, i) => ({ ...a, sort_order: i + 1 }));
     setItems((prev) => prev.map((a) => updates.find((u) => u.id === a.id) || a));
-    setReordered(null);
     try {
       await Promise.all(updates.map((u) => client.put(`/assets/${u.id}`, { sort_order: u.sort_order })));
       toast.success("Urutan kartu tersimpan");
@@ -763,23 +761,14 @@ const ImagesPanel = ({ client }) => {
 
   const onDragEnd = (e) => {
     const { active, over } = e;
-    if (!over || active.id === over.id) { setReordered(null); return; }
+    if (!over || active.id === over.id) return;
     const grp = groups["home_subsidiaries"] || [];
     const from = grp.findIndex((a) => a.id === active.id);
     const to = grp.findIndex((a) => a.id === over.id);
-    if (from < 0 || to < 0) { setReordered(null); return; }
+    if (from < 0 || to < 0) return;
     persistOrder(arrayMove(grp, from, to));
   };
 
-  const onDragOver = (e) => {
-    const { active, over } = e;
-    if (!over || active.id === over.id) return;
-    const grp = (reordered || groups["home_subsidiaries"]) || [];
-    const from = grp.findIndex((a) => a.id === active.id);
-    const to = grp.findIndex((a) => a.id === over.id);
-    if (from < 0 || to < 0) return;
-    setReordered(arrayMove(grp, from, to));
-  };
 
   const addPointer = async (num, blocks) => {
     const nums = blocks.map((b) => b.key.match(/^pillar\.\d+\.div\.(\d+)\.name$/)).filter(Boolean).map((m) => Number(m[1]));
@@ -835,7 +824,6 @@ const ImagesPanel = ({ client }) => {
     const s = a.section || "other";
     (groups[s] = groups[s] || []).push(a);
   });
-  if (reordered) groups["home_subsidiaries"] = reordered;
   Object.entries(groups).forEach(([sec, arr]) => arr.sort((a, b) =>
     sec === "home_subsidiaries"
       ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
@@ -872,7 +860,7 @@ const ImagesPanel = ({ client }) => {
       </form>
 
       {/* Grouped by section in page order */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} onDragOver={onDragOver}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} autoScroll={false} onDragEnd={onDragEnd}>
       {orderedSections.map((secId) => (
         <div key={secId} className="mb-10" data-testid={`image-section-${secId}`}>
           <div className="flex items-center gap-4 mb-4">
@@ -910,11 +898,6 @@ const ImagesPanel = ({ client }) => {
                       <span className="text-copper"> · focal {Math.round(a.focal_x ?? 50)}×{Math.round(a.focal_y ?? 50)}{a.zoom && a.zoom !== 1 ? ` · ${a.zoom}×` : ""}</span>
                     )}
                   </div>
-                  <input
-                    defaultValue={a.alt || ""}
-                    onBlur={(e) => { if (e.target.value !== (a.alt || "")) saveMeta({ ...a }, { alt: e.target.value }, "Alt saved"); }}
-                    placeholder="Alt text…"
-                    className={inputCls} />
                   {(a.section || "other") !== "home_subsidiaries" && (
                   <select
                     defaultValue={a.section || "other"}
@@ -925,7 +908,7 @@ const ImagesPanel = ({ client }) => {
                   </select>
                   )}
                   {(a.section || "other") === "home_subsidiaries" && (
-                    <SubCardTextForm asset={a} inputCls={inputCls} onSave={(meta) => saveMeta({ ...a }, { meta }, "Teks kartu tersimpan")} />
+                    <SubCardTextForm asset={a} inputCls={inputCls} onSave={(meta, extra) => saveMeta({ ...a }, { meta, ...extra }, "Teks kartu tersimpan")} />
                   )}
                   <div className="flex gap-2 mt-auto pt-1">
                     <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>

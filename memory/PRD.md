@@ -89,3 +89,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## Update 2026-06 (drag sorting)
 - Tab Images (section home_subsidiaries): kartu bisa di-drag via handle grip (pojok kanan atas) pakai @dnd-kit; urutan disimpan ke sort_order dan langsung memengaruhi urutan di situs; tier tetap dijaga (branch → subsidiary → affiliate) saat penomoran slot
+
+## Update 2026-06 (perbaikan drag)
+- Fix: kartu 3↔4 tidak bisa bertukar karena STI bertier "branch" dan AGI "subsidiary" — branch & subsidiary kini satu grup penomoran (urutan murni sort_order); hanya afiliasi yang selalu di akhir
+- Fix: susunan ulang dilakukan saat drop (bukan saat drag berjalan) agar target tidak bergeser; autoScroll dimatikan
+- Kolom Alt text dihapus dari tab Images; alt kartu subsidiary otomatis = Nama Perusahaan
