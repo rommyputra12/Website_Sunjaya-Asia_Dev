@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { useLang } from "../../i18n/LanguageContext";
 import { IMAGES } from "../../data/content";
@@ -13,6 +13,20 @@ const SOCIALS = [
 
 export const Footer = () => {
   const { t } = useLang();
+  const navigate = useNavigate();
+  const secretRef = React.useRef({ count: 0, timer: null });
+
+  const handleSecret = () => {
+    const s = secretRef.current;
+    s.count += 1;
+    clearTimeout(s.timer);
+    if (s.count >= 5) {
+      s.count = 0;
+      navigate("/admin");
+      return;
+    }
+    s.timer = setTimeout(() => { s.count = 0; }, 2000);
+  };
 
   return (
     <footer data-testid="site-footer" className="snap-section relative h-[100svh] overflow-hidden bg-[#071d27] text-bone">
@@ -137,7 +151,12 @@ export const Footer = () => {
 
         <div className="mt-3 flex shrink-0 flex-col gap-1.5 border-t border-white/15 pt-3 font-mono text-[8px] tracking-[0.13em] uppercase text-white/50 sm:flex-row sm:items-center sm:justify-between sm:pt-4 sm:text-[9px]">
           <p>{t("footer.copy")}</p>
-          <p>Est. 2013 · Restructured 2025</p>
+          <p
+            onClick={handleSecret}
+            data-testid="secret-admin-trigger"
+            title="Sunjaya Asia Group"
+            className="cursor-default select-none"
+          >Est. 2013 · Restructured 2025</p>
         </div>
       </div>
     </footer>
