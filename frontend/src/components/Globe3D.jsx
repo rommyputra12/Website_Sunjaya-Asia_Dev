@@ -27,8 +27,8 @@ const COMPANIES_BY_CITY = SUBSIDIARIES.reduce((acc, s) => {
 
 const SEEK_DURATION = 1800;
 const HOLD_DURATION = 3500;
-const GLOBE_SCALE = 1.6;
-const GLOBE_OFFSET_Y = -70;
+// Responsive globe layout: smaller scale on narrow (mobile) containers
+const globeLayout = (w) => (w < 768 ? { scale: 1.25, offsetY: -15 } : { scale: 1.68, offsetY: -25 });
 const ROTATE_SPEED = 1.4;
 
 export const Globe3D = ({ locations: propLocations }) => {
@@ -268,10 +268,11 @@ export const Globe3D = ({ locations: propLocations }) => {
           tmpVec.project(camera);
           const px = (tmpVec.x * 0.5 + 0.5) * d.width;
           const py = (-tmpVec.y * 0.5 + 0.5) * d.height;
-          const cx = (d.width - d.width * GLOBE_SCALE) / 2 + px * GLOBE_SCALE;
-          const cy = (d.height - d.height * GLOBE_SCALE) / 2 + py * GLOBE_SCALE + GLOBE_OFFSET_Y;
+          const gl = globeLayout(d.width);
+          const cx = (d.width - d.width * gl.scale) / 2 + px * gl.scale;
+          const cy = (d.height - d.height * gl.scale) / 2 + py * gl.scale + gl.offsetY;
           const onRight = cx > d.width / 2;
-          card.style.display = "block";
+          card.style.display = d.width >= 768 ? "block" : "none";
           card.style.left = onRight ? `${cx - 10}px` : `${cx + 10}px`;
           card.style.top = `${cy}px`;
           card.style.transform = onRight
@@ -365,7 +366,7 @@ export const Globe3D = ({ locations: propLocations }) => {
       {mounted && inView && (
         <div
           className="absolute inset-0 flex items-center justify-center"
-          style={{ transform: `translateY(${GLOBE_OFFSET_Y}px) scale(${GLOBE_SCALE})`, transformOrigin: "center center" }}
+          style={{ transform: `translateY(${globeLayout(dims.width).offsetY}px) scale(${globeLayout(dims.width).scale})`, transformOrigin: "center center" }}
         >
         <Globe
           ref={globeEl}
@@ -418,7 +419,7 @@ export const Globe3D = ({ locations: propLocations }) => {
         <div
           key={activeLocation._id}
           ref={cardRef}
-          className="absolute z-30 pointer-events-none"
+          className="absolute z-30 pointer-events-none hidden md:block"
           style={{
             display: "none",
             animation: "globePop 0.4s ease",
@@ -469,7 +470,7 @@ export const Globe3D = ({ locations: propLocations }) => {
       )}
 
       {/* Bottom dots — click to spin globe to that location */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/75 backdrop-blur-md px-3 py-2 rounded-full shadow-sm border border-copper/20">
         {pointsData.slice(0, Math.min(pointsData.length, 9)).map((p, i) => (
           <button
             key={p._id}

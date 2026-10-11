@@ -408,12 +408,12 @@ export default function Home() {
         </div>
 
         {/* 3D Globe centerpiece — transparent background, globe overflows without affecting content */}
-        <Reveal className="relative flex-1 min-h-[44vh] md:min-h-0 px-4 md:px-6 pt-2 md:pt-4 pb-4 md:pb-6" delay={0.12}>
-          <div className="relative w-full h-full max-w-[1600px] mx-auto min-h-[320px] md:min-h-[400px]">
+        <Reveal className="relative flex-1 min-h-[44vh] md:min-h-0 px-4 md:px-6 pt-2 md:pt-4 pb-0 md:pb-2 flex flex-col" delay={0.12}>
+          <div className="relative w-full flex-1 max-w-[1600px] mx-auto min-h-[320px] md:min-h-[400px]">
             <Globe3D />
 
               {/* Locations panel — adapted from Subsidiaries map legend, restyled for light bg */}
-              <div className="absolute bottom-24 md:bottom-40 left-4 md:left-10 z-10 border border-copper/30 bg-white/80 backdrop-blur-md px-4 py-3 md:px-5 md:py-4 shadow-md rounded-lg max-w-[70vw] md:max-w-none">
+              <div className="absolute bottom-28 md:bottom-32 left-4 md:left-10 z-10 border border-copper/30 bg-white/80 backdrop-blur-md px-4 py-3 md:px-5 md:py-4 shadow-md rounded-lg max-w-[70vw] md:max-w-none">
                 <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-copper mb-2 md:mb-2.5 font-bold">Locations</div>
                 <div className="flex flex-col gap-1 md:gap-1.5">
                   {DEFAULT_LOCATIONS.map((l) => (
@@ -433,7 +433,7 @@ export default function Home() {
               </div>
 
               {/* Bottom-left hub label + CTA */}
-              <div className="absolute bottom-4 md:bottom-5 left-4 md:left-10 z-10 flex flex-col gap-2">
+              <div className="absolute bottom-12 md:bottom-4 left-4 md:left-10 z-10 flex flex-col gap-2">
                 <div className="font-mono text-xs md:text-sm tracking-[0.2em] uppercase text-copper font-bold">
                   {t("presence.hub")}
                 </div>
