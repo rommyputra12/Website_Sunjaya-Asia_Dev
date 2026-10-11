@@ -4,7 +4,8 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Marquee from "react-fast-marquee";
 import { useLang } from "../i18n/LanguageContext";
 import { LineReveal, Reveal, CharReveal } from "../components/motion/Reveal";
-import { IMAGES, STATS, PILLARS, SUBSIDIARIES, DEFAULT_LOCATIONS } from "../data/content";
+import { STATS, PILLARS, SUBSIDIARIES, DEFAULT_LOCATIONS } from "../data/content";
+import AssetImg from "../components/AssetImg";
 import { StaticWorldMap } from "../components/StaticWorldMap";
 import Globe3D, { INFRA_HUBS } from "../components/Globe3D";
 import { tzAbbrev } from "../lib/timezones";
@@ -70,17 +71,11 @@ export default function Home() {
         {/* Parallax image — displayed at 100% (no overlays); text uses shadow effects for legibility */}
         <div className="absolute inset-0 z-0 overflow-hidden hero-banner-enter">
         <motion.div
-          style={{
-            y: parallaxY,
-            scale: parallaxScale,
-            opacity: parallaxOpacity,
-            backgroundImage: `url(${IMAGES.cover})`,
-            backgroundPosition: "center center",
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-          }}
+          style={{ y: parallaxY, scale: parallaxScale, opacity: parallaxOpacity }}
           className="absolute inset-0"
-        />
+        >
+          <AssetImg k="cover" alt="Sunjaya Asia Group" className="w-full h-full object-cover" loading="eager" />
+        </motion.div>
         </div>
 
         {/* Above-the-fold — white line sits just below the hero content */}
@@ -186,10 +181,9 @@ export default function Home() {
 
       {/* BUSINESS PILLAR INTRO — min full viewport, grows if content is taller */}
       <section className="snap-section relative min-h-screen overflow-hidden bg-azure border-t border-copper/40">
-        <img
-          src={IMAGES.bgBusinessPillars}
-          alt="Business pillars background"
-          className="absolute inset-0 h-full w-full object-cover object-[62%_center] md:object-center"
+        <AssetImg
+          k="bgBusinessPillars"
+          className="absolute inset-0 h-full w-full object-cover"
         />
         {/* Top gradient for title legibility */}
         <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-obsidian/60 via-obsidian/20 to-transparent pointer-events-none" />
@@ -239,8 +233,8 @@ export default function Home() {
             <div className="w-full flex flex-col items-center">
               {/* Full image visible — no cropping, chapter + button sit below */}
               <div className="relative w-full h-[36vh] md:h-[calc(100vh-11.5rem)] max-w-full overflow-hidden flex items-center justify-center">
-                <img
-                  src={IMAGES[p.image]}
+                <AssetImg
+                  k={p.image}
                   alt={p.title}
                   className="relative z-10 block max-h-full max-w-full object-contain"
                   style={{ filter: "grayscale(0.3) contrast(1.15)" }}
@@ -280,15 +274,15 @@ export default function Home() {
           <section key={p.num} id={`pillar-${p.num}`} className="snap-section section-light relative min-h-screen pt-20 md:pt-24 pb-8 md:pb-0 flex items-center overflow-hidden border-t border-copper/40">
             {(p.num === "01" || p.num === "02" || p.num === "03") && (
               <>
-                <img
-                  src={p.num === "01"
-                    ? IMAGES.homePillar01Bg
+                <AssetImg
+                  k={p.num === "01"
+                    ? "homePillar01Bg"
                     : p.num === "02"
-                      ? IMAGES.homePillar02Bg
-                      : IMAGES.homePillar03Bg}
+                      ? "homePillar02Bg"
+                      : "homePillar03Bg"}
                   alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 h-full w-full object-cover object-center opacity-[0.6]"
+                  className="absolute inset-0 h-full w-full object-cover opacity-[0.6]"
                 />
                 <div className="absolute inset-0 bg-white/40 pointer-events-none" />
               </>
@@ -322,8 +316,8 @@ export default function Home() {
             {SUBSIDIARIES.slice(0, 6).map((s, i) => (
               <Reveal key={s.id} delay={i * 0.05} className="h-full">
                 <div className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm">
-                  <img
-                    src={IMAGES[s.image]}
+                  <AssetImg
+                    k={s.image}
                     alt={s.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />

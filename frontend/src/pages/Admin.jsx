@@ -266,6 +266,117 @@ const UsersPanel = ({ client, me }) => {
   );
 };
 
+/* ================= FOCAL POINT EDITOR MODAL ================= */
+const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
+  const [fx, setFx] = useState(asset.focal_x ?? 50);
+  const [fy, setFy] = useState(asset.focal_y ?? 50);
+  const [zoom, setZoom] = useState(asset.zoom ?? 1);
+  const [saving, setSaving] = useState(false);
+  const dragging = React.useRef(false);
+  const pickerRef = React.useRef(null);
+
+  const setFromPointer = (e) => {
+    const r = pickerRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const x = Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100));
+    const y = Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100));
+    setFx(Math.round(x * 10) / 10);
+    setFy(Math.round(y * 10) / 10);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await client.put(`/assets/${asset.id}`, { alt: asset.alt, focal_x: fx, focal_y: fy, zoom });
+      toast.success("Focal point saved — live on the site");
+      onSaved();
+      onClose();
+    } catch (e) {
+      toast.error(errMsg(e, "Save failed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const previewStyle = {
+    objectPosition: `${fx}% ${fy}%`,
+    ...(zoom !== 1 ? { transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%` } : {}),
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-obsidian/90 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose} data-testid="focal-editor-modal">
+      <div className="bg-ink border border-white/15 w-full max-w-4xl max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div>
+            <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-copper">Adjust display</span>
+            <h3 className="font-mono text-sm text-bone mt-1 break-all">{asset.key}</h3>
+          </div>
+          <button onClick={onClose} className="h-8 w-8 border border-white/15 text-ash hover:text-copper hover:border-copper font-mono">✕</button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5">
+          {/* Focal picker — click/drag on the full image */}
+          <div>
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">1 · Klik / geser titik fokus pada gambar</p>
+            <div
+              ref={pickerRef}
+              data-testid="focal-picker"
+              className="relative bg-obsidian border border-white/10 cursor-crosshair select-none overflow-hidden max-h-[46vh] mx-auto"
+              style={{ aspectRatio: asset.width && asset.height ? `${asset.width}/${asset.height}` : "4/3" }}
+              onPointerDown={(e) => { dragging.current = true; e.target.setPointerCapture?.(e.pointerId); setFromPointer(e); }}
+              onPointerMove={(e) => { if (dragging.current) setFromPointer(e); }}
+              onPointerUp={() => { dragging.current = false; }}
+            >
+              <img src={asset.url} alt={asset.alt || asset.key} className="w-full h-full object-contain pointer-events-none" draggable={false} />
+              {/* crosshair */}
+              <div className="absolute w-6 h-6 -ml-3 -mt-3 pointer-events-none" style={{ left: `${fx}%`, top: `${fy}%` }}>
+                <div className="absolute inset-0 rounded-full border-2 border-copper bg-copper/20" />
+                <div className="absolute left-1/2 top-1/2 w-1 h-1 -ml-0.5 -mt-0.5 rounded-full bg-copper" />
+              </div>
+            </div>
+            <p className="mt-2 font-mono text-[9px] text-ash">Focal: {fx.toFixed(0)}% × {fy.toFixed(0)}%</p>
+
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-4 mb-2">2 · Zoom</p>
+            <div className="flex items-center gap-3">
+              <input type="range" min="1" max="2.5" step="0.05" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))}
+                data-testid="focal-zoom" className="flex-1 accent-[#B87F3D]" />
+              <span className="font-mono text-[10px] text-bone w-10">{zoom.toFixed(2)}×</span>
+            </div>
+          </div>
+
+          {/* Live previews */}
+          <div>
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">3 · Preview hasil di slot layout</p>
+            <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Kartu (4:3) — subsidiary grid</p>
+            <div className="relative aspect-[4/3] bg-obsidian border border-white/10 overflow-hidden mb-3">
+              <img src={asset.url} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+            </div>
+            <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Banner lebar (21:9) — hero / background</p>
+            <div className="relative aspect-[21/9] bg-obsidian border border-white/10 overflow-hidden">
+              <img src={asset.url} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+            </div>
+            <p className="mt-3 text-[10px] text-ash leading-relaxed">Bagian yang ditandai titik tembaga akan selalu terlihat di semua ukuran slot (desktop &amp; mobile).</p>
+          </div>
+        </div>
+
+        <div className="flex gap-3 px-5 py-4 border-t border-white/10">
+          <button onClick={save} disabled={saving} data-testid="focal-save"
+            className="h-10 px-6 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors disabled:opacity-50">
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button onClick={() => { setFx(50); setFy(50); setZoom(1); }} data-testid="focal-reset"
+            className="h-10 px-4 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-ash hover:text-copper hover:border-copper transition-colors">
+            Reset
+          </button>
+          <button onClick={onClose} className="h-10 px-4 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-ash hover:text-bone transition-colors ml-auto">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ================= IMAGES (asset manager, grouped by page section) ================= */
 const IMAGE_SECTIONS = [
   { id: "nav", label: "Navbar & Brand" },
@@ -290,8 +401,8 @@ const ImagesPanel = ({ client }) => {
   const [newKey, setNewKey] = useState("");
   const [newFile, setNewFile] = useState(null);
   const [newSection, setNewSection] = useState("other");
-  const [newOrder, setNewOrder] = useState(100);
   const [uploading, setUploading] = useState(false);
+  const [editing, setEditing] = useState(null); // asset being focal-edited
 
   const refresh = async () => {
     try {
@@ -350,10 +461,12 @@ const ImagesPanel = ({ client }) => {
       fd.append("file", newFile);
       fd.append("key", newKey.trim());
       fd.append("section", newSection);
-      fd.append("sort_order", String(newOrder));
+      // order is automatic: appended at the end of its section
+      const inSection = items.filter((a) => (a.section || "other") === newSection).length;
+      fd.append("sort_order", String(100 + inSection));
       await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
       toast.success(`Added "${newKey.trim()}"`);
-      setNewKey(""); setNewFile(null); setNewSection("other"); setNewOrder(100);
+      setNewKey(""); setNewFile(null); setNewSection("other");
       e.target.reset();
       await refresh();
     } catch (err) {
@@ -377,7 +490,7 @@ const ImagesPanel = ({ client }) => {
   return (
     <div data-testid="images-panel">
       {/* Add new asset */}
-      <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+      <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">New asset key</label>
           <input value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="e.g. home_new_banner"
@@ -388,10 +501,6 @@ const ImagesPanel = ({ client }) => {
           <select value={newSection} onChange={(e) => setNewSection(e.target.value)} data-testid="new-asset-section" className={`${inputCls} h-10`}>
             {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
-        </div>
-        <div>
-          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Order</label>
-          <input type="number" value={newOrder} onChange={(e) => setNewOrder(parseInt(e.target.value || "100", 10))} data-testid="new-asset-order" className={`${inputCls} h-10`} />
         </div>
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Image file</label>
@@ -416,32 +525,37 @@ const ImagesPanel = ({ client }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {groups[secId].map((a) => (
               <div key={a.id} data-testid={`asset-card-${a.key}`} className="bg-ink border border-white/10 overflow-hidden flex flex-col">
-                <div className="aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center">
-                  <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover" loading="lazy" />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditing(a)}
+                  data-testid={`asset-thumb-${a.key}`}
+                  title="Klik untuk preview & atur posisi crop"
+                  className="relative aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center group cursor-pointer">
+                  <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                  <span className="absolute inset-0 bg-obsidian/0 group-hover:bg-obsidian/50 transition-colors flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[9px] tracking-[0.2em] uppercase text-bone border border-copper bg-obsidian/70 px-3 py-1.5">Edit crop</span>
+                  </span>
+                </button>
                 <div className="p-3 flex flex-col gap-2 flex-1">
                   <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
-                  <div className="font-mono text-[9px] text-ash">{a.width && a.height ? `${a.width}×${a.height}` : "—"}</div>
+                  <div className="font-mono text-[9px] text-ash">
+                    {a.width && a.height ? `${a.width}×${a.height}` : "—"}
+                    {(a.focal_x !== 50 || a.focal_y !== 50 || (a.zoom && a.zoom !== 1)) && (
+                      <span className="text-copper"> · focal {Math.round(a.focal_x ?? 50)}×{Math.round(a.focal_y ?? 50)}{a.zoom && a.zoom !== 1 ? ` · ${a.zoom}×` : ""}</span>
+                    )}
+                  </div>
                   <input
                     defaultValue={a.alt || ""}
                     onBlur={(e) => { if (e.target.value !== (a.alt || "")) saveMeta({ ...a }, { alt: e.target.value }, "Alt saved"); }}
                     placeholder="Alt text…"
                     className={inputCls} />
-                  <div className="flex gap-2">
-                    <select
-                      defaultValue={a.section || "other"}
-                      onChange={(e) => saveMeta({ ...a }, { section: e.target.value }, "Section updated")}
-                      title="Section"
-                      className={`${inputCls} flex-1`}>
-                      {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
-                    </select>
-                    <input
-                      type="number"
-                      defaultValue={a.sort_order ?? 100}
-                      onBlur={(e) => { const v = parseInt(e.target.value || "100", 10); if (v !== (a.sort_order ?? 100)) saveMeta({ ...a }, { sort_order: v }, "Order updated"); }}
-                      title="Order"
-                      className={`${inputCls} w-16`} />
-                  </div>
+                  <select
+                    defaultValue={a.section || "other"}
+                    onChange={(e) => saveMeta({ ...a }, { section: e.target.value }, "Section updated")}
+                    title="Section"
+                    className={inputCls}>
+                    {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                  </select>
                   <div className="flex gap-2 mt-auto pt-1">
                     <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>
                       {busyKey === a.key ? "…" : "Replace"}
@@ -457,6 +571,15 @@ const ImagesPanel = ({ client }) => {
         </div>
       ))}
       {items.length === 0 && <p className="text-ash font-mono text-xs mt-6">No images yet.</p>}
+
+      {editing && (
+        <FocalEditorModal
+          asset={editing}
+          client={client}
+          onClose={() => setEditing(null)}
+          onSaved={refresh}
+        />
+      )}
     </div>
   );
 };

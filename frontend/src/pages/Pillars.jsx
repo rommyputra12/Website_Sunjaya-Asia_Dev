@@ -1,7 +1,8 @@
 import React from "react";
 import { useLang } from "../i18n/LanguageContext";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
-import { PILLARS, IMAGES } from "../data/content";
+import { PILLARS } from "../data/content";
+import AssetImg from "../components/AssetImg";
 
 const DIVISIONS = {
   "01": [
@@ -57,8 +58,8 @@ export default function Pillars() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
               <Reveal className="md:col-span-5" delay={0.1}>
                 <div className="relative sticky top-24 overflow-hidden" style={{ height: "calc(100vh - 7rem)" }}>
-                  <img
-                    src={IMAGES[p.image]}
+                  <AssetImg
+                    k={p.image}
                     alt={p.title}
                     className="absolute inset-0 h-full w-full object-contain"
                   />

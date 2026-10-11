@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import { AssetProvider } from "./context/AssetContext";
 import { SmoothScroll } from "./components/motion/SmoothScroll";
 import { Nav } from "./components/layout/Nav";
 import { Footer } from "./components/layout/Footer";
@@ -45,9 +46,10 @@ function App() {
       <LanguageProvider>
         <BrowserRouter>
           <SmoothScroll>
-            <ScrollTop />
-            <Nav />
-            <main className="min-h-screen">
+            <AssetProvider>
+              <ScrollTop />
+              <Nav />
+              <main className="min-h-screen">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
@@ -78,6 +80,7 @@ function App() {
             </main>
             <Footer />
             <CookieBanner />
+            </AssetProvider>
           </SmoothScroll>
         </BrowserRouter>
       </LanguageProvider>

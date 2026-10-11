@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLang } from "../i18n/LanguageContext";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
-import { IMAGES } from "../data/content";
+import AssetImg from "../components/AssetImg";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 
 const TIMELINE = [
@@ -55,22 +55,12 @@ export default function About() {
 
         {/* Mobile: banner image on top */}
         <div className="md:hidden w-full h-52 overflow-hidden">
-          <div
-            role="img"
-            aria-label="Sunjaya Asia Group office"
-            className="w-full h-full bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url('${IMAGES.aboutBanner}')`, backgroundPosition: "center center", backgroundSize: "cover" }}
-          />
+          <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" className="w-full h-full object-cover" />
         </div>
 
         {/* Desktop: full background image */}
         <div className="hidden md:block relative">
-          <div
-            role="img"
-            aria-label="Sunjaya Asia Group office"
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url('${IMAGES.aboutBanner}')`, backgroundPosition: "center center", backgroundSize: "cover" }}
-          />
+          <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" className="absolute inset-0 w-full h-full object-cover" />
           {/* Gradient at bottom to ensure corporate identity grid is legible */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#051e2b]/30" />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-obsidian/80 to-transparent" />
@@ -153,12 +143,7 @@ export default function About() {
           </div>
           <Reveal>
             <div className="relative aspect-[16/9] overflow-hidden clip-frame border border-black/10">
-              <div
-                role="img"
-                aria-label="Sunjaya Asia Group company history timeline"
-                className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url('${IMAGES.aboutCompanyHistory}')` }}
-              />
+              <AssetImg k="aboutCompanyHistory" alt="Sunjaya Asia Group company history timeline" className="w-full h-full object-cover" />
             </div>
             <div className="mt-6 max-w-lg">
               <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">Our Journey</span>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
-import { SUBSIDIARIES, IMAGES, DEFAULT_LOCATIONS, CERTS } from "../data/content";
+import { SUBSIDIARIES, DEFAULT_LOCATIONS, CERTS } from "../data/content";
+import AssetImg from "../components/AssetImg";
 import { INFRA_HUBS, InteractiveWorldMap } from "../components/InteractiveWorldMap";
 import { useLang } from "../i18n/LanguageContext";
 
@@ -89,8 +90,8 @@ export default function Subsidiaries() {
             return (
               <Reveal key={s.id} className={spans[i % spans.length]} delay={i * 0.05}>
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
-                  <img
-                    src={IMAGES[s.image]}
+                  <AssetImg
+                    k={s.image}
                     alt={s.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
@@ -131,8 +132,8 @@ export default function Subsidiaries() {
             return (
               <Reveal key={s.id} className={spans[i % spans.length]} delay={i * 0.05}>
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
-                  <img
-                    src={IMAGES[s.image]}
+                  <AssetImg
+                    k={s.image}
                     alt={s.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />

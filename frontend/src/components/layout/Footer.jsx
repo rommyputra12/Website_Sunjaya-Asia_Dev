@@ -2,13 +2,13 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { useLang } from "../../i18n/LanguageContext";
-import { IMAGES } from "../../data/content";
+import AssetImg from "../AssetImg";
 
 const SOCIALS = [
-  { href: "https://www.linkedin.com/company/sunjayaasiagroup/", image: IMAGES.footerLinkedin, label: "LinkedIn", external: true },
-  { href: "https://www.instagram.com/sunjaya.group", image: IMAGES.footerInstagram, label: "Instagram", external: true },
-  { to: "/contact", image: IMAGES.footerEmail, label: "Email" },
-  { to: "/contact", image: IMAGES.footerCall, label: "Call center" },
+  { href: "https://www.linkedin.com/company/sunjayaasiagroup/", imageKey: "footerLinkedin", label: "LinkedIn", external: true },
+  { href: "https://www.instagram.com/sunjaya.group", imageKey: "footerInstagram", label: "Instagram", external: true },
+  { to: "/contact", imageKey: "footerEmail", label: "Email" },
+  { to: "/contact", imageKey: "footerCall", label: "Call center" },
 ];
 
 export const Footer = () => {
@@ -30,9 +30,10 @@ export const Footer = () => {
 
   return (
     <footer data-testid="site-footer" className="snap-section relative h-[100svh] overflow-hidden bg-[#071d27] text-bone">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('${IMAGES.bgFooter}')` }}
+      <AssetImg
+        k="bgFooter"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
         aria-hidden="true"
       />
 
@@ -120,8 +121,8 @@ export const Footer = () => {
             {SOCIALS.map((s) => {
               const cls = "group flex h-6 w-6 items-center justify-center rounded-full overflow-hidden transition-all duration-300 hover:scale-110 sm:h-7 sm:w-7";
               const inner = (
-                <img
-                  src={s.image}
+                <AssetImg
+                  k={s.imageKey}
                   alt={s.label}
                   className="h-full w-full object-cover"
                 />

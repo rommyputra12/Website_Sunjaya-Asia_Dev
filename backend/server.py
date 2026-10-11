@@ -716,6 +716,9 @@ class AssetOut(BaseModel):
     height: Optional[int] = None
     section: Optional[str] = "other"
     sort_order: Optional[int] = 100
+    focal_x: Optional[float] = 50.0
+    focal_y: Optional[float] = 50.0
+    zoom: Optional[float] = 1.0
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -725,6 +728,9 @@ class AssetMetaIn(BaseModel):
     alt: Optional[str] = None
     section: Optional[str] = None
     sort_order: Optional[int] = None
+    focal_x: Optional[float] = None
+    focal_y: Optional[float] = None
+    zoom: Optional[float] = None
 
 
 def _asset_public_url(object_name: str) -> str:
@@ -737,6 +743,9 @@ def _asset_row_to_out(it: dict) -> AssetOut:
         width=it.get("width"), height=it.get("height"),
         section=it.get("section") or "other",
         sort_order=it.get("sort_order") if it.get("sort_order") is not None else 100,
+        focal_x=it.get("focal_x") if it.get("focal_x") is not None else 50.0,
+        focal_y=it.get("focal_y") if it.get("focal_y") is not None else 50.0,
+        zoom=it.get("zoom") if it.get("zoom") is not None else 1.0,
         created_at=fmt_ts(it.get("created_at")), updated_at=fmt_ts(it.get("updated_at")),
     )
 
@@ -804,8 +813,9 @@ async def upload_asset(
         r = await c.post(url, headers={**SB_SERVICE_HEADERS,
                          "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
         if r.status_code >= 300 and "PGRST204" in r.text:
-            # section/sort_order columns not migrated yet — retry without them
-            row.pop("section", None); row.pop("sort_order", None)
+            # section/sort_order/focal columns not migrated yet — retry without them
+            for f in ("section", "sort_order", "focal_x", "focal_y", "zoom"):
+                row.pop(f, None)
             r = await c.post(url, headers={**SB_SERVICE_HEADERS,
                              "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
         if r.status_code >= 300:
@@ -824,7 +834,23 @@ async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
         update["section"] = payload.section
     if payload.sort_order is not None:
         update["sort_order"] = payload.sort_order
-    updated = await sb_update("assets", asset_id, update)
+    focal = {}
+    for f in ("focal_x", "focal_y", "zoom"):
+        v = getattr(payload, f, None)
+        if v is not None:
+            focal[f] = v
+    update.update(focal)
+    try:
+        updated = await sb_update("assets", asset_id, update)
+    except httpx.HTTPStatusError as e:
+        if focal and "PGRST204" in e.response.text:
+            # focal columns not migrated yet — retry without them
+            for f in focal:
+                update.pop(f, None)
+            updated = await sb_update("assets", asset_id, update)
+            logger.warning("focal columns missing in assets table — saved without focal data")
+        else:
+            raise
     if not updated:
         raise HTTPException(404, "Asset not found")
     return _asset_row_to_out(updated)

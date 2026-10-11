@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useLang } from "../../i18n/LanguageContext";
-import { LOGO } from "../../data/content";
+import AssetImg from "../AssetImg";
 
 const Logo = () => (
   <Link
@@ -9,11 +9,12 @@ const Logo = () => (
     data-testid="nav-logo"
     className="flex items-center gap-3 group"
   >
-    <img
-      src={LOGO}
-      alt=""
+    <AssetImg
+      k="logo"
+      alt="Sunjaya Asia Group"
       className="w-16 h-16 md:w-20 md:h-20 object-contain transition-transform duration-500 group-hover:scale-105 -mt-1"
       style={{ mixBlendMode: "normal" }}
+      loading="eager"
     />
     <span className="text-bone text-sm md:text-base font-bold tracking-[0.14em] uppercase whitespace-nowrap nav-hero-glow" style={{ fontFamily: "'Montserrat', sans-serif" }}>
       Sunjaya Asia Group
