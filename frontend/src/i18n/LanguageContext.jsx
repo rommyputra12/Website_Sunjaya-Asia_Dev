@@ -10,6 +10,7 @@ export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState(() => localStorage.getItem("sunjaya_lang") || "en");
   // CMS text overrides: { "hero.line1": "...", ... } (EN-first; ID overrides come in a later phase)
   const [overrides, setOverrides] = useState({});
+  const [blocks, setBlocks] = useState([]);
 
   useEffect(() => {
     localStorage.setItem("sunjaya_lang", lang);
@@ -27,6 +28,7 @@ export const LanguageProvider = ({ children }) => {
           if (b.key && (b.value ?? "") !== "") map[b.key] = b.value;
         });
         setOverrides(map);
+        setBlocks(r.data || []);
       } catch {
         // silently fall back to bundled translations
       }
@@ -49,8 +51,14 @@ export const LanguageProvider = ({ children }) => {
     return cur;
   };
 
+  // List CMS blocks whose key starts with prefix, sorted by sort_order
+  const listBlocks = (prefix) =>
+    blocks
+      .filter((b) => b.key.startsWith(prefix))
+      .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, blocks, listBlocks }}>
       {children}
     </LanguageContext.Provider>
   );

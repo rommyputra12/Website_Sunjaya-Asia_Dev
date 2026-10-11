@@ -470,4 +470,18 @@
 ##     -agent: "main"
 ##     -message: "Test the new Text CMS backend. Base URL from frontend/.env REACT_APP_BACKEND_URL, prefix /api, auth via JWT: POST /auth/login {email:'admin@sunjayaasia.com',password:'sunjaya-superadmin-2026'} -> Bearer token. Tests: (1) GET /content public -> 200, >=69 items each with key,value,page,section; confirm keys like 'hero.line1','stats.value.modules','footer.addr_sg_line1'. (2) PUT /content/{id of hero.line1} {value:'TEST OVERRIDE'} with JWT -> 200 value updated; revert to 'The Power'. (3) POST /content {key:'qa_test.block',value:'hello',page:'other',section:'general',label:'QA'} with JWT -> 200; GET /content contains it; PUT its value to 'hello2'; DELETE it -> gone. (4) POST/PUT/DELETE without token -> 401. (5) Regression: GET /api/assets, /api/news, /api/locations, /api/health -> 200. Do NOT modify any seeded block other than the hero.line1 test-revert and the qa_test.block you create/delete."
 ##     -agent: "testing"
+##
+## =============== TEXT CMS — FASE 2 (Pillars/Subsidiaries/Locations) ===============
+## phase2_content:
+##   - task: "Phase 2: Pillars divisions (01.x) dynamic + editable, Subsidiaries text editable, Locations seeded"
+##     implemented: true
+##     working: true
+##     file: "/app/frontend/src/pages/Pillars.jsx, Subsidiaries.jsx, Home.jsx, /app/frontend/src/i18n/LanguageContext.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: true
+##         -agent: "main"
+##         -comment: "Reused existing content_blocks system (no new tables/endpoints). Seeded: 7 locations into locations table (now visible in CMS Locations tab + globe reads them), pillar meta (pillar.NN.kicker/title/body) + pillar divisions (pillar.NN.div.II.name/desc) for 01/02/03, subsidiary fields (subsidiary.ID.name/city/sector/tag) for all 9, and manifesto.title headline. Total content_blocks now 141. LanguageContext exposes blocks + listBlocks(prefix). Pillars.jsx builds DIVISIONS dynamically from CMS blocks (add/remove by adding pillar.NN.div.II.name+.desc blocks) with fallback to bundled DIVISIONS; kicker/title/body via t() override. Subsidiaries page + Home grid render name/city/sector/tag via t(subsidiary.ID.field, fallback). Home pillar sections kicker/title/body via t(). Verified: Pillars page shows 13 divisions + correct headline; Subsidiaries shows all 9 names, 0 broken images; all via CMS with content.js fallback. CMS Content tab now also shows Pillars Page (35) and Subsidiaries Page (36) groups."
 ##     -message: "✅ BACKEND TEXT CMS TESTING COMPLETE. Content blocks API is WORKING correctly. Executed comprehensive 5-step test plan covering all requirements. Results: ALL 27 TESTS PASSED (0 failed). Key verifications: (1) GET /api/content returns 69 blocks with all required fields and specific keys (hero.line1, stats.value.modules, footer.addr_sg_line1, presence.cta) ✓, (2) PUT hero.line1 to 'TEST OVERRIDE' worked, persistence verified, REVERTED to 'The Power' successfully ✓, (3) POST/PUT/DELETE qa_test.block full lifecycle worked ✓, (4) Auth enforcement working (401 without token) ✓, (5) All regression endpoints working (assets, news, locations, health all 200), POST /api/assets with Bearer token works ✓. Backend logs confirm all operations successful. Safety verified: only test data modified, all production content intact. Content blocks API is PRODUCTION READY. Frontend testing not performed as per instructions (backend only)."

@@ -27,7 +27,18 @@ const DIVISIONS = {
 };
 
 export default function Pillars() {
-  const { t } = useLang();
+  const { t, listBlocks } = useLang();
+  // Build divisions per pillar dynamically from CMS content blocks (name + desc pairs),
+  // falling back to the bundled DIVISIONS when the CMS has none.
+  const divisionsFor = (num) => {
+    const names = listBlocks(`pillar.${num}.div.`).filter((b) => b.key.endsWith(".name"));
+    if (names.length === 0) return DIVISIONS[num] || [];
+    return names.map((nb) => {
+      const base = nb.key.replace(/\.name$/, "");
+      const desc = (listBlocks(base + ".desc")[0] || {}).value || "";
+      return { name: nb.value, desc };
+    });
+  };
   return (
     <div data-testid="pillars-page" className="pt-32 pb-24">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10">
@@ -46,11 +57,11 @@ export default function Pillars() {
                   <span className="chapter-num text-[clamp(2.5rem,6vw,5rem)]">{p.num}</span>
                 </div>
                 <div className="md:col-span-6">
-                  <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-ash mb-2">{p.kicker}</div>
-                  <h2 className="font-serif text-2xl md:text-3xl text-bone tracking-tight leading-[1.15]">{p.title}</h2>
+                  <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-ash mb-2">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
+                  <h2 className="font-serif text-2xl md:text-3xl text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h2>
                 </div>
                 <div className="md:col-span-4 text-bone/80 text-base leading-relaxed text-justify">
-                  {p.body}
+                  {t(`pillar.${p.num}.body`, p.body)}
                 </div>
               </div>
             </Reveal>
@@ -60,14 +71,14 @@ export default function Pillars() {
                 <div className="relative sticky top-24 overflow-hidden" style={{ height: "calc(100vh - 7rem)" }}>
                   <AssetImg
                     k={p.image}
-                    alt={p.title}
+                    alt={t(`pillar.${p.num}.title`, p.title)}
                     className="absolute inset-0 h-full w-full object-contain"
                   />
                 </div>
               </Reveal>
               <div className="md:col-span-7 space-y-px bg-white/10">
-                {DIVISIONS[p.num].map((d, i) => (
-                  <Reveal key={d.name} delay={i * 0.05}>
+                {divisionsFor(p.num).map((d, i) => (
+                  <Reveal key={`${p.num}-${i}`} delay={i * 0.05}>
                     <div className="bg-obsidian p-6 md:p-8 group hover:bg-ink transition-colors">
                       <div className="flex items-baseline gap-4 mb-3">
                         <span className="font-mono text-[10px] tracking-[0.22em] text-copper">{p.num}.{i + 1}</span>

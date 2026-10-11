@@ -101,16 +101,16 @@ export default function Subsidiaries() {
                   <div className="absolute top-5 left-5 right-5 z-10 flex items-center justify-between text-photo-shadow">
                     <div className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorForCity(s.city) }} />
-                      <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{s.tag}</span>
+                      <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
                     </div>
                     <span className="font-mono text-[10px] tracking-[0.22em]">{String(i + 1).padStart(2, "0")}</span>
                   </div>
 
                   <div className="absolute bottom-5 left-6 right-6 z-10 text-photo-shadow">
-                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{s.city}</div>
-                    <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{s.name}</h3>
+                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{t(`subsidiary.${s.id}.city`, s.city)}</div>
+                    <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
                     <div className="mt-3 pt-3 border-t border-white/25 flex items-center justify-between gap-3">
-                      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{s.sector}</span>
+                      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
                       <span
                         className="text-copper group-hover:translate-x-1 transition-transform duration-500"
                         style={{ textShadow: "0 1px 4px rgba(5,30,43,0.9)" }}
@@ -143,16 +143,16 @@ export default function Subsidiaries() {
                   <div className="absolute top-5 left-5 right-5 z-10 flex items-center justify-between text-photo-shadow">
                     <div className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorForCity(s.city) }} />
-                      <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{s.tag}</span>
+                      <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
                     </div>
                     <span className="font-mono text-[10px] tracking-[0.22em]">{String(i + 1).padStart(2, "0")}</span>
                   </div>
 
                   <div className="absolute bottom-5 left-6 right-6 z-10 text-photo-shadow">
-                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{s.city}</div>
-                    <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{s.name}</h3>
+                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{t(`subsidiary.${s.id}.city`, s.city)}</div>
+                    <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
                     <div className="mt-3 pt-3 border-t border-white/25 flex items-center justify-between gap-3">
-                      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{s.sector}</span>
+                      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
                       <span
                         className="text-copper group-hover:translate-x-1 transition-transform duration-500"
                         style={{ textShadow: "0 1px 4px rgba(5,30,43,0.9)" }}

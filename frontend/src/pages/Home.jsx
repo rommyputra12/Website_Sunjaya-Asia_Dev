@@ -212,10 +212,10 @@ export default function Home() {
               <span className="chapter-num text-[clamp(2.5rem,5vw,4.5rem)]">{p.num}</span>
               <div className="pt-1 flex-1 min-w-0">
                 <div className="border-b-2 border-copper pb-3 mb-4">
-                  <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-obsidian mb-2 font-bold">{p.kicker}</div>
-                  <h3 className="font-serif text-[1.5rem] md:text-[2rem] text-bone tracking-tight leading-[1.15]">{p.title}</h3>
+                  <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-obsidian mb-2 font-bold">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
+                  <h3 className="font-serif text-[1.5rem] md:text-[2rem] text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h3>
                 </div>
-                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-justify">{p.body}</p>
+                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-justify">{t(`pillar.${p.num}.body`, p.body)}</p>
                 <ul className="mt-5 space-y-2.5 [&>li]:text-sm md:[&>li]:text-base [&>li]:tracking-wide">
                   {p.lines.map((l) => (
                     <li key={l} className="flex items-start gap-2.5 font-mono text-[11px] md:text-xs text-bone font-bold">
@@ -327,12 +327,12 @@ export default function Home() {
                   <div className="relative z-10 h-full p-3 md:p-4 flex flex-col justify-between">
                     <div className="flex items-center gap-2 text-photo-shadow">
                       <span className="w-1.5 h-1.5 rounded-full bg-copper" />
-                      <span className="font-mono text-[8px] md:text-[9px] tracking-[0.22em] uppercase">{s.tag}</span>
+                      <span className="font-mono text-[8px] md:text-[9px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
                     </div>
 
                     <div className="text-photo-shadow">
-                      <div className="font-mono text-[8px] md:text-[9px] tracking-[0.22em] uppercase text-copper mb-0.5">{s.city}</div>
-                      <h3 className="font-mono text-[10px] md:text-xs tracking-[0.08em] leading-snug uppercase">{s.name}</h3>
+                      <div className="font-mono text-[8px] md:text-[9px] tracking-[0.22em] uppercase text-copper mb-0.5">{t(`subsidiary.${s.id}.city`, s.city)}</div>
+                      <h3 className="font-mono text-[10px] md:text-xs tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
                     </div>
                   </div>
                 </div>
