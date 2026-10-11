@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { LocationMapPicker } from "./LocationMapPicker";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const CUSTOM = "__custom";
@@ -112,6 +113,7 @@ const CoordsInput = ({ form, setForm }) => {
         <input data-testid="loc-coords-paste" value={paste} onChange={(e) => applyPaste(e.target.value)} placeholder="e.g. -6.2088, 106.8456" className={inputCls} />
         <p className="mt-1.5 font-mono text-[9px] text-smoke leading-relaxed">Google Maps → right-click the spot → click the coordinates (copied) → paste here.</p>
       </div>
+      <LocationMapPicker lat={form.lat} lng={form.lng} color={form.color} onChange={(lat, lng) => setForm((f) => ({ ...f, lat, lng }))} />
       <div className="grid grid-cols-2 gap-3">
         {["lat", "lng"].map((k) => (
           <div key={k}>

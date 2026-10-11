@@ -696,6 +696,54 @@ ASSET_MIME_EXT = {
     "image/webp": ".webp", "image/gif": ".gif", "image/svg+xml": ".svg",
 }
 MAX_ASSET_BYTES = 20 * 1024 * 1024
+MAX_IMAGE_DIM = 2560
+WEBP_QUALITY = 82
+SKIP_COMPRESS_BYTES = 300 * 1024
+# Asset keys rendered by the public website (mirror of frontend ASSET_DB_KEYS)
+SITE_ASSET_KEYS = {
+    "logo", "cover", "foundation_slide", "core_slide", "future_slide", "sti", "sac", "sae", "agi",
+    "ecs", "sm", "tsn", "san", "kgi", "home_pillar_01_bg", "home_pillar_02_bg", "home_pillar_03_bg",
+    "bg_business_pillars", "bg_footer", "about_banner", "about_company_history", "footer_call",
+    "footer_email", "footer_instagram", "footer_linkedin",
+}
+
+
+def _compress_image(data: bytes, content_type: str):
+    """Resize to MAX_IMAGE_DIM and re-encode as WebP; keeps original if not smaller."""
+    if content_type in ("image/gif", "image/svg+xml"):
+        return data, content_type, None
+    from PIL import Image, ImageOps
+    import io as _io
+    im = Image.open(_io.BytesIO(data))
+    im.load()
+    im = ImageOps.exif_transpose(im)
+    size = im.size
+    needs_resize = max(size) > MAX_IMAGE_DIM
+    if not needs_resize and len(data) <= SKIP_COMPRESS_BYTES:
+        return data, content_type, size
+    if needs_resize:
+        im.thumbnail((MAX_IMAGE_DIM, MAX_IMAGE_DIM), Image.LANCZOS)
+    has_alpha = im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info)
+    im = im.convert("RGBA" if has_alpha else "RGB")
+    buf = _io.BytesIO()
+    im.save(buf, "WEBP", quality=90 if has_alpha else WEBP_QUALITY, method=6)
+    out = buf.getvalue()
+    if not needs_resize and len(out) >= len(data):
+        return data, content_type, size
+    return out, "image/webp", im.size
+
+
+async def _asset_usage() -> set:
+    """URLs referenced by news covers and location photos."""
+    urls = set()
+    for table, col in (("news", "cover_image"), ("locations", "photo_url")):
+        try:
+            for it in await sb_select(table, limit=1000):
+                if it.get(col):
+                    urls.add(it[col])
+        except Exception:
+            pass
+    return urls
 
 
 class AssetOut(BaseModel):
@@ -712,6 +760,7 @@ class AssetOut(BaseModel):
     zoom: Optional[float] = 1.0
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
+    in_use: bool = False
 
 
 class AssetMetaIn(BaseModel):
@@ -728,8 +777,9 @@ def _asset_public_url(object_name: str) -> str:
     return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
 
 
-def _asset_row_to_out(it: dict) -> AssetOut:
+def _asset_row_to_out(it: dict, used_urls: set | None = None) -> AssetOut:
     return AssetOut(
+        in_use=it["key"] in SITE_ASSET_KEYS or it.get("url") in (used_urls or set()),
         id=str(it["id"]), key=it["key"], url=it["url"], alt=it.get("alt"),
         width=it.get("width"), height=it.get("height"),
         section=it.get("section") or "other",
@@ -745,7 +795,8 @@ def _asset_row_to_out(it: dict) -> AssetOut:
 async def list_assets():
     """Public: all image assets as key -> url registry for the frontend."""
     items = await sb_select("assets", order="sort_order.asc", limit=500)
-    return [_asset_row_to_out(it) for it in items]
+    used = await _asset_usage()
+    return [_asset_row_to_out(it, used) for it in items]
 
 
 @api_router.post("/assets", response_model=AssetOut, dependencies=[Depends(require_admin)])
@@ -770,18 +821,17 @@ async def upload_asset(
 
     # Preserve the original filename when provided (keeps Supabase organised like the repo),
     # otherwise derive a stable name from the key.
-    orig = (file.filename or "").strip().replace("/", "_").replace("\\", "_")
-    object_name = orig if orig else f"{key}{ext}"
-
     width = height = None
     try:
-        from PIL import Image, ImageFile
-        import io as _io
-        ImageFile.LOAD_TRUNCATED_IMAGES = True
-        im = Image.open(_io.BytesIO(data)); im.load()
-        width, height = im.size
-    except Exception:
-        pass
+        data, content_type, dims = _compress_image(data, content_type)
+        if dims:
+            width, height = dims
+        ext = ASSET_MIME_EXT.get(content_type, ext)
+    except Exception as e:
+        logger.warning(f"image compression skipped: {e}")
+    orig = (file.filename or "").strip().replace("/", "_").replace("\\", "_")
+    stem = orig.rsplit(".", 1)[0] if orig else key
+    object_name = f"{stem}{ext}"
 
     storage_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
     async with httpx.AsyncClient(timeout=120) as c:
@@ -853,6 +903,8 @@ async def delete_asset(asset_id: str):
     existing = await sb_select_one("assets", {"id": asset_id})
     if not existing:
         raise HTTPException(404, "Asset not found")
+    if existing["key"] in SITE_ASSET_KEYS or existing.get("url") in await _asset_usage():
+        raise HTTPException(409, "This image is used on the website. Use Replace instead of deleting it.")
     # derive object name from the stored public url
     url = existing.get("url", "")
     marker = f"/public/{SUPABASE_BUCKET}/"

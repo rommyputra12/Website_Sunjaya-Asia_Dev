@@ -68,3 +68,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## Backlog
 - P2: Image compression di CMS; Safe-delete flag "used in site" untuk Images
 - P2: Refactor Admin.jsx (Users/Content/Images panel ke file terpisah)
+
+## Update 2026-06 (lanjutan)
+- Super Admin password di-reset ke default (.env SUPER_ADMIN_PASSWORD)
+- Location form: peta mini Leaflet (OSM tiles) — klik peta / drag pin untuk set koordinat (components/admin/LocationMapPicker.jsx)
+- Upload gambar: kompresi server (Pillow) → resize max 2560px, WebP q82 (q90 untuk gambar transparan); gambar ≤300KB & ≤2560px tidak diubah; hasil tidak lebih besar dari asli
+- Images tab: `in_use` (key dipakai situs / URL dipakai News cover / Location photo) → label "Used on site", DELETE diblokir (409)

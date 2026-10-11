@@ -798,7 +798,11 @@ const ImagesPanel = ({ client }) => {
                       <input type="file" accept="image/*" className="hidden" disabled={busyKey === a.key}
                         onChange={(e) => { const f = e.target.files?.[0]; if (f) replaceImage(a.key, f); e.target.value = ""; }} />
                     </label>
-                    <button onClick={() => remove(a)} className="h-8 px-3 border border-red-500/30 text-red-400 font-mono text-[9px] tracking-[0.18em] uppercase hover:bg-red-500/10 transition-colors">Del</button>
+                    {a.in_use ? (
+                      <span data-testid={`asset-in-use-${a.key}`} title="Used on the website — use Replace instead of deleting" className="h-8 px-2 leading-8 border border-copper/40 text-copper font-mono text-[8px] tracking-[0.16em] uppercase cursor-not-allowed">Used on site</span>
+                    ) : (
+                      <button data-testid={`asset-delete-${a.key}`} onClick={() => remove(a)} className="h-8 px-3 border border-red-500/30 text-red-400 font-mono text-[9px] tracking-[0.18em] uppercase hover:bg-red-500/10 transition-colors">Del</button>
+                    )}
                   </div>
                 </div>
               </div>
