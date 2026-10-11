@@ -608,13 +608,26 @@ const sectionIndex = (id) => {
 };
 const sectionLabel = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.label || id;
 
+// Card slot titles: ordered by tier (branch -> subsidiary -> affiliate), then CMS sort order
+const TIER_RANK = { branch: 0, subsidiary: 1, affiliate: 2 };
+const tierOf = (key) => SUBSIDIARIES.find((x) => x.id === key)?.tier;
+const slotLabel = (asset, groupAssets) => {
+  const ordered = [...groupAssets].sort((a, b) =>
+    (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100));
+  const pos = ordered.findIndex((a) => a.id === asset.id);
+  if (pos < 0) return asset.key;
+  return tierOf(asset.key) === "affiliate"
+    ? `Affiliate ${pos + 1 - ordered.filter((a) => tierOf(a.key) !== "affiliate").length}`
+    : `Subsidiaries ${pos + 1}`;
+};
+
 // Editable overlay texts for subsidiary cards (stored in asset.meta)
 const CARD_TEXT_FIELDS = [
   ["tag", "Tag kecil (atas)"],
   ["city", "Kota"],
   ["country", "Negara"],
   ["role", "Role / Fungsi"],
-  ["name", "Nama Perusahaan"],
+  ["name", "Nama Perusahaan (judul)"],
   ["sector", "Bidang / Sector (bawah)"],
 ];
 
@@ -642,6 +655,7 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
         <div key={f}>
           <label className="block font-mono text-[8px] tracking-[0.2em] uppercase text-ash/70 mb-1">{label}</label>
           <input defaultValue={meta[f]?.en || ""} placeholder={defaults[f] || ""} onBlur={(e) => saveField(f, "en", e.target.value)}
+            onInput={f === "name" ? (e) => { e.target.value = e.target.value.toUpperCase(); } : undefined}
             data-testid={`subcard-input-${asset.key}-${f}`} className={inputCls} />
           {showId && (
             <input defaultValue={meta[f]?.id || ""} placeholder={`${defaults[f] || ""} (ID)`} onBlur={(e) => saveField(f, "id", e.target.value)}
@@ -764,7 +778,10 @@ const ImagesPanel = ({ client }) => {
     const s = a.section || "other";
     (groups[s] = groups[s] || []).push(a);
   });
-  Object.values(groups).forEach((arr) => arr.sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
+  Object.entries(groups).forEach(([sec, arr]) => arr.sort((a, b) =>
+    sec === "home_subsidiaries"
+      ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
+      : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
   const orderedSections = Object.keys(groups).sort((a, b) => sectionIndex(a) - sectionIndex(b) || a.localeCompare(b));
 
   const inputCls = "w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none";
@@ -819,7 +836,14 @@ const ImagesPanel = ({ client }) => {
                   </span>
                 </button>
                 <div className="p-3 flex flex-col gap-2 flex-1">
-                  <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
+                  {(a.section || "other") === "home_subsidiaries" ? (
+                    <div data-testid={`asset-title-${a.key}`} className="font-mono text-[11px] text-copper tracking-wide">
+                      {slotLabel(a, groups["home_subsidiaries"])}
+                      {a.meta?.name?.en && <span className="text-bone"> — {a.meta.name.en}</span>}
+                    </div>
+                  ) : (
+                    <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
+                  )}
                   <div className="font-mono text-[9px] text-ash">
                     {a.width && a.height ? `${a.width}×${a.height}` : "—"}
                     {(a.focal_x !== 50 || a.focal_y !== 50 || (a.zoom && a.zoom !== 1)) && (
@@ -831,6 +855,7 @@ const ImagesPanel = ({ client }) => {
                     onBlur={(e) => { if (e.target.value !== (a.alt || "")) saveMeta({ ...a }, { alt: e.target.value }, "Alt saved"); }}
                     placeholder="Alt text…"
                     className={inputCls} />
+                  {(a.section || "other") !== "home_subsidiaries" && (
                   <select
                     defaultValue={a.section || "other"}
                     onChange={(e) => saveMeta({ ...a }, { section: e.target.value }, "Section updated")}
@@ -838,6 +863,7 @@ const ImagesPanel = ({ client }) => {
                     className={inputCls}>
                     {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                   </select>
+                  )}
                   {(a.section || "other") === "home_subsidiaries" && (
                     <SubCardTextForm asset={a} inputCls={inputCls} onSave={(meta) => saveMeta({ ...a }, { meta }, "Teks kartu tersimpan")} />
                   )}

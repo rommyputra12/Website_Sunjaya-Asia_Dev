@@ -70,6 +70,7 @@ export const AssetProvider = ({ children }) => {
         zoom: a?.zoom ?? 1,
         alt: a?.alt || camelKey,
         meta: a?.meta || {},
+        sort_order: a?.sort_order ?? 100,
       };
     });
     return map;

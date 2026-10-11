@@ -5,6 +5,7 @@ import { SUBSIDIARIES, DEFAULT_LOCATIONS, CERTS } from "../data/content";
 import AssetImg from "../components/AssetImg";
 import { InteractiveWorldMap } from "../components/InteractiveWorldMap";
 import { useLang } from "../i18n/LanguageContext";
+import { useAssets } from "../context/AssetContext";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
@@ -19,6 +20,7 @@ const sortedCompanies = [...SUBSIDIARIES].sort(
 
 const subsidiaryCards = sortedCompanies.filter((s) => s.tier !== "affiliate");
 const affiliateCards = sortedCompanies.filter((s) => s.tier === "affiliate");
+const AFF_START = subsidiaryCards.length + 1; // affiliates continue numbering after all branches
 
 const extractCountry = (city) => {
   const parts = city.split(",");
@@ -43,6 +45,9 @@ const AFFILIATE_GROUPS = groupByCountry(affiliateCards);
 
 export default function Subsidiaries() {
   const { t } = useLang();
+  const { byKey } = useAssets();
+  const cmsOrder = (s) => byKey[s.image]?.sort_order ?? 100;
+  const orderCards = (arr) => [...arr].sort((a, b) => cmsOrder(a) - cmsOrder(b));
 
 
   return (
@@ -74,7 +79,7 @@ export default function Subsidiaries() {
 
         {/* Subsidiary photo boxes — auto-sorted: Branch first, then other subsidiaries */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-px bg-white/10 border border-white/10">
-          {subsidiaryCards.map((s, i) => {
+          {orderCards(subsidiaryCards).map((s, i) => {
             const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3", "md:col-span-4", "md:col-span-2"];
             const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[3/2]", "aspect-[3/2]", "aspect-[16/9]", "aspect-[4/5]"];
             return (
@@ -93,7 +98,7 @@ export default function Subsidiaries() {
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorForCity(s.city) }} />
                       <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
                     </div>
-                    <span className="font-mono text-[10px] tracking-[0.22em]">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-[10px] tracking-[0.22em]">{String(s.tier === "affiliate" ? AFF_START + i : i + 1).padStart(2, "0")}</span>
                   </div>
 
                   <div className="absolute bottom-5 left-6 right-6 z-10 text-photo-shadow">
@@ -119,7 +124,7 @@ export default function Subsidiaries() {
 
         {/* Affiliate photo boxes — auto-sorted: Sunjaya-named affiliates first */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-px bg-white/10 border border-white/10 mt-px">
-          {affiliateCards.map((s, i) => {
+          {orderCards(affiliateCards).map((s, i) => {
             const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2"];
             const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]"];
             return (
@@ -138,7 +143,7 @@ export default function Subsidiaries() {
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorForCity(s.city) }} />
                       <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
                     </div>
-                    <span className="font-mono text-[10px] tracking-[0.22em]">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-[10px] tracking-[0.22em]">{String(s.tier === "affiliate" ? AFF_START + i : i + 1).padStart(2, "0")}</span>
                   </div>
 
                   <div className="absolute bottom-5 left-6 right-6 z-10 text-photo-shadow">

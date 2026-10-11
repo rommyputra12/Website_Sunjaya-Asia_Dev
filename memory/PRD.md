@@ -81,3 +81,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - LanguageContext.t('subsidiary.x.f') membaca meta via useAssets, split city/country otomatis, fallback ID→EN→default
 - Kartu di Home & /subsidiaries kini menampilkan baris "Negara · Role"
 - Toggle "+ Terjemahan ID" per kartu untuk kolom Bahasa Indonesia
+
+## Update 2026-06 (slot kartu Subsidiaries)
+- Kartu di tab Images (home_subsidiaries) berjudul slot: "Subsidiaries 1-7" (branch→subsidiary, ikut sort_order) lalu "Affiliate 1-2"; nama perusahaan (meta.name.en) tampil di samping judul; kode key disembunyikan; dropdown section dihilangkan (fix di section ini); input Nama Perusahaan auto-kapital
+- Urutan kartu di halaman Subsidiaries & teaser Home mengikuti sort_order CMS per tier; nomor kartu 01-09 kontinu (afiliasi lanjut setelah semua branch); sort_order di DB dirapikan: sac,sae,sti,agi,ecs,sm,tsn,san,kgi = 1-9
+- Kartu baru di section ini otomatis dapat nomor berikutnya saat CMS menyusun ulang

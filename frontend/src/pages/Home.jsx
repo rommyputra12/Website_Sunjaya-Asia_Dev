@@ -5,7 +5,9 @@ import Marquee from "react-fast-marquee";
 import { useLang } from "../i18n/LanguageContext";
 import { LineReveal, Reveal, CharReveal } from "../components/motion/Reveal";
 import { STATS, PILLARS, SUBSIDIARIES } from "../data/content";
+const SUB_ORDER = [...SUBSIDIARIES].sort((a, b) => ({ branch: 0, subsidiary: 1, affiliate: 2 })[a.tier] - ({ branch: 0, subsidiary: 1, affiliate: 2 })[b.tier]);
 import { useLocations } from "../hooks/useLocations";
+import { useAssets } from "../context/AssetContext";
 import AssetImg from "../components/AssetImg";
 import { StaticWorldMap } from "../components/StaticWorldMap";
 import Globe3D from "../components/Globe3D";
@@ -59,6 +61,8 @@ const HeroClock = () => {
 
 export default function Home() {
   const { t } = useLang();
+  const { byKey } = useAssets();
+  const subCards = SUB_ORDER.slice().sort((a, b) => (byKey[a.image]?.sort_order ?? 100) - (byKey[b.image]?.sort_order ?? 100));
   const locations = useLocations();
   const infraCount = locations.filter((l) => l.type === "infra").length;
   const countryCount = new Set(locations.map((l) => l.country.trim().toLowerCase())).size;
@@ -317,7 +321,7 @@ export default function Home() {
           </div>
 
           <div className="grid flex-1 min-h-[340px] md:min-h-[480px] grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 [grid-auto-rows:1fr]">
-            {SUBSIDIARIES.slice(0, 6).map((s, i) => (
+            {subCards.slice(0, 6).map((s, i) => (
               <Reveal key={s.id} delay={i * 0.05} className="h-full">
                 <Link to="/subsidiaries" data-testid={`home-sub-card-${s.id}`} className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm cursor-pointer ring-0 hover:ring-2 hover:ring-copper/70 transition-shadow duration-300">
                   <AssetImg
