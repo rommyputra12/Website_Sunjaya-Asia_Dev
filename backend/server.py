@@ -8,7 +8,9 @@ from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import bcrypt
+from jose import jwt, JWTError
 
 
 ROOT_DIR = Path(__file__).parent
@@ -36,6 +38,11 @@ EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY", "")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Sunjaya Asia Group")
 CONTACT_RECIPIENT = os.environ.get("CONTACT_RECIPIENT", "info@sunjayaasia.com")
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "change-me")
+JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-me")
+JWT_ALG = "HS256"
+JWT_EXPIRE_HOURS = 12
+SUPER_ADMIN_EMAIL = os.environ.get("SUPER_ADMIN_EMAIL", "")
+SUPER_ADMIN_PASSWORD = os.environ.get("SUPER_ADMIN_PASSWORD", "")
 
 app = FastAPI(title="Sunjaya Asia Group API")
 api_router = APIRouter(prefix="/api")
@@ -50,8 +57,9 @@ def now_iso() -> str:
 
 # ============ SUPABASE HELPERS ============
 
-async def sb_select(table: str, filters: dict | None = None, order: str | None = None, limit: int = 200) -> list:
-    """Query rows from Supabase via REST API."""
+async def sb_select(table: str, filters: dict | None = None, order: str | None = None, limit: int = 200, svc: bool = False) -> list:
+    """Query rows from Supabase via REST API. svc=True uses the service-role key."""
+    hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?select=*"
     if filters:
         for k, v in filters.items():
@@ -60,47 +68,51 @@ async def sb_select(table: str, filters: dict | None = None, order: str | None =
         url += f"&order={order}"
     url += f"&limit={limit}"
     async with httpx.AsyncClient(timeout=30) as c:
-        r = await c.get(url, headers=SB_HEADERS)
+        r = await c.get(url, headers=hdrs)
         r.raise_for_status()
         return r.json()
 
 
-async def sb_select_one(table: str, filters: dict) -> dict | None:
+async def sb_select_one(table: str, filters: dict, svc: bool = False) -> dict | None:
     """Query a single row."""
+    hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?select=*&limit=1"
     for k, v in filters.items():
         url += f"&{k}=eq.{v}"
     async with httpx.AsyncClient(timeout=30) as c:
-        r = await c.get(url, headers=SB_HEADERS)
+        r = await c.get(url, headers=hdrs)
         r.raise_for_status()
         data = r.json()
         return data[0] if data else None
 
 
-async def sb_insert(table: str, row: dict) -> dict:
+async def sb_insert(table: str, row: dict, svc: bool = False) -> dict:
     """Insert a row and return it."""
+    hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?select=*"
     async with httpx.AsyncClient(timeout=30) as c:
-        r = await c.post(url, headers={**SB_HEADERS, "Prefer": "return=representation"}, json=row)
+        r = await c.post(url, headers={**hdrs, "Prefer": "return=representation"}, json=row)
         r.raise_for_status()
         return r.json()[0]
 
 
-async def sb_update(table: str, row_id: str, update: dict) -> dict | None:
+async def sb_update(table: str, row_id: str, update: dict, svc: bool = False) -> dict | None:
     """Update a row by id and return it."""
+    hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?id=eq.{row_id}&select=*"
     async with httpx.AsyncClient(timeout=30) as c:
-        r = await c.patch(url, headers={**SB_HEADERS, "Prefer": "return=representation"}, json=update)
+        r = await c.patch(url, headers={**hdrs, "Prefer": "return=representation"}, json=update)
         r.raise_for_status()
         data = r.json()
         return data[0] if data else None
 
 
-async def sb_delete(table: str, row_id: str) -> bool:
+async def sb_delete(table: str, row_id: str, svc: bool = False) -> bool:
     """Delete a row by id."""
+    hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?id=eq.{row_id}"
     async with httpx.AsyncClient(timeout=30) as c:
-        r = await c.delete(url, headers=SB_HEADERS)
+        r = await c.delete(url, headers=hdrs)
         r.raise_for_status()
         return True
 
@@ -193,10 +205,53 @@ def slugify(text: str) -> str:
     return text[:80] or uuid.uuid4().hex[:8]
 
 
-def require_admin(x_admin_token: Optional[str] = Header(default=None)):
-    if not x_admin_token or x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    return True
+# ============ AUTH (JWT multi-user + legacy admin token) ============
+
+def hash_password(pw: str) -> str:
+    return bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
+
+
+def verify_password(pw: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(pw.encode(), hashed.encode())
+    except Exception:
+        return False
+
+
+def create_token(user: dict) -> str:
+    payload = {
+        "sub": str(user["id"]),
+        "email": user["email"],
+        "name": user.get("name", ""),
+        "role": user.get("role", "editor"),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS),
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+
+
+def decode_token(token: str) -> dict | None:
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+    except JWTError:
+        return None
+
+
+def require_admin(x_admin_token: Optional[str] = Header(default=None), authorization: Optional[str] = Header(default=None)):
+    """Accept a JWT Bearer token (multi-user) OR the legacy X-Admin-Token."""
+    if authorization and authorization.startswith("Bearer "):
+        payload = decode_token(authorization[7:])
+        if payload:
+            return payload
+    if x_admin_token and x_admin_token == ADMIN_TOKEN:
+        return {"sub": "legacy-admin", "name": "Legacy Admin", "role": "superadmin", "legacy": True}
+    raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+def require_superadmin(x_admin_token: Optional[str] = Header(default=None), authorization: Optional[str] = Header(default=None)):
+    payload = require_admin(x_admin_token, authorization)
+    if payload.get("role") != "superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    return payload
 
 
 def fmt_ts(val) -> str:
@@ -418,6 +473,138 @@ async def delete_news(news_id: str):
 
 @api_router.post("/admin/verify", dependencies=[Depends(require_admin)])
 async def admin_verify():
+    return {"ok": True}
+
+
+# ============ AUTH & USER MANAGEMENT (multi-user CMS) ============
+
+class LoginIn(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserOut(BaseModel):
+    id: str
+    name: str
+    email: str
+    role: str
+    active: bool
+    created_at: Optional[str] = None
+
+
+class UserIn(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=200)
+    role: str = "editor"
+    active: bool = True
+
+
+class UserUpdate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    name: Optional[str] = Field(None, min_length=1, max_length=120)
+    role: Optional[str] = None
+    active: Optional[bool] = None
+    password: Optional[str] = Field(None, min_length=8, max_length=200)
+
+
+def _user_to_out(it: dict) -> UserOut:
+    return UserOut(
+        id=str(it["id"]), name=it["name"], email=it["email"],
+        role=it.get("role", "editor"), active=bool(it.get("active", True)),
+        created_at=fmt_ts(it.get("created_at")),
+    )
+
+
+async def _seed_superadmin_if_empty():
+    """Create the super admin from env when the admin_users table is empty."""
+    users = await sb_select("admin_users", limit=1, svc=True)
+    if users:
+        return
+    if not SUPER_ADMIN_EMAIL or not SUPER_ADMIN_PASSWORD:
+        logger.warning("admin_users empty and SUPER_ADMIN_* env not set — cannot seed")
+        return
+    row = {
+        "name": "Super Admin",
+        "email": SUPER_ADMIN_EMAIL.strip().lower(),
+        "password_hash": hash_password(SUPER_ADMIN_PASSWORD),
+        "role": "superadmin",
+        "active": True,
+    }
+    await sb_insert("admin_users", row, svc=True)
+    logger.info(f"Seeded super admin: {SUPER_ADMIN_EMAIL}")
+
+
+@api_router.post("/auth/login")
+async def auth_login(payload: LoginIn):
+    await _seed_superadmin_if_empty()
+    user = await sb_select_one("admin_users", {"email": payload.email.strip().lower()}, svc=True)
+    if not user or not verify_password(payload.password, user.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not user.get("active", True):
+        raise HTTPException(status_code=403, detail="Account is deactivated")
+    return {"token": create_token(user), "user": _user_to_out(user).model_dump()}
+
+
+@api_router.get("/auth/me")
+async def auth_me(payload: dict = Depends(require_admin)):
+    return {"sub": payload.get("sub"), "name": payload.get("name"), "email": payload.get("email"), "role": payload.get("role"), "legacy": payload.get("legacy", False)}
+
+
+@api_router.get("/auth/users", response_model=List[UserOut], dependencies=[Depends(require_superadmin)])
+async def list_users():
+    users = await sb_select("admin_users", order="created_at.asc", limit=500, svc=True)
+    return [_user_to_out(u) for u in users]
+
+
+@api_router.post("/auth/users", response_model=UserOut, dependencies=[Depends(require_superadmin)])
+async def create_user(payload: UserIn):
+    email = payload.email.strip().lower()
+    existing = await sb_select_one("admin_users", {"email": email}, svc=True)
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+    if payload.role not in ("superadmin", "editor"):
+        raise HTTPException(status_code=400, detail="Role must be 'superadmin' or 'editor'")
+    row = {
+        "name": payload.name.strip(), "email": email,
+        "password_hash": hash_password(payload.password),
+        "role": payload.role, "active": payload.active,
+    }
+    created = await sb_insert("admin_users", row, svc=True)
+    return _user_to_out(created)
+
+
+@api_router.put("/auth/users/{user_id}", response_model=UserOut, dependencies=[Depends(require_superadmin)])
+async def update_user(user_id: str, payload: UserUpdate):
+    existing = await sb_select_one("admin_users", {"id": user_id}, svc=True)
+    if not existing:
+        raise HTTPException(404, "User not found")
+    update = {"updated_at": now_iso()}
+    if payload.name is not None:
+        update["name"] = payload.name.strip()
+    if payload.role is not None:
+        if payload.role not in ("superadmin", "editor"):
+            raise HTTPException(400, "Role must be 'superadmin' or 'editor'")
+        update["role"] = payload.role
+    if payload.active is not None:
+        update["active"] = payload.active
+    if payload.password:
+        update["password_hash"] = hash_password(payload.password)
+    updated = await sb_update("admin_users", user_id, update, svc=True)
+    if not updated:
+        raise HTTPException(404, "User not found")
+    return _user_to_out(updated)
+
+
+@api_router.delete("/auth/users/{user_id}", dependencies=[Depends(require_superadmin)])
+async def delete_user(user_id: str, payload: dict = Depends(require_superadmin)):
+    if str(user_id) == str(payload.get("sub")):
+        raise HTTPException(400, "You cannot delete your own account")
+    existing = await sb_select_one("admin_users", {"id": user_id}, svc=True)
+    if not existing:
+        raise HTTPException(404, "User not found")
+    await sb_delete("admin_users", user_id, svc=True)
     return {"ok": True}
 
 

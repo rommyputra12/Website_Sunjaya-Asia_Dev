@@ -389,4 +389,45 @@
 ##     -message: "Verify via UI at REACT_APP_BACKEND_URL frontend: (1) Scroll to footer, click element [data-testid=secret-admin-trigger] 5 times quickly -> should navigate to /admin showing the admin login (data-testid=admin-login). (2) Enter token sunjaya-admin-2026-secret in [data-testid=admin-token-input], submit [data-testid=admin-login-submit] -> admin page appears. (3) Click [data-testid=admin-tab-images] -> ImagesPanel shows a grid of >=25 asset cards with thumbnails that actually load (supabase urls). (4) Use the Add form: fill [data-testid=new-asset-key] = 'ui_test_asset', choose a small image in [data-testid=new-asset-file], submit [data-testid=new-asset-submit] -> success toast and new card appears. (5) On that new card, click Replace with another image -> success. (6) Delete the 'ui_test_asset' card (confirm dialog) -> card removed. DO NOT delete any of the 25 production assets. Report pass/fail with screenshots."
 ##     -message: "✅ BACKEND TESTING COMPLETE. Image CMS Assets API is WORKING correctly. Executed comprehensive 7-step test plan plus regression tests. Results: 17/18 tests PASSED. All critical functionality verified: list assets (25 items with Supabase URLs), upload with auth (401 without token, 200 with token), update alt text, delete asset from database, validation (415 for non-images), existing endpoints still working (news, locations, health all return 200). Minor note: deleted asset URL briefly accessible due to Supabase CDN caching (infrastructure behavior, not code bug) - asset correctly removed from database which is source of truth for frontend. No production assets affected. Backend logs confirm all operations successful (DELETE returned 200 OK for storage, 204 for database). Assets API is PRODUCTION READY. Frontend testing not performed as per instructions."
 ##     -agent: "testing"
+##
+## =============== MULTI-USER AUTH (Email+Password+JWT) ===============
+## backend_multiuser_auth:
+##   - task: "Multi-user CMS auth: JWT login, seed superadmin, user management endpoints"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Added bcrypt + python-jose. New endpoints: POST /api/auth/login (email+password -> JWT, auto-seeds superadmin from SUPER_ADMIN_EMAIL/SUPER_ADMIN_PASSWORD env if admin_users empty), GET /api/auth/me, GET/POST/PUT/DELETE /api/auth/users (superadmin only). require_admin now accepts JWT Bearer OR legacy X-Admin-Token (backwards compatible); require_superadmin gates user mgmt. admin_users table: id,name,email,password_hash,role(superadmin|editor),active. Creds: admin@sunjayaasia.com / sunjaya-superadmin-2026 (superadmin), editor@sunjayaasia.com / editorpass123 (editor). Verified via curl: login OK, wrong password 401, create user OK, list OK."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED - Comprehensive testing of multi-user CMS authentication completed. ALL 23 TESTS PASSED (0 failed). CRITICAL FUNCTIONALITY WORKING: (1) POST /auth/login with superadmin credentials returns 200 with JWT token and user object (role: superadmin). (2) POST /auth/login with wrong password correctly returns 401. (3) GET /auth/me with Bearer token returns 200 with email+role. (4) GET /auth/me without token correctly returns 401. (5) GET /auth/users with superadmin JWT returns 200 with array of 2 users, CRITICAL SECURITY CHECK PASSED: NO user contains 'password_hash' field (verified all users have no password_hash exposed). (6) POST /auth/users creates qaeditor successfully (200), duplicate email correctly returns 409. (7) Login as qaeditor returns 200 with role 'editor'. (8) Editor JWT permissions correct: GET /auth/users returns 403 (superadmin only), GET /api/assets returns 200 (public), POST /api/assets returns 200 (editor CAN manage content). (9) Superadmin can deactivate user (PUT returns 200, active=false), login as deactivated user correctly returns 403, reactivate works (PUT returns 200, active=true). (10) DELETE /auth/users/{id} returns 200, login as deleted user correctly returns 401. (11) Regression tests PASSED: legacy X-Admin-Token still works (POST /api/assets 200, DELETE /api/assets 200), POST /api/assets with NO auth correctly returns 401, public endpoints working (GET /api/news 200, GET /api/locations 200, GET /api/health 200). Backend logs confirm all operations successful with correct status codes. CRITICAL SAFETY VERIFIED: Never deleted or deactivated admin@sunjayaasia.com or editor@sunjayaasia.com, only created/modified/deleted qaeditor@sunjayaasia.com (test user) and test assets. Multi-user authentication system is PRODUCTION READY."
+## frontend_multiuser_auth:
+##   - task: "Admin CMS login Email+Password + Users tab (superadmin only)"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/pages/Admin.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Login form now email (data-testid=admin-email-input) + password (data-testid=admin-token-input kept for compat) -> POST /auth/login -> JWT stored in localStorage sunjaya_admin_token, sent as Authorization: Bearer. Header shows name+role. New Users tab (data-testid=admin-tab-users, superadmin only) -> UsersPanel: add user (name/email/password/role), activate/deactivate, make editor/admin, reset password, delete (cannot delete self). All CMS panels now send Authorization Bearer."
+##
+## test_plan:
+##   current_focus: []
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+##
+## agent_communication_auth:
+##     -agent: "main"
+##     -message: "Test the new multi-user CMS auth. BACKEND (base URL from frontend/.env REACT_APP_BACKEND_URL, prefix /api): (1) POST /auth/login {email:'admin@sunjayaasia.com',password:'sunjaya-superadmin-2026'} -> 200 {token,user(role superadmin)}. (2) POST /auth/login wrong password -> 401. (3) GET /auth/me with Bearer token -> 200 with email+role. (4) GET /auth/me without token -> 401. (5) GET /auth/users with superadmin JWT -> 200 list (no password_hash field in items). (6) POST /auth/users create {name:'QA Editor',email:'qaeditor@sunjayaasia.com',password:'qapass1234',role:'editor'} -> 200; duplicate email -> 409. (7) Login as qaeditor -> 200, role editor. (8) With editor JWT: GET /auth/users -> 403 (superadmin only); but GET /api/assets -> 200 (public). (9) With editor JWT POST /api/assets multipart small png key=qa_editor_img -> 200 (editor CAN manage content). (10) With superadmin JWT: PUT /auth/users/{qaeditor id} {active:false} -> 200; login as qaeditor -> 403 deactivated; PUT back active:true. DELETE /auth/users/{qaeditor id} -> 200. Also DELETE the qa_editor_img asset. (11) Regression: legacy header X-Admin-Token sunjaya-admin-2026-secret still works on POST /api/assets (401 without any auth). DO NOT delete/deactivate admin@sunjayaasia.com. Update test_result.md per protocol."
+##     -agent: "testing"
+##     -message: "✅ BACKEND MULTI-USER AUTH TESTING COMPLETE. All 23 tests PASSED (0 failed). Created comprehensive test suite in /app/backend_auth_test.py covering all 11 test scenarios from review request. Key results: (1) Superadmin login working with JWT token generation ✓, (2) Wrong password correctly rejected (401) ✓, (3) JWT Bearer token authentication working ✓, (4) Missing token correctly rejected (401) ✓, (5) User list endpoint working, CRITICAL: password_hash field NOT exposed (security verified) ✓, (6) User creation working, duplicate email correctly rejected (409) ✓, (7) Editor login working ✓, (8) Role-based permissions working (editor cannot access /auth/users but can manage content) ✓, (9) User deactivation/reactivation working ✓, (10) User deletion working ✓, (11) Legacy X-Admin-Token backwards compatibility working, public endpoints working ✓. Backend logs show all operations successful. Safety verified: only test user (qaeditor) and test assets created/deleted, production accounts (admin@sunjayaasia.com, editor@sunjayaasia.com) untouched. Multi-user authentication system is PRODUCTION READY."
 ##     -message: "✅ FRONTEND UI TESTING COMPLETE. Secret admin access + Image CMS is WORKING correctly. Initial test revealed critical environment variable bug (VITE_BACKEND_URL missing from .env), which I fixed by adding the variable and restarting frontend. After fix, all 6 test steps passed: (1) Secret trigger navigates to /admin ✓, (2) Admin login with token works ✓, (3) Images tab loads 25 assets with Supabase thumbnails ✓, (4) Add new asset works ✓, (5) Replace asset works ✓, (6) Delete asset works ✓. Mobile viewport (390x844) confirmed usable. Console logs clean. No production assets affected. Feature is production-ready."

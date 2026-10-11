@@ -19,18 +19,21 @@ const emptyLoc = { city: "", country: "", role: "", lat: 0, lng: 0, color: "#C86
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
   const [authed, setAuthed] = useState(false);
+  const [me, setMe] = useState(null);
   const [tab, setTab] = useState("news");
 
-  const client = axios.create({ baseURL: API, headers: { "X-Admin-Token": token } });
+  const client = axios.create({ baseURL: API, headers: { Authorization: token ? `Bearer ${token}` : "" } });
 
   useEffect(() => {
     if (!token) return;
     (async () => {
       try {
-        await client.post("/admin/verify");
+        const r = await client.get("/auth/me");
+        setMe(r.data);
         setAuthed(true);
       } catch {
         setAuthed(false);
+        setMe(null);
         localStorage.removeItem(TOKEN_KEY);
       }
     })();
@@ -39,20 +42,23 @@ export default function Admin() {
 
   const login = async (e) => {
     e.preventDefault();
-    const val = e.target.token.value.trim();
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
     try {
-      await axios.post(`${API}/admin/verify`, {}, { headers: { "X-Admin-Token": val } });
-      setToken(val);
-      localStorage.setItem(TOKEN_KEY, val);
-      toast.success("Access granted");
-    } catch {
-      toast.error("Invalid admin token");
+      const r = await axios.post(`${API}/auth/login`, { email, password });
+      setToken(r.data.token);
+      setMe(r.data.user);
+      localStorage.setItem(TOKEN_KEY, r.data.token);
+      toast.success(`Welcome, ${r.data.user.name}`);
+    } catch (err) {
+      toast.error(errMsg(err, "Invalid email or password"));
     }
   };
 
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
     setToken("");
+    setMe(null);
     setAuthed(false);
   };
 
@@ -63,10 +69,11 @@ export default function Admin() {
         <div className="max-w-md mx-auto px-6">
           <span className="font-mono text-[10px] tracking-[0.24em] uppercase text-copper">CMS Access</span>
           <h1 className="font-serif text-4xl text-bone mt-3 tracking-tight">Administrator</h1>
-          <p className="mt-4 text-ash font-mono text-xs tracking-wide">Enter your admin token to manage the CMS.</p>
+          <p className="mt-4 text-ash font-mono text-xs tracking-wide">Sign in with your CMS account to manage the website.</p>
           <form onSubmit={login} className="mt-8 space-y-4">
-            <input name="token" type="password" required data-testid="admin-token-input" placeholder="Admin token" className="w-full h-12 bg-ink border border-white/15 px-4 font-mono text-sm text-bone focus:border-copper focus:outline-none" />
-            <button type="submit" data-testid="admin-login-submit" className="w-full h-12 bg-copper text-obsidian font-mono text-[11px] tracking-[0.24em] uppercase hover:bg-copper-hi transition-colors">Enter</button>
+            <input name="email" type="email" required autoComplete="username" data-testid="admin-email-input" placeholder="Email" className="w-full h-12 bg-ink border border-white/15 px-4 font-mono text-sm text-bone focus:border-copper focus:outline-none" />
+            <input name="password" type="password" required autoComplete="current-password" data-testid="admin-token-input" placeholder="Password" className="w-full h-12 bg-ink border border-white/15 px-4 font-mono text-sm text-bone focus:border-copper focus:outline-none" />
+            <button type="submit" data-testid="admin-login-submit" className="w-full h-12 bg-copper text-obsidian font-mono text-[11px] tracking-[0.24em] uppercase hover:bg-copper-hi transition-colors">Sign in</button>
           </form>
         </div>
       </div>
@@ -81,17 +88,19 @@ export default function Admin() {
           <div>
             <span className="font-mono text-[10px] tracking-[0.24em] uppercase text-copper">CMS</span>
             <h1 className="font-serif text-5xl text-bone mt-2 tracking-tight">Content Management</h1>
+            {me && <p className="mt-2 font-mono text-[10px] tracking-[0.18em] uppercase text-ash" data-testid="admin-identity">{me.name || me.email} · {me.role}</p>}
           </div>
           <button onClick={logout} data-testid="admin-logout" className="h-10 px-4 border border-white/15 font-mono text-[10px] tracking-[0.22em] uppercase text-ash hover:text-copper hover:border-copper transition-colors">Sign out</button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-px bg-white/10 border border-white/10 mb-10 w-fit">
+        <div className="flex gap-px bg-white/10 border border-white/10 mb-10 w-fit flex-wrap">
           {[
             { k: "news", label: "News" },
             { k: "locations", label: "Locations" },
             { k: "images", label: "Images" },
             { k: "inquiries", label: "Inquiries" },
+            ...(me?.role === "superadmin" ? [{ k: "users", label: "Users" }] : []),
           ].map((tb) => (
             <button
               key={tb.k}
@@ -110,10 +119,152 @@ export default function Admin() {
         {tab === "locations" && <LocationsPanel client={client} />}
         {tab === "images" && <ImagesPanel client={client} />}
         {tab === "inquiries" && <InquiriesPanel client={client} />}
+        {tab === "users" && me?.role === "superadmin" && <UsersPanel client={client} me={me} />}
       </div>
     </div>
   );
 }
+
+/* ================= USERS (superadmin only) ================= */
+const UsersPanel = ({ client, me }) => {
+  const [items, setItems] = useState([]);
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "editor" });
+  const [saving, setSaving] = useState(false);
+  const [resetId, setResetId] = useState(null);
+  const [resetPw, setResetPw] = useState("");
+
+  const refresh = async () => {
+    try {
+      const r = await client.get("/auth/users");
+      setItems(r.data || []);
+    } catch (e) {
+      toast.error(errMsg(e, "Failed to load users"));
+    }
+  };
+  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
+
+  const addUser = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await client.post("/auth/users", form);
+      toast.success(`User "${form.email}" created`);
+      setForm({ name: "", email: "", password: "", role: "editor" });
+      await refresh();
+    } catch (err) {
+      toast.error(errMsg(err, "Failed to create user"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const patchUser = async (id, update, msg) => {
+    try {
+      await client.put(`/auth/users/${id}`, update);
+      toast.success(msg);
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Update failed"));
+    }
+  };
+
+  const removeUser = async (u) => {
+    if (!window.confirm(`Delete user "${u.email}"? This cannot be undone.`)) return;
+    try {
+      await client.delete(`/auth/users/${u.id}`);
+      toast.success("User deleted");
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Delete failed"));
+    }
+  };
+
+  const inputCls = "h-10 bg-obsidian border border-white/15 px-3 font-mono text-sm text-bone focus:border-copper focus:outline-none";
+
+  return (
+    <div data-testid="users-panel">
+      {/* Add user */}
+      <form onSubmit={addUser} className="bg-ink border border-white/10 p-5 mb-8 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Name</label>
+          <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} data-testid="new-user-name" placeholder="Full name" className={`w-full ${inputCls}`} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Email</label>
+          <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="new-user-email" placeholder="user@sunjayaasia.com" className={`w-full ${inputCls}`} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Password (min 8)</label>
+          <input required type="password" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} data-testid="new-user-password" placeholder="••••••••" className={`w-full ${inputCls}`} />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Role</label>
+          <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} data-testid="new-user-role" className={`w-full ${inputCls}`}>
+            <option value="editor">Editor</option>
+            <option value="superadmin">Super Admin</option>
+          </select>
+        </div>
+        <button type="submit" disabled={saving} data-testid="new-user-submit"
+          className="h-10 px-6 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors disabled:opacity-50">
+          {saving ? "Adding…" : "Add user"}
+        </button>
+      </form>
+
+      {/* Users table */}
+      <div className="border border-white/10">
+        <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-ink font-mono text-[9px] tracking-[0.2em] uppercase text-ash">
+          <div className="col-span-3">Name</div>
+          <div className="col-span-3">Email</div>
+          <div className="col-span-2">Role</div>
+          <div className="col-span-1">Status</div>
+          <div className="col-span-3 text-right">Actions</div>
+        </div>
+        {items.map((u) => (
+          <div key={u.id} data-testid={`user-row-${u.email}`} className="grid grid-cols-12 gap-2 px-4 py-3 border-t border-white/10 items-center">
+            <div className="col-span-3 text-sm text-bone font-mono">{u.name}</div>
+            <div className="col-span-3 text-xs text-ash font-mono break-all">{u.email}</div>
+            <div className="col-span-2">
+              <span className={`font-mono text-[9px] tracking-[0.18em] uppercase px-2 py-1 border ${u.role === "superadmin" ? "border-copper/40 text-copper" : "border-white/15 text-ash"}`}>{u.role}</span>
+            </div>
+            <div className="col-span-1">
+              <span className={`font-mono text-[9px] tracking-[0.18em] uppercase ${u.active ? "text-green-400" : "text-red-400"}`}>{u.active ? "Active" : "Off"}</span>
+            </div>
+            <div className="col-span-3 flex justify-end gap-2 flex-wrap">
+              <button onClick={() => patchUser(u.id, { active: !u.active }, u.active ? "User deactivated" : "User activated")}
+                data-testid={`user-toggle-${u.email}`}
+                className="h-8 px-3 border border-white/15 font-mono text-[9px] tracking-[0.15em] uppercase text-ash hover:text-copper hover:border-copper transition-colors">
+                {u.active ? "Deactivate" : "Activate"}
+              </button>
+              <button onClick={() => patchUser(u.id, { role: u.role === "superadmin" ? "editor" : "superadmin" }, "Role updated")}
+                className="h-8 px-3 border border-white/15 font-mono text-[9px] tracking-[0.15em] uppercase text-ash hover:text-copper hover:border-copper transition-colors">
+                {u.role === "superadmin" ? "Make editor" : "Make admin"}
+              </button>
+              {resetId === u.id ? (
+                <span className="flex gap-1">
+                  <input type="password" minLength={8} value={resetPw} onChange={(e) => setResetPw(e.target.value)} placeholder="New password"
+                    data-testid={`user-reset-input-${u.email}`}
+                    className="h-8 w-32 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none" />
+                  <button onClick={async () => { await patchUser(u.id, { password: resetPw }, "Password reset"); setResetId(null); setResetPw(""); }}
+                    data-testid={`user-reset-submit-${u.email}`}
+                    className="h-8 px-2 bg-copper text-obsidian font-mono text-[9px] uppercase">OK</button>
+                  <button onClick={() => { setResetId(null); setResetPw(""); }} className="h-8 px-2 border border-white/15 text-ash font-mono text-[9px]">✕</button>
+                </span>
+              ) : (
+                <button onClick={() => setResetId(u.id)} data-testid={`user-reset-${u.email}`}
+                  className="h-8 px-3 border border-white/15 font-mono text-[9px] tracking-[0.15em] uppercase text-ash hover:text-copper hover:border-copper transition-colors">Reset PW</button>
+              )}
+              {u.email !== me?.email && (
+                <button onClick={() => removeUser(u)} data-testid={`user-delete-${u.email}`}
+                  className="h-8 px-3 border border-red-500/30 text-red-400 font-mono text-[9px] tracking-[0.15em] uppercase hover:bg-red-500/10 transition-colors">Del</button>
+              )}
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <p className="text-ash font-mono text-xs px-4 py-6">No users found.</p>}
+      </div>
+    </div>
+  );
+};
 
 /* ================= IMAGES (asset manager) ================= */
 const ImagesPanel = ({ client }) => {
