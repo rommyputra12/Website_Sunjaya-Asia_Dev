@@ -878,6 +878,98 @@ async def delete_asset(asset_id: str):
     return {"ok": True}
 
 
+# ============ CONTENT BLOCKS (editable text CMS) ============
+
+class ContentOut(BaseModel):
+    id: str
+    key: str
+    value: Optional[str] = ""
+    page: Optional[str] = "other"
+    section: Optional[str] = "general"
+    sort_order: Optional[int] = 100
+    label: Optional[str] = None
+    type: Optional[str] = "text"
+    updated_at: Optional[str] = None
+
+
+class ContentIn(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    key: str = Field(min_length=1, max_length=200)
+    value: Optional[str] = ""
+    page: Optional[str] = "other"
+    section: Optional[str] = "general"
+    sort_order: Optional[int] = 100
+    label: Optional[str] = None
+    type: Optional[str] = "text"
+
+
+class ContentUpdate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    value: Optional[str] = None
+    label: Optional[str] = None
+    page: Optional[str] = None
+    section: Optional[str] = None
+    sort_order: Optional[int] = None
+    type: Optional[str] = None
+
+
+def _content_to_out(it: dict) -> ContentOut:
+    return ContentOut(
+        id=str(it["id"]), key=it["key"], value=it.get("value") or "",
+        page=it.get("page") or "other", section=it.get("section") or "general",
+        sort_order=it.get("sort_order") if it.get("sort_order") is not None else 100,
+        label=it.get("label"), type=it.get("type") or "text",
+        updated_at=fmt_ts(it.get("updated_at")),
+    )
+
+
+@api_router.get("/content", response_model=List[ContentOut])
+async def list_content():
+    """Public: all editable text blocks (key -> value) for the frontend."""
+    items = await sb_select("content_blocks", order="sort_order.asc", limit=1000)
+    return [_content_to_out(it) for it in items]
+
+
+@api_router.post("/content", response_model=ContentOut, dependencies=[Depends(require_admin)])
+async def create_content(payload: ContentIn):
+    key = payload.key.strip()
+    existing = await sb_select_one("content_blocks", {"key": key})
+    row = {
+        "key": key, "value": payload.value or "", "page": payload.page or "other",
+        "section": payload.section or "general",
+        "sort_order": payload.sort_order if payload.sort_order is not None else 100,
+        "label": payload.label, "type": payload.type or "text", "updated_at": now_iso(),
+    }
+    if existing:
+        updated = await sb_update("content_blocks", existing["id"], row)
+        return _content_to_out(updated)
+    created = await sb_insert("content_blocks", row)
+    return _content_to_out(created)
+
+
+@api_router.put("/content/{content_id}", response_model=ContentOut, dependencies=[Depends(require_admin)])
+async def update_content(content_id: str, payload: ContentUpdate):
+    existing = await sb_select_one("content_blocks", {"id": content_id})
+    if not existing:
+        raise HTTPException(404, "Content block not found")
+    update = {"updated_at": now_iso()}
+    for f in ("value", "label", "page", "section", "sort_order", "type"):
+        v = getattr(payload, f, None)
+        if v is not None:
+            update[f] = v
+    updated = await sb_update("content_blocks", content_id, update)
+    return _content_to_out(updated)
+
+
+@api_router.delete("/content/{content_id}", dependencies=[Depends(require_admin)])
+async def delete_content(content_id: str):
+    existing = await sb_select_one("content_blocks", {"id": content_id})
+    if not existing:
+        raise HTTPException(404, "Content block not found")
+    await sb_delete("content_blocks", content_id)
+    return {"ok": True}
+
+
 app.include_router(api_router)
 
 app.add_middleware(
