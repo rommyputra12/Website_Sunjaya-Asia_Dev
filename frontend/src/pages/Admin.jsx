@@ -90,6 +90,7 @@ export default function Admin() {
           {[
             { k: "news", label: "News" },
             { k: "locations", label: "Locations" },
+            { k: "images", label: "Images" },
             { k: "inquiries", label: "Inquiries" },
           ].map((tb) => (
             <button
@@ -107,11 +108,142 @@ export default function Admin() {
 
         {tab === "news" && <NewsPanel client={client} />}
         {tab === "locations" && <LocationsPanel client={client} />}
+        {tab === "images" && <ImagesPanel client={client} />}
         {tab === "inquiries" && <InquiriesPanel client={client} />}
       </div>
     </div>
   );
 }
+
+/* ================= IMAGES (asset manager) ================= */
+const ImagesPanel = ({ client }) => {
+  const [items, setItems] = useState([]);
+  const [busyKey, setBusyKey] = useState(null);
+  const [newKey, setNewKey] = useState("");
+  const [newFile, setNewFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const refresh = async () => {
+    try {
+      const r = await client.get("/assets");
+      setItems((r.data || []).sort((a, b) => a.key.localeCompare(b.key)));
+    } catch (e) {
+      toast.error(errMsg(e, "Failed to load images"));
+    }
+  };
+  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
+
+  const replaceImage = async (key, file) => {
+    if (!file) return;
+    setBusyKey(key);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("key", key);
+      await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      toast.success(`Updated "${key}"`);
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Upload failed"));
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  const saveAlt = async (asset, alt) => {
+    try {
+      await client.put(`/assets/${asset.id}`, { alt });
+      toast.success("Alt text saved");
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Save failed"));
+    }
+  };
+
+  const remove = async (asset) => {
+    if (!window.confirm(`Delete image "${asset.key}"? This cannot be undone.`)) return;
+    try {
+      await client.delete(`/assets/${asset.id}`);
+      toast.success("Image deleted");
+      await refresh();
+    } catch (e) {
+      toast.error(errMsg(e, "Delete failed"));
+    }
+  };
+
+  const addNew = async (e) => {
+    e.preventDefault();
+    if (!newKey.trim() || !newFile) { toast.error("Provide a key and a file"); return; }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", newFile);
+      fd.append("key", newKey.trim());
+      await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      toast.success(`Added "${newKey.trim()}"`);
+      setNewKey(""); setNewFile(null);
+      e.target.reset();
+      await refresh();
+    } catch (err) {
+      toast.error(errMsg(err, "Upload failed"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div data-testid="images-panel">
+      {/* Add new asset */}
+      <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-8 flex flex-col md:flex-row md:items-end gap-4">
+        <div className="flex-1">
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">New asset key</label>
+          <input value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="e.g. home_new_banner"
+            data-testid="new-asset-key"
+            className="w-full h-10 bg-obsidian border border-white/15 px-3 font-mono text-sm text-bone focus:border-copper focus:outline-none" />
+        </div>
+        <div className="flex-1">
+          <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Image file</label>
+          <input type="file" accept="image/*" onChange={(e) => setNewFile(e.target.files?.[0] || null)}
+            data-testid="new-asset-file"
+            className="w-full text-xs text-ash file:mr-3 file:py-2 file:px-3 file:border-0 file:bg-copper file:text-obsidian file:font-mono file:text-[10px] file:uppercase file:tracking-wider" />
+        </div>
+        <button type="submit" disabled={uploading} data-testid="new-asset-submit"
+          className="h-10 px-6 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors disabled:opacity-50">
+          {uploading ? "Uploading…" : "Add image"}
+        </button>
+      </form>
+
+      {/* Grid of existing assets */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {items.map((a) => (
+          <div key={a.id} data-testid={`asset-card-${a.key}`} className="bg-ink border border-white/10 overflow-hidden flex flex-col">
+            <div className="aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center">
+              <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover" loading="lazy" />
+            </div>
+            <div className="p-3 flex flex-col gap-2 flex-1">
+              <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
+              <div className="font-mono text-[9px] text-ash">{a.width && a.height ? `${a.width}×${a.height}` : "—"}</div>
+              <input
+                defaultValue={a.alt || ""}
+                onBlur={(e) => { if (e.target.value !== (a.alt || "")) saveAlt(a, e.target.value); }}
+                placeholder="Alt text…"
+                className="w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none" />
+              <div className="flex gap-2 mt-auto pt-1">
+                <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>
+                  {busyKey === a.key ? "…" : "Replace"}
+                  <input type="file" accept="image/*" className="hidden" disabled={busyKey === a.key}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) replaceImage(a.key, f); e.target.value = ""; }} />
+                </label>
+                <button onClick={() => remove(a)} className="h-8 px-3 border border-red-500/30 text-red-400 font-mono text-[9px] tracking-[0.18em] uppercase hover:bg-red-500/10 transition-colors">Del</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {items.length === 0 && <p className="text-ash font-mono text-xs mt-6">No images yet.</p>}
+    </div>
+  );
+};
 
 /* ================= NEWS ================= */
 const NewsPanel = ({ client }) => {

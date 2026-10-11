@@ -142,7 +142,7 @@
 ## metadata:
 ##   created_by: "main_agent"
 ##   version: "1.0"
-##   test_sequence: 3
+##   test_sequence: 4
 ##   run_ui: true
 ##
 ## test_plan:
@@ -325,4 +325,44 @@
 ##         -comment: "✅ VERIFIED at desktop (1920x800) and mobile (390x844). ALL CHECKPOINTS PASSED: (1) Globe renders correctly - canvas 2688x811px desktop / 448x678px mobile, shows 3D Earth with continents (light blue-gray), blue atmosphere glow, colored location dots, dashed copper arcs; globe looks BIG and positioned slightly above bottom as intended. (2) Globe container reaches section bottom - gap 0.0px desktop (perfect fit), container uses flex-1 successfully. (3) Carousel dots pill (white rounded pill, 146x26px) is VISIBLE near bottom center at both viewports - desktop y=757.59px (16px from section bottom), mobile y=809.64px; does NOT overlap EXPLORE button (desktop: no horizontal overlap, mobile: no vertical overlap). (4) All overlay elements visible and correctly positioned - LOCATIONS panel (left side), OPERATIONS & DISTRIBUTION HUB label, EXPLORE ALL LOCATIONS button all present with no overlaps between any elements. (5) Floating info card behavior correct - VISIBLE on desktop (display:block, tracking globe points, shows city name/role), HIDDEN on mobile (display:none as expected). (6) Carousel dot interaction works - clicking dot rotates globe to focus that location (verified with before/after screenshots 3s apart showing position change). (7) Regression checks PASSED - Hero section intact (887px height), Pillar 01/02/03 backgrounds all visible (1376x768 each), Subsidiaries grid has 6 cards with button below, no horizontal overflow at either viewport (1920px desktop / 390px mobile), no critical console errors (only harmless Vite HMR WebSocket and WebGL GPU stall warnings). Globe positioning fix CONFIRMED WORKING - globe is bigger (scale 1.68 desktop / 1.25 mobile), positioned lower with slight raise (offsetY -25 desktop / -15 mobile), all overlays moved down correctly, no overlaps, mobile layout stacked properly."
 ##     -message: "✅ VERIFICATION COMPLETE for v4. Task 'Subsidiaries section v4 - konten diturunkan, space kosong bawah dihilangkan, foto membesar' is WORKING correctly. Tested at 4 viewports (1920x1080, 1920x800, 1366x768, 390x844). User requirement satisfied: header text and photos shifted LOWER (header clearance 95-119px, not hidden under navbar), photos BIGGER (card rows 399px at 1080px, 259px at 800px, both exceeding requirements), empty space at bottom NEARLY GONE (16px desktop / 8px mobile, within 5-25px target). Button sits clearly below grid with 16-20px gap, no overlap, fully visible and clickable. All 6 cards visible, all photos loaded. Regression passed: Hero, Pillar 01/02/03 backgrounds (1376x768 each), Globe rendering (2560x640px canvas), no horizontal overflow. Ready for user acceptance."
 ##     -agent: "testing"
-##     -message: "✅ FINAL VERIFICATION COMPLETE. Task 'Global Presence - globe diturunkan & diperbesar (lalu dinaikkan sedikit), elemen overlay ikut turun, tanpa overlap' is WORKING correctly at desktop (1920x800) and mobile (390x844). Comprehensive testing confirms: Globe renders with all elements (continents, atmosphere, arcs, dots), looks BIG (canvas 2688x811px desktop / 448x678px mobile), positioned slightly above bottom with container reaching section bottom (0px gap). Carousel dots pill (white rounded pill 146x26px) visible near bottom center, does NOT overlap EXPLORE button at either viewport. All overlay elements (LOCATIONS panel, hub label, EXPLORE button) visible with no overlaps. Floating info card correctly VISIBLE on desktop, HIDDEN on mobile. Carousel dot interaction works (globe rotates on click). All regression checks PASSED (Hero, Pillar backgrounds, Subsidiaries grid, no horizontal overflow, no critical console errors). Globe positioning implementation is SUCCESSFUL and ready for user acceptance."
+##
+## =============== IMAGE CMS + SUPABASE MIGRATION ===============
+## backend_assets_cms:
+##   - task: "Assets API (Supabase Storage + assets table) — list/upload/update-alt/delete"
+##     implemented: true
+##     working: true
+##     file: "/app/backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Added GET /api/assets (public list), POST /api/assets (admin: multipart file+key+alt -> upload to Supabase Storage bucket 'website-images' with service_role key, upsert assets row by key), PUT /api/assets/{id} (admin: update alt), DELETE /api/assets/{id} (admin: delete storage object best-effort + row). Supabase creds in backend/.env (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_STORAGE_BUCKET). Admin token: X-Admin-Token = sunjaya-admin-2026-secret. Bucket created (public, 20MB). Migrated 25 images to Supabase with same filenames; /api/assets returns 25 rows; public URLs return 200 without auth."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED - Comprehensive testing of Image CMS backend API completed. PASSED 17/18 tests. CRITICAL FUNCTIONALITY WORKING: (1) GET /api/assets returns 200 with 25 assets, all have required fields (id, key, url), all URLs contain supabase.co/storage/v1/object/public/website-images. Tested 3 sample URLs directly - all return 200 with image content-type. (2) POST /api/assets WITHOUT admin header correctly returns 401 (auth working). (3) POST /api/assets WITH admin header returns 200 with valid Supabase URL, uploaded image is accessible. (4) PUT /api/assets/{id} successfully updates alt text from 'Test CMS' to 'Updated Alt'. (5) GET /api/assets confirms test asset present with updated alt. (6) DELETE /api/assets/{id} returns 200, asset removed from database (GET /api/assets no longer shows it), backend logs show successful DELETE to both Supabase Storage (200 OK) and database (204 No Content). (7) POST with non-image file (.txt) correctly returns 415 (validation working). (8) Regression tests PASSED: GET /api/news (200), GET /api/locations (200), GET /api/health (200). MINOR: Deleted asset URL still accessible via CDN cache (Supabase infrastructure behavior, not code bug) - asset correctly removed from database (source of truth), frontend won't reference it. NO production assets affected. Backend logs confirm all operations successful. Assets API is PRODUCTION READY."
+## frontend_image_cms:
+##   - task: "Frontend images from Supabase URLs + Admin Images tab (CMS)"
+##     implemented: true
+##     working: "NA"
+##     file: "/app/frontend/src/data/content.js, /app/frontend/src/pages/Admin.jsx, Home.jsx, About.jsx, Footer.jsx"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "content.js IMAGES/LOGO now point to Supabase public URLs (base https://gtgkmjazuljesliaurcb.supabase.co/storage/v1/object/public/website-images). Replaced all direct /images/ refs in Home.jsx (pillar bg, bg_business_pillars), Footer.jsx (social icons, bg_footer), About.jsx (banner, company history). Removed /app/frontend/public/images (80MB) from repo and gitignored it. Added Admin '/admin' Images tab (ImagesPanel): grid of 25 assets with thumbnail, key, dimensions, editable alt (onBlur save), Replace (file upload), Delete, and an Add-new form (key + file). Home verified: 18/18 imgs load from supabase.co, 0 broken."
+##
+## test_plan:
+##   current_focus: []
+##   stuck_tasks: []
+##   test_all: false
+##   test_priority: "high_first"
+##
+## agent_communication_images:
+##     -agent: "main"
+##     -message: "Test the new Image CMS. BACKEND (use base URL from frontend/.env REACT_APP_BACKEND_URL, admin header X-Admin-Token: sunjaya-admin-2026-secret): (1) GET /api/assets returns >=25 rows each with key+url (supabase public url). (2) POST /api/assets multipart (file=<small png>, key=test_cms_upload, alt=Test) returns 200 with a supabase url; GET the returned url = 200. (3) PUT /api/assets/{id} {alt:'Updated'} updates alt. (4) DELETE /api/assets/{id} for the test asset removes it (GET its url should 400/404 afterwards). (5) POST without admin header = 401. Do NOT delete any of the 25 production assets — only the test_cms_upload one you create. FRONTEND is optional unless asked."
+##     -agent: "testing"
+##     -message: "✅ BACKEND TESTING COMPLETE. Image CMS Assets API is WORKING correctly. Executed comprehensive 7-step test plan plus regression tests. Results: 17/18 tests PASSED. All critical functionality verified: list assets (25 items with Supabase URLs), upload with auth (401 without token, 200 with token), update alt text, delete asset from database, validation (415 for non-images), existing endpoints still working (news, locations, health all return 200). Minor note: deleted asset URL briefly accessible due to Supabase CDN caching (infrastructure behavior, not code bug) - asset correctly removed from database which is source of truth for frontend. No production assets affected. Backend logs confirm all operations successful (DELETE returned 200 OK for storage, 204 for database). Assets API is PRODUCTION READY. Frontend testing not performed as per instructions."

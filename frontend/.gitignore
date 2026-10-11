@@ -11,6 +11,9 @@
 # production
 /build
 
+# image assets — now served from Supabase Storage, not stored in the repo
+/public/images
+
 # misc
 .DS_Store
 .env.local

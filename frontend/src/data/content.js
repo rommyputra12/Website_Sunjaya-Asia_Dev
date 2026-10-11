@@ -1,27 +1,43 @@
-const USER = {
-  logo: "/images/logo_sunjaya.png",
-  foundationSlide: "/images/pillar_foundation.jpg",
-  futureSlide: "/images/pillar_future.jpg",
-  cover: "/images/cover_sunjaya.png",
-};
+// ============================================================================
+// Image assets — served from Supabase Storage (bucket: website-images).
+// Binaries no longer live in the repo. The CMS (/admin -> Images) manages these
+// via the backend; replacing an image keeps the same filename/URL so the site
+// reflects the change automatically. Keys here mirror the asset keys in the DB.
+// ============================================================================
+const SUPA_IMG = "https://gtgkmjazuljesliaurcb.supabase.co/storage/v1/object/public/website-images";
+const img = (file) => `${SUPA_IMG}/${file}`;
 
-export const LOGO = USER.logo;
+export const LOGO = img("logo_sunjaya.png");
 
 export const IMAGES = {
-  cover: USER.cover,
-  foundationSlide: USER.foundationSlide,
-  coreSlide: "/images/pillar_core.png",
-  futureSlide: USER.futureSlide,
+  cover: img("cover_sunjaya.png"),
+  foundationSlide: img("pillar_foundation.jpg"),
+  coreSlide: img("pillar_core.png"),
+  futureSlide: img("pillar_future.jpg"),
   // Subsidiary photos
-  sti: "/images/Subsidiaries_Sunjaya_Teknologi_Indonesia.png",
-  sac: "/images/Subsidiaries_Sunjaya_America.png",
-  sae: "/images/Subsidiaries_Sunjaya_Emirates.jpeg",
-  agi: "/images/Subsidiaries_Allwyn_Group_Indonesia.jpeg",
-  ecs: "/images/Subsidiaries_ECS_Indo_Distribusi.jpeg",
-  sm: "/images/Subsidiaries_Sunjaya_Music.jpg",
-  tsn: "/images/Subsidiaries_Teknologi_Sosial_Nusantara.jpg",
-  san: "/images/Subsidiaries_Sunjaya_An_Xin.jpg",
-  kgi: "/images/Subsidiaries_Kindred_Group_Indonesia.png",
+  sti: img("Subsidiaries_Sunjaya_Teknologi_Indonesia.png"),
+  sac: img("Subsidiaries_Sunjaya_America.png"),
+  sae: img("Subsidiaries_Sunjaya_Emirates.jpeg"),
+  agi: img("Subsidiaries_Allwyn_Group_Indonesia.jpeg"),
+  ecs: img("Subsidiaries_ECS_Indo_Distribusi.jpeg"),
+  sm: img("Subsidiaries_Sunjaya_Music.jpg"),
+  tsn: img("Subsidiaries_Teknologi_Sosial_Nusantara.jpg"),
+  san: img("Subsidiaries_Sunjaya_An_Xin.jpg"),
+  kgi: img("Subsidiaries_Kindred_Group_Indonesia.png"),
+  // Pillar section backgrounds + decorative backgrounds
+  homePillar01Bg: img("Home_Pillar_01_The_Foundation_Background.jpeg"),
+  homePillar02Bg: img("Home_Pillar_02_The_Core_Background.jpeg"),
+  homePillar03Bg: img("Home_Pillar_03_The_Future_Background.png"),
+  bgBusinessPillars: img("bg_business_pillars.jpg"),
+  bgFooter: img("bg_footer.jpg"),
+  // About page
+  aboutBanner: img("about_banner.jpg"),
+  aboutCompanyHistory: img("about_company_history.jpg"),
+  // Footer contact icons
+  footerCall: img("Footer_Call_Us_Logo.webp"),
+  footerEmail: img("Footer_Email_Logo.jpg"),
+  footerInstagram: img("Footer_Instagram_Logo.png"),
+  footerLinkedin: img("Footer_Linkedin_Logo.jpg"),
 };
 
 export const STATS = [

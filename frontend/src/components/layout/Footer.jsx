@@ -2,12 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { useLang } from "../../i18n/LanguageContext";
+import { IMAGES } from "../../data/content";
 
 const SOCIALS = [
-  { href: "https://www.linkedin.com/company/sunjayaasiagroup/", image: "/images/Footer_Linkedin_Logo.jpg", label: "LinkedIn", external: true },
-  { href: "https://www.instagram.com/sunjaya.group", image: "/images/Footer_Instagram_Logo.png", label: "Instagram", external: true },
-  { to: "/contact", image: "/images/Footer_Email_Logo.jpg", label: "Email" },
-  { to: "/contact", image: "/images/Footer_Call_Us_Logo.webp", label: "Call center" },
+  { href: "https://www.linkedin.com/company/sunjayaasiagroup/", image: IMAGES.footerLinkedin, label: "LinkedIn", external: true },
+  { href: "https://www.instagram.com/sunjaya.group", image: IMAGES.footerInstagram, label: "Instagram", external: true },
+  { to: "/contact", image: IMAGES.footerEmail, label: "Email" },
+  { to: "/contact", image: IMAGES.footerCall, label: "Call center" },
 ];
 
 export const Footer = () => {
@@ -17,7 +18,7 @@ export const Footer = () => {
     <footer data-testid="site-footer" className="snap-section relative h-[100svh] overflow-hidden bg-[#071d27] text-bone">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/bg_footer.jpg')" }}
+        style={{ backgroundImage: `url('${IMAGES.bgFooter}')` }}
         aria-hidden="true"
       />
 

@@ -187,7 +187,7 @@ export default function Home() {
       {/* BUSINESS PILLAR INTRO — min full viewport, grows if content is taller */}
       <section className="snap-section relative min-h-screen overflow-hidden bg-azure border-t border-copper/40">
         <img
-          src="/images/bg_business_pillars.jpg"
+          src={IMAGES.bgBusinessPillars}
           alt="Business pillars background"
           className="absolute inset-0 h-full w-full object-cover object-[62%_center] md:object-center"
         />
@@ -282,10 +282,10 @@ export default function Home() {
               <>
                 <img
                   src={p.num === "01"
-                    ? "/images/Home_Pillar_01_The_Foundation_Background.jpeg"
+                    ? IMAGES.homePillar01Bg
                     : p.num === "02"
-                      ? "/images/Home_Pillar_02_The_Core_Background.jpeg"
-                      : "/images/Home_Pillar_03_The_Future_Background.png"}
+                      ? IMAGES.homePillar02Bg
+                      : IMAGES.homePillar03Bg}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover object-center opacity-[0.6]"

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File, Form
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
@@ -17,9 +17,16 @@ load_dotenv(ROOT_DIR / '.env')
 # Supabase
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or SUPABASE_KEY
+SUPABASE_BUCKET = os.environ.get("SUPABASE_STORAGE_BUCKET", "website-images")
 SB_HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+}
+SB_SERVICE_HEADERS = {
+    "apikey": SUPABASE_SERVICE_KEY,
+    "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
     "Content-Type": "application/json",
 }
 
@@ -499,6 +506,144 @@ async def update_location(loc_id: str, payload: LocationIn):
 @api_router.delete("/locations/{loc_id}", dependencies=[Depends(require_admin)])
 async def delete_location(loc_id: str):
     await sb_delete("locations", loc_id)
+    return {"ok": True}
+
+
+# ============ ASSETS (image registry + Supabase Storage) ============
+
+from urllib.parse import quote as _urlquote
+
+ASSET_MIME_EXT = {
+    "image/jpeg": ".jpg", "image/jpg": ".jpg", "image/png": ".png",
+    "image/webp": ".webp", "image/gif": ".gif", "image/svg+xml": ".svg",
+}
+MAX_ASSET_BYTES = 20 * 1024 * 1024
+
+
+class AssetOut(BaseModel):
+    id: str
+    key: str
+    url: str
+    alt: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class AssetMetaIn(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    alt: Optional[str] = None
+
+
+def _asset_public_url(object_name: str) -> str:
+    return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
+
+
+def _asset_row_to_out(it: dict) -> AssetOut:
+    return AssetOut(
+        id=str(it["id"]), key=it["key"], url=it["url"], alt=it.get("alt"),
+        width=it.get("width"), height=it.get("height"),
+        created_at=fmt_ts(it.get("created_at")), updated_at=fmt_ts(it.get("updated_at")),
+    )
+
+
+@api_router.get("/assets", response_model=List[AssetOut])
+async def list_assets():
+    """Public: all image assets as key -> url registry for the frontend."""
+    items = await sb_select("assets", order="key.asc", limit=500)
+    return [_asset_row_to_out(it) for it in items]
+
+
+@api_router.post("/assets", response_model=AssetOut, dependencies=[Depends(require_admin)])
+async def upload_asset(
+    file: UploadFile = File(...),
+    key: str = Form(...),
+    alt: Optional[str] = Form(None),
+):
+    """Admin: upload (or replace) an image for a given asset key."""
+    key = (key or "").strip()
+    if not key:
+        raise HTTPException(400, "Asset key is required")
+    content_type = (file.content_type or "").lower()
+    ext = ASSET_MIME_EXT.get(content_type)
+    if not ext:
+        raise HTTPException(415, "Only JPEG, PNG, WebP, GIF, SVG images are accepted")
+    data = await file.read(MAX_ASSET_BYTES + 1)
+    if len(data) > MAX_ASSET_BYTES:
+        raise HTTPException(413, "Image exceeds 20MB limit")
+
+    # Preserve the original filename when provided (keeps Supabase organised like the repo),
+    # otherwise derive a stable name from the key.
+    orig = (file.filename or "").strip().replace("/", "_").replace("\\", "_")
+    object_name = orig if orig else f"{key}{ext}"
+
+    width = height = None
+    try:
+        from PIL import Image, ImageFile
+        import io as _io
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+        im = Image.open(_io.BytesIO(data)); im.load()
+        width, height = im.size
+    except Exception:
+        pass
+
+    storage_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
+    async with httpx.AsyncClient(timeout=120) as c:
+        up = await c.post(
+            storage_url,
+            headers={**{k: v for k, v in SB_SERVICE_HEADERS.items() if k != "Content-Type"},
+                     "Content-Type": content_type, "x-upsert": "true",
+                     "Cache-Control": "public, max-age=31536000"},
+            content=data,
+        )
+        if up.status_code >= 300:
+            raise HTTPException(502, f"Storage upload failed: {up.text[:200]}")
+
+    public_url = _asset_public_url(object_name)
+    row = {"key": key, "url": public_url, "alt": alt, "width": width, "height": height,
+           "updated_at": now_iso()}
+    url = f"{SUPABASE_URL}/rest/v1/assets?on_conflict=key"
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.post(url, headers={**SB_SERVICE_HEADERS,
+                         "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
+        if r.status_code >= 300:
+            raise HTTPException(502, f"Asset metadata save failed: {r.text[:200]}")
+        return _asset_row_to_out(r.json()[0])
+
+
+@api_router.put("/assets/{asset_id}", response_model=AssetOut, dependencies=[Depends(require_admin)])
+async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
+    """Admin: update the alt text of an asset."""
+    existing = await sb_select_one("assets", {"id": asset_id})
+    if not existing:
+        raise HTTPException(404, "Asset not found")
+    update = {"alt": payload.alt, "updated_at": now_iso()}
+    updated = await sb_update("assets", asset_id, update)
+    if not updated:
+        raise HTTPException(404, "Asset not found")
+    return _asset_row_to_out(updated)
+
+
+@api_router.delete("/assets/{asset_id}", dependencies=[Depends(require_admin)])
+async def delete_asset(asset_id: str):
+    """Admin: delete an asset (storage object best-effort + DB row)."""
+    existing = await sb_select_one("assets", {"id": asset_id})
+    if not existing:
+        raise HTTPException(404, "Asset not found")
+    # derive object name from the stored public url
+    url = existing.get("url", "")
+    marker = f"/public/{SUPABASE_BUCKET}/"
+    if marker in url:
+        from urllib.parse import unquote
+        object_name = unquote(url.split(marker, 1)[1])
+        storage_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
+        try:
+            async with httpx.AsyncClient(timeout=30) as c:
+                await c.delete(storage_url, headers={k: v for k, v in SB_SERVICE_HEADERS.items() if k != "Content-Type"})
+        except Exception as e:
+            logger.warning(f"Storage delete failed (continuing): {e}")
+    await sb_delete("assets", asset_id)
     return {"ok": True}
 
 

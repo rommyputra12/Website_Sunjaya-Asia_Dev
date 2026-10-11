@@ -59,7 +59,7 @@ export default function About() {
             role="img"
             aria-label="Sunjaya Asia Group office"
             className="w-full h-full bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url('/images/about_banner.jpg')", backgroundPosition: "center center", backgroundSize: "cover" }}
+            style={{ backgroundImage: `url('${IMAGES.aboutBanner}')`, backgroundPosition: "center center", backgroundSize: "cover" }}
           />
         </div>
 
@@ -69,7 +69,7 @@ export default function About() {
             role="img"
             aria-label="Sunjaya Asia Group office"
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url('/images/about_banner.jpg')", backgroundPosition: "center center", backgroundSize: "cover" }}
+            style={{ backgroundImage: `url('${IMAGES.aboutBanner}')`, backgroundPosition: "center center", backgroundSize: "cover" }}
           />
           {/* Gradient at bottom to ensure corporate identity grid is legible */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#051e2b]/30" />
@@ -157,7 +157,7 @@ export default function About() {
                 role="img"
                 aria-label="Sunjaya Asia Group company history timeline"
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: "url('/images/about_company_history.jpg')" }}
+                style={{ backgroundImage: `url('${IMAGES.aboutCompanyHistory}')` }}
               />
             </div>
             <div className="mt-6 max-w-lg">
