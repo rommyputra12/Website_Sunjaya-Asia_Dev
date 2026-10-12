@@ -94,3 +94,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Fix: kartu 3↔4 tidak bisa bertukar karena STI bertier "branch" dan AGI "subsidiary" — branch & subsidiary kini satu grup penomoran (urutan murni sort_order); hanya afiliasi yang selalu di akhir
 - Fix: susunan ulang dilakukan saat drop (bukan saat drag berjalan) agar target tidak bergeser; autoScroll dimatikan
 - Kolom Alt text dihapus dari tab Images; alt kartu subsidiary otomatis = Nama Perusahaan
+
+## Update 2026-06 (News texts dipindah)
+- Grup "News Page" dihapus dari tab Content; 5 teks halaman News (title, sub, empty, read, back) kini diedit di tab News → panel lipat "Teks Halaman News" (EN + ID). Data tetap di content_blocks (page=news)

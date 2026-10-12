@@ -390,7 +390,6 @@ const CONTENT_PAGES = [
   { id: "pillars", label: "Pillars Page" },
   { id: "subsidiaries", label: "Subsidiaries Page" },
   { id: "about", label: "About Page" },
-  { id: "news", label: "News Page" },
   { id: "contact", label: "Contact Page" },
   { id: "footer", label: "Footer" },
   { id: "other", label: "Other / Custom" },
@@ -411,7 +410,7 @@ const ContentPanel = ({ client }) => {
   const refresh = async () => {
     try {
       const r = await client.get("/content");
-      setItems(r.data || []);
+      setItems((r.data || []).filter((b) => b.page !== "news")); // news page texts live in the News tab
     } catch (e) {
       toast.error(errMsg(e, "Failed to load content"));
     }
@@ -945,6 +944,48 @@ const ImagesPanel = ({ client }) => {
 };
 
 /* ================= NEWS ================= */
+const NEWS_TEXT_LABELS = { "news.title": "Judul halaman", "news.sub": "Sub-judul", "news.empty": "Pesan saat kosong", "news.read": "Tombol baca", "news.back": "Tombol kembali" };
+
+// Static texts of the News page, edited here instead of the Content tab
+const NewsPageTexts = ({ client }) => {
+  const [blocks, setBlocks] = useState([]);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    client.get("/content").then((r) => setBlocks((r.data || []).filter((b) => b.page === "news"))).catch(() => {});
+  }, [client]);
+  const save = async (b, field, value) => {
+    if (value === (b[field] || "")) return;
+    try {
+      await client.put(`/content/${b.id}`, { [field]: value });
+      setBlocks((prev) => prev.map((x) => (x.id === b.id ? { ...x, [field]: value } : x)));
+      toast.success("Teks tersimpan");
+    } catch (e) { toast.error(errMsg(e, "Gagal menyimpan")); }
+  };
+  if (!blocks.length) return null;
+  const cls = "w-full h-10 bg-obsidian border border-white/15 px-3 font-mono text-xs text-bone focus:border-copper focus:outline-none";
+  return (
+    <div data-testid="news-page-texts" className="lg:col-span-12 border border-white/10 bg-ink">
+      <button onClick={() => setOpen(!open)} data-testid="news-page-texts-toggle"
+        className="w-full flex items-center justify-between px-6 py-4 font-mono text-[10px] tracking-[0.24em] uppercase text-copper hover:bg-white/5 transition-colors">
+        Teks Halaman News <span className="text-ash">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {blocks.map((b) => (
+            <div key={b.id}>
+              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">{NEWS_TEXT_LABELS[b.key] || b.label || b.key}</label>
+              <div className="grid grid-cols-2 gap-2">
+                <input defaultValue={b.value || ""} placeholder="EN" onBlur={(e) => save(b, "value", e.target.value)} data-testid={`news-text-${b.key}`} className={cls} />
+                <input defaultValue={b.value_id || ""} placeholder="ID" onBlur={(e) => save(b, "value_id", e.target.value)} data-testid={`news-text-${b.key}-id`} className={cls} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const NewsPanel = ({ client }) => {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(emptyNews);
@@ -995,6 +1036,7 @@ const NewsPanel = ({ client }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <NewsPageTexts client={client} />
       <form onSubmit={save} data-testid="admin-form" className="lg:col-span-5 border border-white/10 p-8 bg-ink space-y-4 h-fit sticky top-24">
         <div className="font-mono text-[10px] tracking-[0.24em] uppercase text-copper">{editingId ? "Edit Article" : "New Article"}</div>
         <Field label="Title" value={form.title} onChange={upd("title")} required id="title" />
