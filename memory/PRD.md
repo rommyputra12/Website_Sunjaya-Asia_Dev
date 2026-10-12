@@ -120,3 +120,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Indikator "belum tersimpan" (titik kuning berdenyut) per field & per kantor saat diketik belum di-blur
 - Tombol "View on site" per section → buka tab baru ke anchor (id: hero, stats, business-pillars, subsidiaries-teaser, global-presence, pillar-NN, site-footer)
 - Teaser Subsidiaries di Home bisa diedit: home.subs.{kicker,title,desc,cta} + preview
+
+## Update 2026-06 (Global Presence angka & preview asli)
+- Angka statistik Global Presence otomatis dari tab Locations (HQ+Branch, Infrastructure Hub, negara unik); CMS menampilkan hint "(angka otomatis dari Locations — …: N)" di label; mockup memakai angka asli
+- Preview tiap section punya 2 mode: "Tampilan asli" (iframe situs live diskalakan, scroll ke anchor section, reload setelah simpan; default) dan "Highlight edit" (mockup + sorotan field aktif)
+- CookieBanner disembunyikan saat situs dimuat di dalam iframe

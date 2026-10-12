@@ -4,6 +4,7 @@ import { ChevronDown, ExternalLink, Plus, Search, Trash2, X } from "lucide-react
 import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, MAX_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
 import { PreviewCtx, SectionPreview } from "./ContentPreview";
+import { useLocations } from "../../hooks/useLocations";
 
 const errMsg = (err, fb) => (typeof err?.response?.data?.detail === "string" ? err.response.data.detail : fb);
 const inputCls = "w-full bg-obsidian border border-white/15 px-3 py-2 font-mono text-[12px] text-bone focus:border-copper focus:outline-none";
@@ -21,8 +22,8 @@ const SCHEMA = [
       f("home.pillars_intro.para2", "Paragraf 2", "textarea"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)")] },
     { id: "subsidiaries_teaser", url: "/#subsidiaries-teaser", label: "Subsidiaries & Affiliates (Teaser)", fields: [f("home.subs.kicker", "Judul kecil"), f("home.subs.title", "Judul"), f("home.subs.desc", "Deskripsi", "textarea"), f("home.subs.cta", "Tombol")] },
     { id: "stats", url: "/#stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
-    { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi", "textarea"),
-      f("presence.stats.branches", "Label statistik — Branches"), f("presence.stats.clients", "Label statistik — Affiliates/Infra"), f("presence.stats.countries", "Label statistik — Countries"), f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
+    { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi (tampil di halaman Subsidiaries)", "textarea"),
+      { ...f("presence.stats.branches", "Label statistik — Branches"), auto: "branches" }, { ...f("presence.stats.clients", "Label statistik — Affiliates/Infra"), auto: "clients" }, { ...f("presence.stats.countries", "Label statistik — Countries"), auto: "countries" }, f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
   ] },
   { page: "pillars", label: "Pillars Page", sections: [
     { id: "intro", url: "/pillars", label: "Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title", "Judul intro", "textarea")] },
@@ -50,7 +51,7 @@ const useUpsert = (client, refresh) => async (key, meta, patch) => {
   } catch (e) { toast.error(errMsg(e, "Gagal menyimpan")); }
 };
 
-const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete }) => {
+const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete, hint }) => {
   const [showId, setShowId] = useState(!!block?.value_id);
   const { setActive, setDraft, active } = useContext(PreviewCtx);
   const focus = () => setActive(testid);
@@ -64,7 +65,7 @@ const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete }) 
   return (
     <div data-testid={`content-block-${testid}`} className={`bg-obsidian/40 border p-3 transition-colors ${active === testid ? "border-copper/70" : "border-white/10"}`}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="font-mono text-[10px] tracking-[0.12em] text-ash">{label}</span>
+        <span className="font-mono text-[10px] tracking-[0.12em] text-ash">{label}{hint && <span data-testid={`auto-hint-${testid}`} className="ml-2 normal-case text-[#7FC8EE]">{hint}</span>}</span>
         <span className="flex items-center gap-3">
           {isDirty && <span data-testid={`unsaved-${testid}`} className="flex items-center gap-1 font-mono text-[8px] tracking-[0.14em] uppercase text-amber-400"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />belum tersimpan</span>}
           <button type="button" onClick={() => setShowId(!showId)} className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper">{showId ? "− ID" : "+ ID"}</button>
@@ -208,6 +209,12 @@ export const ContentPanel = ({ client }) => {
   const [active, setActive] = useState(null);
   const setDraft = (k, v) => setDraftMap((d) => ({ ...d, [k]: v }));
   const [query, setQuery] = useState("");
+  const locs = useLocations();
+  const infra = locs.filter((l) => l.type === "infra").length;
+  const counts = { branches: locs.length - infra, clients: infra, countries: new Set(locs.map((l) => (l.country || "").trim().toLowerCase())).size };
+  const AUTO_DESC = { branches: "HQ + Branch", clients: "Infrastructure Hub", countries: "negara unik" };
+  const [version, setVersion] = useState(0);
+  useEffect(() => { setVersion((v) => v + 1); }, [items]);
   const q = query.trim().toLowerCase();
   const fieldHit = (fd) => matchText(q, fd.label, fd.key, byKey[fd.key]?.value, byKey[fd.key]?.value_id, defaultOf(fd.key));
   const sectionFields = (pg, sec) => {
@@ -223,7 +230,7 @@ export const ContentPanel = ({ client }) => {
   useEffect(() => { setDraftMap({}); }, [items]);
 
   return (
-    <PreviewCtx.Provider value={{ draft, setDraft, active, setActive, byKey }}>
+    <PreviewCtx.Provider value={{ draft, setDraft, active, setActive, byKey, counts, version }}>
     <div data-testid="content-panel">
       <p className="text-ash font-mono text-xs max-w-2xl mb-4">Klik halaman lalu section untuk mengedit. Perubahan tersimpan otomatis saat keluar dari kolom. Kolom ID (Bahasa Indonesia) opsional — jika kosong memakai teks bawaan.</p>
       <div className="relative mb-6 max-w-xl">
@@ -243,13 +250,14 @@ export const ContentPanel = ({ client }) => {
                 <>
                   {sectionFields(pg, sec).map((fd, i) => (
                     <BiField key={fd.key} label={fd.label} type={fd.type} block={byKey[fd.key]} placeholder={defaultOf(fd.key)} testid={fd.key}
+                      hint={fd.auto && `(angka otomatis dari Locations — ${AUTO_DESC[fd.auto]}: ${counts[fd.auto]})`}
                       onSave={(p) => upsert(fd.key, { block: byKey[fd.key], page: pg.page, section: sec.id, label: fd.label, type: fd.type, sort: i + 1 }, p)} />
                   ))}
                   {sec.pointers && <Pointers num={sec.pointers} items={items.filter((b) => b.section === sec.id)} client={client} refresh={refresh} upsert={upsert} />}
                 </>
               )}
               </div>
-              <div className="lg:col-span-5 lg:self-stretch"><SectionPreview sectionId={sec.id} /></div>
+              <div className="lg:col-span-5 lg:self-stretch"><SectionPreview sectionId={sec.id} url={sec.url} /></div>
               </div>
             </Accordion>
           ))}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Phone, Star } from "lucide-react";
 import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
@@ -82,19 +82,22 @@ const Stats = () => (
   </Frame>
 );
 
-const Presence = () => (
+const Presence = () => {
+  const { counts = {} } = useContext(PreviewCtx);
+  return (
   <Frame light>
     <Kicker k="presence.kicker" light />
     <div className="mt-2 font-serif text-[14px] leading-tight"><T k="presence.title" /> <T k="presence.titleHighlight" className="text-copper italic" /></div>
     <T k="presence.sub" as="p" className="mt-2 text-obsidian/70" />
     <div className="mt-3 grid grid-cols-3 gap-2">
       {["branches", "clients", "countries"].map((id) => (
-        <div key={id}><div className="font-serif text-[14px] text-copper">#</div><T k={`presence.stats.${id}`} className="font-mono text-[7px] uppercase text-obsidian/60" /></div>
+        <div key={id}><div className="font-serif text-[14px] text-copper">{counts[id]}</div><T k={`presence.stats.${id}`} className="font-mono text-[7px] uppercase text-obsidian/60" /></div>
       ))}
     </div>
     <div className="mt-3 flex items-center justify-between"><T k="presence.hub" className="font-mono text-[7px] uppercase text-obsidian/60" /><Btn k="presence.cta" /></div>
   </Frame>
-);
+  );
+};
 
 const PillarsPageIntro = () => (
   <Frame><Kicker k="manifesto.overline" /><T k="manifesto.title" as="div" className="mt-2 font-serif text-[15px] leading-tight" /></Frame>
@@ -170,15 +173,44 @@ const MAP = {
   about: About, contact: Contact, footer: FooterTop, offices: Offices,
 };
 
-export const SectionPreview = ({ sectionId }) => {
+// Real capture: the live page scaled down inside an iframe, scrolled to the section anchor
+const LiveFrame = ({ url, version }) => {
+  const box = useRef(null);
+  const [w, setW] = useState(560);
+  useEffect(() => {
+    const ro = new ResizeObserver(([e]) => setW(e.contentRect.width));
+    if (box.current) ro.observe(box.current);
+    return () => ro.disconnect();
+  }, []);
+  const scale = w / 1440;
+  return (
+    <div ref={box} className="relative w-full border border-white/15 overflow-hidden bg-obsidian" style={{ height: 810 * scale }}>
+      <iframe key={version} title="Live preview" src={url} data-testid="preview-live-iframe" loading="lazy"
+        className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: 1440, height: 810, transform: `scale(${scale})` }} />
+    </div>
+  );
+};
+
+export const SectionPreview = ({ sectionId, url }) => {
+  const { version } = useContext(PreviewCtx);
+  const [mode, setMode] = useState("live");
   const m = sectionId.match(/^pillar_(\d+)$/);
   const C = m ? () => <Pillar num={m[1]} /> : MAP[sectionId];
-  if (!C) return null;
+  if (!C && !url) return null;
+  const tab = (id, label) => (
+    <button onClick={() => setMode(id)} data-testid={`preview-mode-${id}-${sectionId}`}
+      className={`px-2 py-1 font-mono text-[8px] tracking-[0.18em] uppercase transition-colors ${mode === id ? "bg-copper text-obsidian" : "text-ash hover:text-copper"}`}>{label}</button>
+  );
   return (
     <div data-testid={`preview-${sectionId}`} className="lg:sticky lg:top-24">
-      <div className="font-mono text-[9px] tracking-[0.22em] uppercase text-ash mb-2">Preview · tampilan di situs</div>
-      <C />
-      <p className="mt-2 font-mono text-[8px] text-smoke">Klik sebuah field — bagian yang diedit disorot oranye.</p>
+      <div className="flex items-center justify-between mb-2">
+        <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-ash">Preview</span>
+        <span className="flex border border-white/15">{url && tab("live", "Tampilan asli")}{C && tab("mock", "Highlight edit")}</span>
+      </div>
+      {mode === "live" && url ? <LiveFrame url={url} version={version} /> : <C />}
+      <p className="mt-2 font-mono text-[8px] text-smoke">
+        {mode === "live" && url ? "Tampilan asli situs — diperbarui setelah teks tersimpan." : "Klik sebuah field — bagian yang diedit disorot oranye, berubah langsung saat mengetik."}
+      </p>
     </div>
   );
 };
