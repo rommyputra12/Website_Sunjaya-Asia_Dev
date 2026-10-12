@@ -16,14 +16,14 @@ const stat = (n, id, name) => [f(`stats.value.${id}`, `Statistik ${n} — Angka 
 const SCHEMA = [
   { page: "home", label: "Home Page", sections: [
     { id: "hero", label: "Hero (Banner Utama)", fields: [f("hero.overline", "Teks kecil atas"), f("hero.line1", "Judul baris 1"), f("hero.line2", "Judul baris 2"), f("hero.sub", "Deskripsi", "textarea"), f("hero.cta_primary", "Tombol utama"), f("hero.cta_secondary", "Tombol kedua")] },
-    { id: "pillars_intro", label: "Business Pillars Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title_pre", "Judul", "textarea"), f("manifesto.title_highlight", "Judul (highlight)"),
-      f("manifesto.ch1_title", "Pilar 1 — Judul"), f("manifesto.ch1_desc", "Pilar 1 — Deskripsi", "textarea"), f("manifesto.ch2_title", "Pilar 2 — Judul"), f("manifesto.ch2_desc", "Pilar 2 — Deskripsi", "textarea"), f("manifesto.ch3_title", "Pilar 3 — Judul"), f("manifesto.ch3_desc", "Pilar 3 — Deskripsi", "textarea")] },
+    { id: "pillars_intro", label: "Business Pillars Intro", fields: [f("home.pillars_intro.kicker", "Judul kecil (Business Pillars)"), f("home.pillars_intro.para1", "Paragraf 1", "textarea"),
+      f("home.pillars_intro.para2", "Paragraf 2", "textarea"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)")] },
     { id: "stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
     { id: "global_presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi", "textarea"),
       f("presence.stats.branches", "Label statistik — Branches"), f("presence.stats.clients", "Label statistik — Affiliates/Infra"), f("presence.stats.countries", "Label statistik — Countries"), f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
   ] },
   { page: "pillars", label: "Pillars Page", sections: [
-    { id: "intro", label: "Intro", fields: [f("manifesto.title", "Judul intro", "textarea")] },
+    { id: "intro", label: "Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title", "Judul intro", "textarea")] },
     ...["01", "02", "03"].map((n, i) => ({ id: `pillar_${n}`, label: `Pillar ${n} — ${["The Foundation", "The Core", "The Future"][i]}`, pointers: n,
       fields: [f(`pillar.${n}.kicker`, "Kicker"), f(`pillar.${n}.title`, "Judul"), f(`pillar.${n}.body`, "Deskripsi", "textarea")] })),
   ] },
@@ -50,8 +50,10 @@ const useUpsert = (client, refresh) => async (key, meta, patch) => {
 
 const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete }) => {
   const [showId, setShowId] = useState(!!block?.value_id);
-  const Tag = type === "textarea" ? "textarea" : "input";
-  const extra = type === "textarea" ? { rows: 3 } : {};
+  const len = Math.max((block?.value || "").length, (placeholder || "").length);
+  const multi = type === "textarea" || len > 70;
+  const Tag = multi ? "textarea" : "input";
+  const extra = multi ? { rows: Math.min(8, Math.max(2, Math.ceil(len / 85) + 1)) } : {};
   return (
     <div data-testid={`content-block-${testid}`} className="bg-obsidian/40 border border-white/10 p-3">
       <div className="flex items-center justify-between mb-1.5">

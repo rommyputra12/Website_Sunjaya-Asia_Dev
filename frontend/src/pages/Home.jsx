@@ -59,8 +59,20 @@ const HeroClock = () => {
   return <span className="font-mono text-[10px] tracking-[0.22em] text-white uppercase whitespace-nowrap">{display}</span>;
 };
 
+const PILLARS_INTRO = {
+  kicker: "Business Pillars",
+  para1: "Sunjaya Asia Group Limited is a leading multi-sector investment holding corporation driving global progress and sustainable development. Leveraging our strong track record in international trade, we connect essential global resources with high-impact technology.",
+  para2: "Operating through interconnected global hubs, the Group manages a diverse commercial portfolio across",
+  highlight: "3 (three) synergistic strategic pillars:",
+};
+
 export default function Home() {
-  const { t } = useLang();
+  const { t, listBlocks } = useLang();
+  // Pillar pointers come from the same CMS blocks as the Pillars page
+  const pillarLines = (p) => {
+    const names = listBlocks(`pillar.${p.num}.div.`).filter((b) => b.key.endsWith(".name"));
+    return names.length ? names.map((b) => t(b.key, b.value)) : p.lines;
+  };
   const { byKey } = useAssets();
   const subCards = SUB_ORDER.slice().sort((a, b) => (byKey[a.image]?.sort_order ?? 100) - (byKey[b.image]?.sort_order ?? 100));
   const locations = useLocations();
@@ -199,13 +211,13 @@ export default function Home() {
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-10 pt-24 md:pt-28">
           <Reveal>
             <div className="md:ml-[42%]">
-              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">Business Pillars</span>
+              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
             </div>
             <p className="mt-3 md:ml-[42%] text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
-              Sunjaya Asia Group Limited is a leading multi-sector investment holding corporation driving global progress and sustainable development. Leveraging our strong track record in international trade, we connect essential global resources with high-impact technology.
+              {t("home.pillars_intro.para1", PILLARS_INTRO.para1)}
             </p>
             <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
-              Operating through interconnected global hubs, the Group manages a diverse commercial portfolio across <span className="font-bold text-copper">3 (three) synergistic strategic pillars:</span>
+              {t("home.pillars_intro.para2", PILLARS_INTRO.para2)} <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
         </div>
@@ -225,7 +237,7 @@ export default function Home() {
                 </div>
                 <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-justify">{t(`pillar.${p.num}.body`, p.body)}</p>
                 <ul className="mt-5 space-y-2.5 [&>li]:text-sm md:[&>li]:text-base [&>li]:tracking-wide">
-                  {p.lines.map((l) => (
+                  {pillarLines(p).map((l) => (
                     <li key={l} className="flex items-start gap-2.5 font-mono text-[11px] md:text-xs text-bone font-bold">
                       <Star className="w-3.5 h-3.5 text-copper shrink-0 fill-copper mt-[2px]" strokeWidth={0} />
                       {l}

@@ -104,3 +104,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Pillar: field Kicker/Judul/Deskripsi + kartu Pointer (Nama+Deskripsi), tambah/hapus
 - Footer: Tagline, Deskripsi (footer.description), Nama perusahaan (footer.company) + editor "Kantor & Kontak" terstruktur (JSON di content_blocks key footer.offices: [{label,line1,line2,phone}]), maks 4; kantor 1 = HQ, sisanya berjajar (grid 1-3 kolom); ikon telepon & link tel: otomatis
 - Halaman Contact membaca daftar kantor yang sama (data/offices.js useOffices)
+
+## Update 2026-06 (fix Business Pillars Intro)
+- Akar masalah: section Business Pillars Intro di Home di-hardcode, field manifesto.* di CMS tidak dipakai Home (warisan lama, title_pre terpotong karena input 1 baris)
+- Home kini memakai key baru home.pillars_intro.{kicker,para1,para2,highlight} (seed = teks yang tampil); 8 blok manifesto.* lama yang tidak dipakai dihapus; Pillars Intro tetap manifesto.overline + manifesto.title
+- Pointer pillar di Home kini dibaca dari CMS (sama dengan halaman Pillars)
+- Field CMS: teks panjang (>70 char) otomatis textarea dengan tinggi menyesuaikan
