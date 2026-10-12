@@ -58,6 +58,17 @@ const PillarsIntro = () => (
   </Frame>
 );
 
+const SubsTeaser = () => (
+  <Frame light>
+    <div className="flex justify-between gap-3">
+      <div><Kicker k="home.subs.kicker" light /><T k="home.subs.title" as="div" className="mt-1 font-serif text-[12px]" /></div>
+      <T k="home.subs.desc" as="p" className="text-[#1d538f] text-right max-w-[45%]" />
+    </div>
+    <div className="mt-3 grid grid-cols-3 gap-1">{[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="h-10 bg-obsidian/70 rounded-sm" />)}</div>
+    <div className="mt-3 text-center"><Btn k="home.subs.cta" /></div>
+  </Frame>
+);
+
 const Stats = () => (
   <Frame className="bg-[#0d3149]">
     <div className="grid grid-cols-2 gap-3">
@@ -155,7 +166,7 @@ const Offices = () => {
 };
 
 const MAP = {
-  hero: Hero, pillars_intro: PillarsIntro, stats: Stats, global_presence: Presence, intro: PillarsPageIntro,
+  hero: Hero, pillars_intro: PillarsIntro, subsidiaries_teaser: SubsTeaser, stats: Stats, global_presence: Presence, intro: PillarsPageIntro,
   about: About, contact: Contact, footer: FooterTop, offices: Offices,
 };
 

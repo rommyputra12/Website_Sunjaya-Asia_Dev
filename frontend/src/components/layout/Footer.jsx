@@ -45,7 +45,7 @@ export const Footer = () => {
   };
 
   return (
-    <footer data-testid="site-footer" className="snap-section relative h-[100svh] overflow-hidden bg-[#071d27] text-bone">
+    <footer id="site-footer" data-testid="site-footer" className="snap-section relative h-[100svh] overflow-hidden bg-[#071d27] text-bone">
       <AssetImg
         k="bgFooter"
         alt=""

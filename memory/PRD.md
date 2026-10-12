@@ -114,3 +114,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## Update 2026-06 (Content preview)
 - Tab Content: setiap section punya kartu preview mini (components/admin/ContentPreview.jsx) di kanan (sticky), mockup layout situs; update live saat mengetik; field aktif disorot oranye di preview & border form
 - Judul section accordion berwarna biru muda (#7FC8EE) tebal; label field abu-abu — tidak lagi sama-sama putih
+
+## Update 2026-06 (Content: search, unsaved, view on site, teaser)
+- Kotak cari di tab Content (label/key/isi EN/ID) → hanya section/field yang cocok, accordion terbuka otomatis, pesan kosong
+- Indikator "belum tersimpan" (titik kuning berdenyut) per field & per kantor saat diketik belum di-blur
+- Tombol "View on site" per section → buka tab baru ke anchor (id: hero, stats, business-pillars, subsidiaries-teaser, global-presence, pillar-NN, site-footer)
+- Teaser Subsidiaries di Home bisa diedit: home.subs.{kicker,title,desc,cta} + preview

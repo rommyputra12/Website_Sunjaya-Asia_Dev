@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ExternalLink, Plus, Search, Trash2, X } from "lucide-react";
 import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, MAX_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
 import { PreviewCtx, SectionPreview } from "./ContentPreview";
@@ -16,27 +16,28 @@ const stat = (n, id, name) => [f(`stats.value.${id}`, `Statistik ${n} — Angka 
 // Only fields listed here are editable; everything else (nav, form labels, copyright…) is locked
 const SCHEMA = [
   { page: "home", label: "Home Page", sections: [
-    { id: "hero", label: "Hero (Banner Utama)", fields: [f("hero.overline", "Teks kecil atas"), f("hero.line1", "Judul baris 1"), f("hero.line2", "Judul baris 2"), f("hero.sub", "Deskripsi", "textarea"), f("hero.cta_primary", "Tombol utama"), f("hero.cta_secondary", "Tombol kedua")] },
-    { id: "pillars_intro", label: "Business Pillars Intro", fields: [f("home.pillars_intro.kicker", "Judul kecil (Business Pillars)"), f("home.pillars_intro.para1", "Paragraf 1", "textarea"),
+    { id: "hero", url: "/#hero", label: "Hero (Banner Utama)", fields: [f("hero.overline", "Teks kecil atas"), f("hero.line1", "Judul baris 1"), f("hero.line2", "Judul baris 2"), f("hero.sub", "Deskripsi", "textarea"), f("hero.cta_primary", "Tombol utama"), f("hero.cta_secondary", "Tombol kedua")] },
+    { id: "pillars_intro", url: "/#business-pillars", label: "Business Pillars Intro", fields: [f("home.pillars_intro.kicker", "Judul kecil (Business Pillars)"), f("home.pillars_intro.para1", "Paragraf 1", "textarea"),
       f("home.pillars_intro.para2", "Paragraf 2", "textarea"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)")] },
-    { id: "stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
-    { id: "global_presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi", "textarea"),
+    { id: "subsidiaries_teaser", url: "/#subsidiaries-teaser", label: "Subsidiaries & Affiliates (Teaser)", fields: [f("home.subs.kicker", "Judul kecil"), f("home.subs.title", "Judul"), f("home.subs.desc", "Deskripsi", "textarea"), f("home.subs.cta", "Tombol")] },
+    { id: "stats", url: "/#stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
+    { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi", "textarea"),
       f("presence.stats.branches", "Label statistik — Branches"), f("presence.stats.clients", "Label statistik — Affiliates/Infra"), f("presence.stats.countries", "Label statistik — Countries"), f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
   ] },
   { page: "pillars", label: "Pillars Page", sections: [
-    { id: "intro", label: "Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title", "Judul intro", "textarea")] },
-    ...["01", "02", "03"].map((n, i) => ({ id: `pillar_${n}`, label: `Pillar ${n} — ${["The Foundation", "The Core", "The Future"][i]}`, pointers: n,
+    { id: "intro", url: "/pillars", label: "Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title", "Judul intro", "textarea")] },
+    ...["01", "02", "03"].map((n, i) => ({ id: `pillar_${n}`, url: `/pillars#pillar-${n}`, label: `Pillar ${n} — ${["The Foundation", "The Core", "The Future"][i]}`, pointers: n,
       fields: [f(`pillar.${n}.kicker`, "Kicker"), f(`pillar.${n}.title`, "Judul"), f(`pillar.${n}.body`, "Deskripsi", "textarea")] })),
   ] },
   { page: "about", label: "About Page", sections: [
-    { id: "about", label: "Tentang Kami", fields: [f("about.overline", "Teks kecil atas"), f("about.title", "Judul", "textarea"), f("about.body1", "Paragraf 1", "textarea"), f("about.body2", "Paragraf 2", "textarea")] },
+    { id: "about", url: "/about", label: "Tentang Kami", fields: [f("about.overline", "Teks kecil atas"), f("about.title", "Judul", "textarea"), f("about.body1", "Paragraf 1", "textarea"), f("about.body2", "Paragraf 2", "textarea")] },
   ] },
   { page: "contact", label: "Contact Page", sections: [
-    { id: "contact", label: "Header & Pesan", fields: [f("contact.title", "Judul"), f("contact.sub", "Deskripsi", "textarea"), f("contact.success", "Pesan setelah terkirim", "textarea")] },
+    { id: "contact", url: "/contact", label: "Header & Pesan", fields: [f("contact.title", "Judul"), f("contact.sub", "Deskripsi", "textarea"), f("contact.success", "Pesan setelah terkirim", "textarea")] },
   ] },
   { page: "footer", label: "Footer", sections: [
-    { id: "footer", label: "Tagline & Perusahaan", fields: [f("footer.tagline", "Tagline besar"), f("footer.description", "Deskripsi singkat", "textarea"), f("footer.company", "Nama perusahaan")] },
-    { id: "offices", label: `Kantor & Kontak (maks. ${MAX_OFFICES})`, offices: true },
+    { id: "footer", url: "/#site-footer", label: "Tagline & Perusahaan", fields: [f("footer.tagline", "Tagline besar"), f("footer.description", "Deskripsi singkat", "textarea"), f("footer.company", "Nama perusahaan")] },
+    { id: "offices", url: "/#site-footer", label: `Kantor & Kontak (maks. ${MAX_OFFICES})`, offices: true },
   ] },
 ];
 
@@ -53,6 +54,9 @@ const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete }) 
   const [showId, setShowId] = useState(!!block?.value_id);
   const { setActive, setDraft, active } = useContext(PreviewCtx);
   const focus = () => setActive(testid);
+  const [dirty, setDirty] = useState({});
+  const mark = (fld, v) => setDirty((d) => ({ ...d, [fld]: v !== (block?.[fld] || "") }));
+  const isDirty = dirty.value || dirty.value_id;
   const len = Math.max((block?.value || "").length, (placeholder || "").length);
   const multi = type === "textarea" || len > 70;
   const Tag = multi ? "textarea" : "input";
@@ -62,16 +66,17 @@ const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete }) 
       <div className="flex items-center justify-between mb-1.5">
         <span className="font-mono text-[10px] tracking-[0.12em] text-ash">{label}</span>
         <span className="flex items-center gap-3">
+          {isDirty && <span data-testid={`unsaved-${testid}`} className="flex items-center gap-1 font-mono text-[8px] tracking-[0.14em] uppercase text-amber-400"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />belum tersimpan</span>}
           <button type="button" onClick={() => setShowId(!showId)} className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper">{showId ? "− ID" : "+ ID"}</button>
           {onDelete && <button type="button" onClick={onDelete} data-testid={`remove-pointer-${testid}`} className="text-red-400/70 hover:text-red-400"><Trash2 size={12} /></button>}
         </span>
       </div>
       <div className={`grid gap-2 ${showId ? "md:grid-cols-2" : ""}`}>
-        <Tag {...extra} key={`en-${block?.value}`} defaultValue={block?.value || ""} placeholder={placeholder} data-testid={`content-input-${testid}`} onFocus={focus} onChange={(e) => setDraft(testid, e.target.value)}
-          onBlur={(e) => e.target.value !== (block?.value || "") && onSave({ value: e.target.value })} className={`${inputCls} resize-y`} />
+        <Tag {...extra} key={`en-${block?.value}`} defaultValue={block?.value || ""} placeholder={placeholder} data-testid={`content-input-${testid}`} onFocus={focus} onChange={(e) => { setDraft(testid, e.target.value); mark("value", e.target.value); }}
+          onBlur={(e) => { if (e.target.value !== (block?.value || "")) onSave({ value: e.target.value }); setDirty((d) => ({ ...d, value: false })); }} className={`${inputCls} resize-y`} />
         {showId && (
-          <Tag {...extra} key={`id-${block?.value_id}`} defaultValue={block?.value_id || ""} placeholder="Bahasa Indonesia (opsional)" data-testid={`content-input-${testid}-id`} onFocus={focus}
-            onBlur={(e) => e.target.value !== (block?.value_id || "") && onSave({ value_id: e.target.value })} className={`${inputCls} resize-y border-copper/30`} />
+          <Tag {...extra} key={`id-${block?.value_id}`} defaultValue={block?.value_id || ""} placeholder="Bahasa Indonesia (opsional)" data-testid={`content-input-${testid}-id`} onFocus={focus} onChange={(e) => mark("value_id", e.target.value)}
+            onBlur={(e) => { if (e.target.value !== (block?.value_id || "")) onSave({ value_id: e.target.value }); setDirty((d) => ({ ...d, value_id: false })); }} className={`${inputCls} resize-y border-copper/30`} />
         )}
       </div>
     </div>
@@ -126,13 +131,15 @@ const OfficesEditor = ({ items, upsert }) => {
   const { setActive, setDraft } = useContext(PreviewCtx);
   const block = items.find((b) => b.key === OFFICES_KEY);
   const [list, setList] = useState(parseOffices(block?.value) || DEFAULT_OFFICES);
+  const [dirtyIdx, setDirtyIdx] = useState(null);
   useEffect(() => { setList(parseOffices(block?.value) || DEFAULT_OFFICES); }, [block?.value]);
   const persist = (next) => upsert(OFFICES_KEY, { block, page: "footer", section: "offices", label: "Kantor & Kontak", type: "json" }, { value: JSON.stringify(next) });
-  const setField = (i, k, v) => setList((l) => {
-    const n = l.map((o, j) => (j === i ? { ...o, [k]: v } : o));
+  const setField = (i, k, v) => {
+    const n = list.map((o, j) => (j === i ? { ...o, [k]: v } : o));
+    setList(n);
     setDraft(OFFICES_KEY, JSON.stringify(n));
-    return n;
-  });
+    setDirtyIdx(i);
+  };
   const fields = [["label", "Judul kantor (mis. Head Quarter · Singapore)"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["phone", "Nomor telepon"]];
   return (
     <div className="space-y-3" data-testid="offices-editor">
@@ -140,14 +147,15 @@ const OfficesEditor = ({ items, upsert }) => {
       {list.map((o, i) => (
         <div key={i} data-testid={`office-${i}`} className="border border-white/10 p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper">{i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`}</span>
+            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper flex items-center gap-3">{i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`}
+              {dirtyIdx === i && <span data-testid={`unsaved-office-${i}`} className="flex items-center gap-1 text-[8px] text-amber-400 normal-case tracking-[0.14em]"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />belum tersimpan</span>}</span>
             {list.length > 1 && <button onClick={() => { const n = list.filter((_, j) => j !== i); setList(n); persist(n); }} data-testid={`office-remove-${i}`} className="text-red-400/70 hover:text-red-400"><Trash2 size={12} /></button>}
           </div>
           <div className="grid md:grid-cols-2 gap-2">
             {fields.map(([k, l]) => (
               <div key={k}>
                 <label className={lbl}>{l}</label>
-                <input value={o[k] || ""} onChange={(e) => setField(i, k, e.target.value)} onFocus={() => setActive(`office-${i}`)} onBlur={() => persist(list)} data-testid={`office-${i}-${k}`} className={inputCls} />
+                <input value={o[k] || ""} onChange={(e) => setField(i, k, e.target.value)} onFocus={() => setActive(`office-${i}`)} onBlur={() => { if (dirtyIdx === i) persist(list); setDirtyIdx(null); }} data-testid={`office-${i}-${k}`} className={inputCls} />
               </div>
             ))}
           </div>
@@ -161,21 +169,31 @@ const OfficesEditor = ({ items, upsert }) => {
   );
 };
 
-const Accordion = ({ title, count, level = 0, children, testid }) => {
-  const [open, setOpen] = useState(false);
+const Accordion = ({ title, count, level = 0, children, testid, forceOpen, href }) => {
+  const [openState, setOpen] = useState(false);
+  const open = forceOpen || openState;
   return (
     <div data-testid={testid} className={level === 0 ? "border border-white/10 bg-ink mb-3" : "border-t border-white/10"}>
-      <button onClick={() => setOpen(!open)} data-testid={`${testid}-toggle`}
-        className={`w-full flex items-center justify-between text-left hover:bg-white/5 transition-colors ${level === 0 ? "px-5 py-4" : "px-5 py-3 pl-8"}`}>
-        <span className={`font-mono uppercase ${level === 0 ? "text-[11px] tracking-[0.24em] text-copper" : "text-[10px] tracking-[0.2em] text-[#7FC8EE] font-bold"}`}>
-          {title}{count != null && <span className="text-ash ml-2">· {count}</span>}
-        </span>
-        <ChevronDown size={14} className={`text-ash transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-      </button>
+      <div className={`flex items-center hover:bg-white/5 transition-colors ${level === 0 ? "px-5" : "px-5 pl-8"}`}>
+        <button onClick={() => setOpen(!openState)} data-testid={`${testid}-toggle`} className={`flex-1 flex items-center justify-between text-left ${level === 0 ? "py-4" : "py-3"}`}>
+          <span className={`font-mono uppercase ${level === 0 ? "text-[11px] tracking-[0.24em] text-copper" : "text-[10px] tracking-[0.2em] text-[#7FC8EE] font-bold"}`}>
+            {title}{count != null && <span className="text-ash ml-2">· {count}</span>}
+          </span>
+          <ChevronDown size={14} className={`text-ash transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        </button>
+        {href && (
+          <a href={href} target="_blank" rel="noopener noreferrer" data-testid={`${testid}-view`} title="Buka bagian ini di situs"
+            className="ml-4 inline-flex items-center gap-1.5 h-7 px-2.5 border border-white/15 font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper hover:border-copper transition-colors">
+            <ExternalLink size={11} /> View on site
+          </a>
+        )}
+      </div>
       {open && <div className={level === 0 ? "" : "px-5 pl-8 pb-5"}>{children}</div>}
     </div>
   );
 };
+
+const matchText = (q, ...vals) => vals.some((v) => (v || "").toLowerCase().includes(q));
 
 export const ContentPanel = ({ client }) => {
   const [items, setItems] = useState([]);
@@ -189,21 +207,41 @@ export const ContentPanel = ({ client }) => {
   const [draft, setDraftMap] = useState({});
   const [active, setActive] = useState(null);
   const setDraft = (k, v) => setDraftMap((d) => ({ ...d, [k]: v }));
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const fieldHit = (fd) => matchText(q, fd.label, fd.key, byKey[fd.key]?.value, byKey[fd.key]?.value_id, defaultOf(fd.key));
+  const sectionFields = (pg, sec) => {
+    if (!q || sec.offices || matchText(q, sec.label, pg.label)) return sec.fields;
+    return (sec.fields || []).filter(fieldHit);
+  };
+  const sectionHit = (pg, sec) => {
+    if (!q || matchText(q, sec.label, pg.label)) return true;
+    if (sec.offices) return matchText(q, byKey[OFFICES_KEY]?.value || JSON.stringify(DEFAULT_OFFICES));
+    if (sec.pointers && items.some((b) => b.section === sec.id && matchText(q, b.value, b.value_id))) return true;
+    return sectionFields(pg, sec).length > 0;
+  };
   useEffect(() => { setDraftMap({}); }, [items]);
 
   return (
     <PreviewCtx.Provider value={{ draft, setDraft, active, setActive, byKey }}>
     <div data-testid="content-panel">
-      <p className="text-ash font-mono text-xs max-w-2xl mb-6">Klik halaman lalu section untuk mengedit. Perubahan langsung tayang. Kolom ID (Bahasa Indonesia) opsional — jika kosong memakai teks bawaan.</p>
-      {SCHEMA.map((pg) => (
-        <Accordion key={pg.page} title={pg.label} count={pg.sections.length} testid={`content-page-${pg.page}`}>
-          {pg.sections.map((sec) => (
-            <Accordion key={sec.id} level={1} title={sec.label} testid={`content-section-${sec.id}`}>
+      <p className="text-ash font-mono text-xs max-w-2xl mb-4">Klik halaman lalu section untuk mengedit. Perubahan tersimpan otomatis saat keluar dari kolom. Kolom ID (Bahasa Indonesia) opsional — jika kosong memakai teks bawaan.</p>
+      <div className="relative mb-6 max-w-xl">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ash" />
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari teks, mis. 'Discover' atau 'Jakarta'…" data-testid="content-search"
+          className="w-full h-11 bg-obsidian border border-white/15 pl-9 pr-9 font-mono text-xs text-bone focus:border-copper focus:outline-none" />
+        {query && <button onClick={() => setQuery("")} data-testid="content-search-clear" className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-copper"><X size={14} /></button>}
+      </div>
+      {q && SCHEMA.every((pg) => !pg.sections.some((sec) => sectionHit(pg, sec))) && <p data-testid="content-search-empty" className="font-mono text-xs text-ash mb-6">Tidak ada teks yang cocok dengan "{query}".</p>}
+      {SCHEMA.filter((pg) => pg.sections.some((sec) => sectionHit(pg, sec))).map((pg) => (
+        <Accordion key={pg.page} title={pg.label} count={pg.sections.length} testid={`content-page-${pg.page}`} forceOpen={!!q}>
+          {pg.sections.filter((sec) => sectionHit(pg, sec)).map((sec) => (
+            <Accordion key={sec.id} level={1} title={sec.label} testid={`content-section-${sec.id}`} forceOpen={!!q} href={sec.url}>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-7 space-y-3">
               {sec.offices ? <OfficesEditor items={items} upsert={upsert} /> : (
                 <>
-                  {sec.fields.map((fd, i) => (
+                  {sectionFields(pg, sec).map((fd, i) => (
                     <BiField key={fd.key} label={fd.label} type={fd.type} block={byKey[fd.key]} placeholder={defaultOf(fd.key)} testid={fd.key}
                       onSave={(p) => upsert(fd.key, { block: byKey[fd.key], page: pg.page, section: sec.id, label: fd.label, type: fd.type, sort: i + 1 }, p)} />
                   ))}

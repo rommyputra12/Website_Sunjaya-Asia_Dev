@@ -66,6 +66,13 @@ const PILLARS_INTRO = {
   highlight: "3 (three) synergistic strategic pillars:",
 };
 
+const SUBS_TEASER = {
+  kicker: "Subsidiaries & Affiliates",
+  title: "A group of specialised companies driving every pillar.",
+  desc: "Our subsidiaries and strategic affiliates operate across waste technology, energy storage, capital markets, distribution, IT, defense and media.",
+  cta: "View all subsidiaries",
+};
+
 export default function Home() {
   const { t, listBlocks } = useLang();
   // Pillar pointers come from the same CMS blocks as the Pillars page
@@ -87,7 +94,7 @@ export default function Home() {
   return (
     <div data-testid="home-page">
       {/* HERO */}
-      <section ref={heroRef} className="relative pt-20 md:pt-24 overflow-hidden isolate flex flex-col">
+      <section ref={heroRef} id="hero" className="relative pt-20 md:pt-24 overflow-hidden isolate flex flex-col">
         {/* Parallax image — displayed at 100% (no overlays); text uses shadow effects for legibility */}
         <div className="absolute inset-0 z-0 overflow-hidden hero-banner-enter">
         <motion.div
@@ -172,7 +179,7 @@ export default function Home() {
         </div>
 
         {/* Stats 01–04 — fade up into view on scroll */}
-        <div
+        <div id="stats"
           className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 pb-8 md:pb-10 grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-8 items-start justify-items-center"
         >
           {STATS.map((s, i) => (
@@ -200,7 +207,7 @@ export default function Home() {
       </section>
 
       {/* BUSINESS PILLAR INTRO — min full viewport, grows if content is taller */}
-      <section className="snap-section relative min-h-screen overflow-hidden bg-azure border-t border-copper/40">
+      <section id="business-pillars" className="snap-section relative min-h-screen overflow-hidden bg-azure border-t border-copper/40">
         <AssetImg
           k="bgBusinessPillars"
           className="absolute inset-0 h-full w-full object-cover"
@@ -318,16 +325,16 @@ export default function Home() {
       })}
 
       {/* SUBSIDIARIES TEASER — grid fills available space (big photos) with a min-height floor so cards never squash or spill over the button */}
-      <section className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-0 flex flex-col overflow-hidden">
+      <section id="subsidiaries-teaser" className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-0 flex flex-col overflow-hidden">
         <div className="max-w-[1700px] mx-auto px-4 md:px-8 w-full flex-1 flex flex-col justify-center pt-4 md:pt-6 pb-2 md:pb-4">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4 mb-5 md:mb-6">
             <Reveal className="max-w-4xl">
-              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">Subsidiaries & Affiliates</span>
-              <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">A group of specialised companies driving every pillar.</h2>
+              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.subs.kicker", SUBS_TEASER.kicker)}</span>
+              <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">{t("home.subs.title", SUBS_TEASER.title)}</h2>
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-[#1d538f] text-xs md:text-sm leading-[1.35] md:text-right md:max-w-[40rem]">
-                Our subsidiaries and strategic affiliates operate across waste technology, energy storage, capital markets, distribution, IT, defense and media.
+                {t("home.subs.desc", SUBS_TEASER.desc)}
               </p>
             </Reveal>
           </div>
@@ -370,7 +377,7 @@ export default function Home() {
               className="group relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-[#2576ae]/50 bg-[#2576ae]/15 backdrop-blur-md text-[#2576ae] hover:text-white transition-all duration-400 font-mono text-[10px] md:text-[11px] tracking-[0.22em] uppercase font-semibold w-fit overflow-hidden"
             >
               <span className="absolute inset-0 bg-[#2576ae] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
-              <span className="relative z-10">View all subsidiaries</span>
+              <span className="relative z-10">{t("home.subs.cta", SUBS_TEASER.cta)}</span>
               <svg className="relative z-10 transition-transform duration-400 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="9" x2="15" y2="9" />
                 <polyline points="11,5 15,9 11,13" />
@@ -381,7 +388,7 @@ export default function Home() {
       </section>
 
       {/* GLOBAL PRESENCE — "Being There Wherever" style: 3D globe centerpiece + headline + stats */}
-      <section className="snap-section relative min-h-screen pt-20 md:pt-24 flex flex-col overflow-hidden bg-bone border-t border-copper/30">
+      <section id="global-presence" className="snap-section relative min-h-screen pt-20 md:pt-24 flex flex-col overflow-hidden bg-bone border-t border-copper/30">
         <div className="absolute inset-0 pointer-events-none bg-bone" />
 
         {/* Headline + stats row */}
