@@ -125,3 +125,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Angka statistik Global Presence otomatis dari tab Locations (HQ+Branch, Infrastructure Hub, negara unik); CMS menampilkan hint "(angka otomatis dari Locations — …: N)" di label; mockup memakai angka asli
 - Preview tiap section punya 2 mode: "Tampilan asli" (iframe situs live diskalakan, scroll ke anchor section, reload setelah simpan; default) dan "Highlight edit" (mockup + sorotan field aktif)
 - CookieBanner disembunyikan saat situs dimuat di dalam iframe
+
+## Update 2026-06 (About page penuh di CMS)
+- About.jsx: semua teks hardcoded kini dari CMS (default di data/aboutDefaults.js, sudah di-seed ke content_blocks): Identitas Perusahaan (list JSON about.identity, maks 4), Company History, Timeline (list about.timeline.items, bisa urut naik/turun), Competitive Edge (judul, deskripsi, 3 kolom + 3 list), Strategic Partnership CTA (teks, tombol, email)
+- Penanda warna oranye: tulis *kata* (komponen RichText), Enter = baris baru
+- LanguageContext.tl(key, fallback) membaca list JSON (ID dari value_id jika ada)
+- ContentPanel: ListEditor generik (tambah/hapus/urut, maks, penanda belum tersimpan) — juga dipakai untuk Kantor & Kontak footer

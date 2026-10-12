@@ -72,8 +72,17 @@ export const LanguageProvider = ({ children }) => {
       .filter((b) => b.key.startsWith(prefix))
       .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
 
+  // JSON list stored in a CMS block (EN value, optional ID value_id); falls back to the given default
+  const tl = (key, fallback) => {
+    const b = blocks.find((x) => x.key === key);
+    for (const raw of [lang === "id" ? b?.value_id : null, b?.value]) {
+      try { const arr = JSON.parse(raw || ""); if (Array.isArray(arr) && arr.length) return arr; } catch { /* use next */ }
+    }
+    return fallback;
+  };
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, blocks, listBlocks }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, tl, blocks, listBlocks }}>
       {children}
     </LanguageContext.Provider>
   );

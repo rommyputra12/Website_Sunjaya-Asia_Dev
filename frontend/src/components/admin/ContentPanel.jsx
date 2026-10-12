@@ -1,15 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ExternalLink, Plus, Search, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Plus, Search, Trash2, X } from "lucide-react";
 import { translations } from "../../i18n/translations";
-import { DEFAULT_OFFICES, MAX_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
+import { DEFAULT_OFFICES, MAX_OFFICES, OFFICES_KEY } from "../../data/offices";
+import { ABOUT_TEXT, ABOUT_LISTS } from "../../data/aboutDefaults";
 import { PreviewCtx, SectionPreview } from "./ContentPreview";
 import { useLocations } from "../../hooks/useLocations";
 
 const errMsg = (err, fb) => (typeof err?.response?.data?.detail === "string" ? err.response.data.detail : fb);
 const inputCls = "w-full bg-obsidian border border-white/15 px-3 py-2 font-mono text-[12px] text-bone focus:border-copper focus:outline-none";
 const lbl = "block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5";
-const defaultOf = (key) => key.split(".").reduce((c, p) => (c && typeof c === "object" ? c[p] : undefined), translations.en) || "";
+const defaultOf = (key) => key.split(".").reduce((c, p) => (c && typeof c === "object" ? c[p] : undefined), translations.en) || ABOUT_TEXT[key] || "";
+const lst = (key, label, fields, extra = {}) => ({ key, label, fields, defaults: ABOUT_LISTS[key] || extra.defaults, ...extra });
+const ACCENT_HINT = "Tulis *kata* untuk warna oranye";
 
 const f = (key, label, type = "text") => ({ key, label, type });
 const stat = (n, id, name) => [f(`stats.value.${id}`, `Statistik ${n} — Angka (${name})`), f(`stats.${id}`, `Statistik ${n} — Keterangan`)];
@@ -32,13 +35,24 @@ const SCHEMA = [
   ] },
   { page: "about", label: "About Page", sections: [
     { id: "about", url: "/about", label: "Tentang Kami", fields: [f("about.overline", "Teks kecil atas"), f("about.title", "Judul", "textarea"), f("about.body1", "Paragraf 1", "textarea"), f("about.body2", "Paragraf 2", "textarea")] },
+    { id: "about_identity", url: "/about", label: "Identitas Perusahaan (Kotak UEN, Established…)", fields: [],
+      lists: [lst("about.identity", "Kotak identitas", [["label", "Label (mis. UEN)"], ["value", "Isi"]], { max: 4, itemLabel: "Kotak", sortable: true })] },
+    { id: "about_history", url: "/about#company-history", label: "Company History", fields: [f("about.history.kicker", "Judul section"), f("about.history.since", "Teks kanan (Since…)"), f("about.history.journey_kicker", "Judul kecil di bawah foto"), f("about.history.journey", "Kalimat di bawah foto")] },
+    { id: "about_timeline", url: "/about#timeline", label: "Timeline", fields: [f("about.timeline.kicker", "Judul section"), f("about.timeline.title", "Sub-judul")],
+      lists: [lst("about.timeline.items", "Milestone", [["year", "Tahun"], ["title", "Judul"], ["body", "Deskripsi", "textarea"]], { itemLabel: "Milestone", sortable: true })] },
+    { id: "about_edge", url: "/about#competitive-edge", label: "Competitive Edge", fields: [f("about.edge.kicker", "Judul section"), f("about.edge.title", "Judul baris 1"), f("about.edge.highlight", "Judul baris 2 (oranye)"), { ...f("about.edge.desc", "Deskripsi", "textarea"), hintText: ACCENT_HINT },
+      f("about.edge.col1", "Kolom 1 — Judul"), f("about.edge.col2", "Kolom 2 — Judul"), f("about.edge.col3", "Kolom 3 — Judul")],
+      lists: [1, 2, 3].map((n) => lst(`about.edge.list${n}`, `Kolom ${n} — Daftar`, [["text", "Teks"]], { itemLabel: "Baris", sortable: true })) },
+    { id: "about_partner", url: "/about#partnership", label: "Strategic Partnership (CTA)", fields: [f("about.partner.kicker", "Judul kecil"), { ...f("about.partner.text", "Kalimat utama (Enter = baris baru)", "textarea"), hintText: ACCENT_HINT }, f("about.partner.cta", "Tombol"), f("about.partner.email", "Email")] },
   ] },
   { page: "contact", label: "Contact Page", sections: [
     { id: "contact", url: "/contact", label: "Header & Pesan", fields: [f("contact.title", "Judul"), f("contact.sub", "Deskripsi", "textarea"), f("contact.success", "Pesan setelah terkirim", "textarea")] },
   ] },
   { page: "footer", label: "Footer", sections: [
     { id: "footer", url: "/#site-footer", label: "Tagline & Perusahaan", fields: [f("footer.tagline", "Tagline besar"), f("footer.description", "Deskripsi singkat", "textarea"), f("footer.company", "Nama perusahaan")] },
-    { id: "offices", url: "/#site-footer", label: `Kantor & Kontak (maks. ${MAX_OFFICES})`, offices: true },
+    { id: "offices", url: "/#site-footer", label: `Kantor & Kontak (maks. ${MAX_OFFICES})`, fields: [],
+      lists: [{ key: OFFICES_KEY, label: "Kantor", defaults: DEFAULT_OFFICES, max: MAX_OFFICES, itemLabel: "Kantor", sortable: true, note: "Kantor 1 tampil sebagai Head Quarter; ikon telepon otomatis",
+        itemTitle: (i) => (i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`), fields: [["label", "Judul kantor"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["phone", "Nomor telepon"]] }] },
   ] },
 ];
 
@@ -128,43 +142,55 @@ const Pointers = ({ num, items, client, refresh, upsert }) => {
   );
 };
 
-const OfficesEditor = ({ items, upsert }) => {
+// Generic editor for a JSON list stored in one CMS block (offices, timeline, identity boxes…)
+const ListEditor = ({ items, upsert, list: cfg, page, section }) => {
   const { setActive, setDraft } = useContext(PreviewCtx);
-  const block = items.find((b) => b.key === OFFICES_KEY);
-  const [list, setList] = useState(parseOffices(block?.value) || DEFAULT_OFFICES);
+  const block = items.find((b) => b.key === cfg.key);
+  const parse = (raw) => { try { const a = JSON.parse(raw || ""); return Array.isArray(a) && a.length ? a : null; } catch { return null; } };
+  const [list, setList] = useState(parse(block?.value) || cfg.defaults);
   const [dirtyIdx, setDirtyIdx] = useState(null);
-  useEffect(() => { setList(parseOffices(block?.value) || DEFAULT_OFFICES); }, [block?.value]);
-  const persist = (next) => upsert(OFFICES_KEY, { block, page: "footer", section: "offices", label: "Kantor & Kontak", type: "json" }, { value: JSON.stringify(next) });
-  const setField = (i, k, v) => {
-    const n = list.map((o, j) => (j === i ? { ...o, [k]: v } : o));
-    setList(n);
-    setDraft(OFFICES_KEY, JSON.stringify(n));
-    setDirtyIdx(i);
-  };
-  const fields = [["label", "Judul kantor (mis. Head Quarter · Singapore)"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["phone", "Nomor telepon"]];
+  useEffect(() => { setList(parse(block?.value) || cfg.defaults); }, [block?.value]); // eslint-disable-line react-hooks/exhaustive-deps
+  const persist = (next) => upsert(cfg.key, { block, page, section, label: cfg.label, type: "json" }, { value: JSON.stringify(next) });
+  const update = (n, idx = null) => { setList(n); setDraft(cfg.key, JSON.stringify(n)); setDirtyIdx(idx); };
+  const move = (i, d) => { const n = [...list]; [n[i], n[i + d]] = [n[i + d], n[i]]; update(n); persist(n); };
+  const blank = Object.fromEntries(cfg.fields.map(([k]) => [k, ""]));
+  const tid = cfg.key.replace(/\./g, "-");
   return (
-    <div className="space-y-3" data-testid="offices-editor">
-      <p className="font-mono text-[10px] text-ash">Kantor pertama tampil sebagai Head Quarter (atas), sisanya berjajar di bawah. Ikon telepon otomatis.</p>
+    <div className="space-y-3" data-testid={`list-${tid}`}>
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper">{cfg.label} ({list.length}{cfg.max ? `/${cfg.max}` : ""})</span>
+        {cfg.note && <span className="font-mono text-[9px] text-ash">{cfg.note}</span>}
+      </div>
       {list.map((o, i) => (
-        <div key={i} data-testid={`office-${i}`} className="border border-white/10 p-3">
+        <div key={i} data-testid={`${tid}-item-${i}`} className="border border-white/10 p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper flex items-center gap-3">{i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`}
-              {dirtyIdx === i && <span data-testid={`unsaved-office-${i}`} className="flex items-center gap-1 text-[8px] text-amber-400 normal-case tracking-[0.14em]"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />belum tersimpan</span>}</span>
-            {list.length > 1 && <button onClick={() => { const n = list.filter((_, j) => j !== i); setList(n); persist(n); }} data-testid={`office-remove-${i}`} className="text-red-400/70 hover:text-red-400"><Trash2 size={12} /></button>}
+            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-[#7FC8EE] flex items-center gap-3">{cfg.itemTitle ? cfg.itemTitle(i) : `${cfg.itemLabel || "Item"} ${i + 1}`}
+              {dirtyIdx === i && <span data-testid={`unsaved-${tid}-${i}`} className="flex items-center gap-1 text-[8px] text-amber-400 normal-case tracking-[0.14em]"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />belum tersimpan</span>}</span>
+            <span className="flex items-center gap-2 text-ash">
+              {cfg.sortable && i > 0 && <button onClick={() => move(i, -1)} title="Naik" className="hover:text-copper"><ChevronUp size={13} /></button>}
+              {cfg.sortable && i < list.length - 1 && <button onClick={() => move(i, 1)} title="Turun" className="hover:text-copper"><ChevronDown size={13} /></button>}
+              {list.length > 1 && <button onClick={() => { const n = list.filter((_, j) => j !== i); update(n); persist(n); }} data-testid={`${tid}-remove-${i}`} className="text-red-400/70 hover:text-red-400"><Trash2 size={12} /></button>}
+            </span>
           </div>
-          <div className="grid md:grid-cols-2 gap-2">
-            {fields.map(([k, l]) => (
-              <div key={k}>
-                <label className={lbl}>{l}</label>
-                <input value={o[k] || ""} onChange={(e) => setField(i, k, e.target.value)} onFocus={() => setActive(`office-${i}`)} onBlur={() => { if (dirtyIdx === i) persist(list); setDirtyIdx(null); }} data-testid={`office-${i}-${k}`} className={inputCls} />
-              </div>
-            ))}
+          <div className={`grid gap-2 ${cfg.fields.length > 1 ? "md:grid-cols-2" : ""}`}>
+            {cfg.fields.map(([k, l, type]) => {
+              const Tag = type === "textarea" ? "textarea" : "input";
+              return (
+                <div key={k} className={type === "textarea" ? "md:col-span-2" : ""}>
+                  <label className={lbl}>{l}</label>
+                  <Tag rows={type === "textarea" ? 3 : undefined} value={o[k] || ""} data-testid={`${tid}-${i}-${k}`}
+                    onChange={(e) => update(list.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)), i)}
+                    onFocus={() => setActive(`${cfg.key}-${i}`)} onBlur={() => { if (dirtyIdx === i) persist(list); setDirtyIdx(null); }}
+                    className={`${inputCls} resize-y`} />
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}
-      {list.length < MAX_OFFICES && (
-        <button onClick={() => { const n = [...list, { label: "New Office", line1: "", line2: "", phone: "" }]; setList(n); persist(n); }} data-testid="office-add"
-          className="h-9 px-4 border border-copper/60 text-copper font-mono text-[9px] tracking-[0.2em] uppercase hover:bg-copper hover:text-obsidian transition-colors inline-flex items-center gap-2"><Plus size={12} /> Tambah Kantor</button>
+      {(!cfg.max || list.length < cfg.max) && (
+        <button onClick={() => { const n = [...list, blank]; update(n); persist(n); }} data-testid={`${tid}-add`}
+          className="h-9 px-4 border border-copper/60 text-copper font-mono text-[9px] tracking-[0.2em] uppercase hover:bg-copper hover:text-obsidian transition-colors inline-flex items-center gap-2"><Plus size={12} /> Tambah {cfg.itemLabel || "Item"}</button>
       )}
     </div>
   );
@@ -218,12 +244,12 @@ export const ContentPanel = ({ client }) => {
   const q = query.trim().toLowerCase();
   const fieldHit = (fd) => matchText(q, fd.label, fd.key, byKey[fd.key]?.value, byKey[fd.key]?.value_id, defaultOf(fd.key));
   const sectionFields = (pg, sec) => {
-    if (!q || sec.offices || matchText(q, sec.label, pg.label)) return sec.fields;
+    if (!q || matchText(q, sec.label, pg.label)) return sec.fields;
     return (sec.fields || []).filter(fieldHit);
   };
   const sectionHit = (pg, sec) => {
     if (!q || matchText(q, sec.label, pg.label)) return true;
-    if (sec.offices) return matchText(q, byKey[OFFICES_KEY]?.value || JSON.stringify(DEFAULT_OFFICES));
+    if ((sec.lists || []).some((l) => matchText(q, byKey[l.key]?.value || JSON.stringify(l.defaults)))) return true;
     if (sec.pointers && items.some((b) => b.section === sec.id && matchText(q, b.value, b.value_id))) return true;
     return sectionFields(pg, sec).length > 0;
   };
@@ -246,13 +272,14 @@ export const ContentPanel = ({ client }) => {
             <Accordion key={sec.id} level={1} title={sec.label} testid={`content-section-${sec.id}`} forceOpen={!!q} href={sec.url}>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-7 space-y-3">
-              {sec.offices ? <OfficesEditor items={items} upsert={upsert} /> : (
+              {(
                 <>
                   {sectionFields(pg, sec).map((fd, i) => (
                     <BiField key={fd.key} label={fd.label} type={fd.type} block={byKey[fd.key]} placeholder={defaultOf(fd.key)} testid={fd.key}
-                      hint={fd.auto && `(angka otomatis dari Locations — ${AUTO_DESC[fd.auto]}: ${counts[fd.auto]})`}
+                      hint={fd.auto ? `(angka otomatis dari Locations — ${AUTO_DESC[fd.auto]}: ${counts[fd.auto]})` : fd.hintText && `(${fd.hintText})`}
                       onSave={(p) => upsert(fd.key, { block: byKey[fd.key], page: pg.page, section: sec.id, label: fd.label, type: fd.type, sort: i + 1 }, p)} />
                   ))}
+                  {(sec.lists || []).map((l) => <ListEditor key={l.key} list={l} items={items} upsert={upsert} page={pg.page} section={sec.id} />)}
                   {sec.pointers && <Pointers num={sec.pointers} items={items.filter((b) => b.section === sec.id)} client={client} refresh={refresh} upsert={upsert} />}
                 </>
               )}
