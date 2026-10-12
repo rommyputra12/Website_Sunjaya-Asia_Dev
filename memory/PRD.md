@@ -97,3 +97,10 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## Update 2026-06 (News texts dipindah)
 - Grup "News Page" dihapus dari tab Content; 5 teks halaman News (title, sub, empty, read, back) kini diedit di tab News → panel lipat "Teks Halaman News" (EN + ID). Data tetap di content_blocks (page=news)
+
+## Update 2026-06 (Content tab terstruktur)
+- Tab Content ditulis ulang (components/admin/ContentPanel.jsx): accordion Halaman → Section (semua tertutup awal), label ramah, kolom ID opsional per field (+ ID)
+- Hanya field di SCHEMA yang tampil; dikunci/disembunyikan: Navbar, label form Contact, jenis Inquiry, Copyright footer, Add custom block, alamat footer lama (addr_*)
+- Pillar: field Kicker/Judul/Deskripsi + kartu Pointer (Nama+Deskripsi), tambah/hapus
+- Footer: Tagline, Deskripsi (footer.description), Nama perusahaan (footer.company) + editor "Kantor & Kontak" terstruktur (JSON di content_blocks key footer.offices: [{label,line1,line2,phone}]), maks 4; kantor 1 = HQ, sisanya berjajar (grid 1-3 kolom); ikon telepon & link tel: otomatis
+- Halaman Contact membaca daftar kantor yang sama (data/offices.js useOffices)

@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
 import { useLang } from "../i18n/LanguageContext";
+import { useOffices, telHref } from "../data/offices";
 import { toast, Toaster } from "sonner";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 export default function Contact() {
   const { t } = useLang();
+  const offices = useOffices();
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", subject: "", message: "", inquiry_type: "general" });
@@ -42,17 +44,15 @@ export default function Contact() {
             <p className="mt-6 text-bone/80 text-lg leading-relaxed max-w-md">{t("contact.sub")}</p>
 
             <div className="mt-16 space-y-8">
-              <div className="border-t border-white/10 pt-6">
-                <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">Singapore · Headquarters</div>
-                <p className="text-bone text-base mt-2 max-w-sm">{t("footer.addr_sg")}</p>
-              </div>
-              <div className="border-t border-white/10 pt-6">
-                <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">Jakarta · Operations</div>
-                <p className="text-bone text-base mt-2 max-w-sm">{t("footer.addr_id")}</p>
-              </div>
+              {offices.map((o, i) => (
+                <div key={i} data-testid={`contact-office-${i}`} className="border-t border-white/10 pt-6">
+                  <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{o.label}</div>
+                  <p className="text-bone text-base mt-2 max-w-sm">{[o.line1, o.line2].filter(Boolean).join(", ")}</p>
+                  {o.phone && <a href={telHref(o.phone)} className="block text-bone/80 text-sm font-mono mt-1 hover:text-copper transition-colors">{o.phone}</a>}
+                </div>
+              ))}
               <div className="border-t border-white/10 pt-6 space-y-1">
                 <span className="block text-bone text-lg font-mono lowercase">info@sunjayaasia.com</span>
-                <a href="tel:+622121689411" className="block text-bone text-lg font-mono">+62 21 2168 9411</a>
               </div>
             </div>
           </div>

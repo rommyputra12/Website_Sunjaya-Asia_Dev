@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { useLang } from "../../i18n/LanguageContext";
 import AssetImg from "../AssetImg";
+import { useOffices, telHref } from "../../data/offices";
 
 const SOCIALS = [
   { href: "https://www.linkedin.com/company/sunjayaasiagroup/", imageKey: "footerLinkedin", label: "LinkedIn", external: true },
@@ -11,8 +12,23 @@ const SOCIALS = [
   { to: "/contact", imageKey: "footerCall", label: "Call center" },
 ];
 
+const OfficeBlock = ({ o, i }) => (
+  <div data-testid={`footer-office-${i}`} className="max-w-xs">
+    <div className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:text-xs">{o.label}</div>
+    {o.line1 && <p>{o.line1}</p>}
+    {o.line2 && <p>{o.line2}</p>}
+    {o.phone && (
+      <a href={telHref(o.phone)} className="mt-2 flex items-center gap-2 text-[11px] leading-[1.4] text-white/80 transition-colors hover:text-copper sm:text-xs">
+        <Phone className="h-3.5 w-3.5 shrink-0 text-copper" strokeWidth={1.5} />
+        {o.phone}
+      </a>
+    )}
+  </div>
+);
+
 export const Footer = () => {
   const { t } = useLang();
+  const [hq, ...branches] = useOffices();
   const navigate = useNavigate();
   const secretRef = React.useRef({ count: 0, timer: null });
 
@@ -45,41 +61,18 @@ export const Footer = () => {
                 {t("footer.tagline")}
               </h2>
               <p className="mt-3 ml-32 max-w-[min(100%,540px)] border-l border-copper/70 pl-5 text-[11px] leading-[1.5] text-white/70 sm:ml-36 sm:pl-6 sm:text-xs lg:ml-40 lg:pl-7 lg:text-sm">
-                Empowering global industries by bridging essential resources with next-generation technology, sustainable infrastructure, and transformative enterprise solutions.
+                {t("footer.description", "Empowering global industries by bridging essential resources with next-generation technology, sustainable infrastructure, and transformative enterprise solutions.")}
               </p>
 
-              <div className="mt-8 w-fit border-t border-white/15 pt-3 md:mt-10 md:pt-4 lg:mt-12 lg:pt-5">
-                <div className="mb-3 font-mono text-[15px] tracking-[0.2em] uppercase text-white font-bold sm:mb-4 sm:text-base">Sunjaya Asia Group Limited</div>
+              <div className="mt-8 w-fit max-w-full border-t border-white/15 pt-3 md:mt-10 md:pt-4 lg:mt-12 lg:pt-5">
+                <div className="mb-3 font-mono text-[15px] tracking-[0.2em] uppercase text-white font-bold sm:mb-4 sm:text-base">{t("footer.company", "Sunjaya Asia Group Limited")}</div>
                 <div className="text-[11px] leading-[1.4] text-white/80 sm:text-xs">
-                  <div>
-                    <div className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:text-xs">Head Quarter · Registered Office</div>
-                    <p>{t("footer.addr_sg_line1")}</p>
-                    <p>{t("footer.addr_sg_line2")}</p>
-                    <a href="tel:+6531080411" className="mt-2 flex items-center gap-2 text-[11px] leading-[1.4] text-white/80 transition-colors hover:text-copper sm:text-xs">
-                      <Phone className="h-3.5 w-3.5 shrink-0 text-copper" strokeWidth={1.5} />
-                      +65 3108 0411
-                    </a>
-                  </div>
-                  <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-8">
-                    <div>
-                      <div className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:text-xs">Branch & Central Hub · Indonesia</div>
-                      <p>{t("footer.addr_id_line1")}<sup className="text-[0.6em]">th</sup>, Kawasan Mega Kuningan</p>
-                      <p>{t("footer.addr_id_line2")}</p>
-                      <a href="tel:+622121689411" className="mt-2 flex items-center gap-2 text-[11px] leading-[1.4] text-white/80 transition-colors hover:text-copper sm:text-xs">
-                        <Phone className="h-3.5 w-3.5 shrink-0 text-copper" strokeWidth={1.5} />
-                        +62 21 2168 9411
-                      </a>
+                  {hq && <OfficeBlock o={hq} i={0} />}
+                  {branches.length > 0 && (
+                    <div className={`mt-10 grid grid-cols-1 gap-4 sm:gap-8 ${branches.length === 1 ? "" : branches.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+                      {branches.map((o, i) => <OfficeBlock key={i} o={o} i={i + 1} />)}
                     </div>
-                    <div>
-                      <div className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:text-xs">Branch Investment Hub · United States</div>
-                      <p>8 The Green, Ste A, Suite B</p>
-                      <p>Dover, DE 19901, Kent County, Delaware, United States</p>
-                      <a href="tel:+13022489559" className="mt-2 flex items-center gap-2 text-[11px] leading-[1.4] text-white/80 transition-colors hover:text-copper sm:text-xs">
-                        <Phone className="h-3.5 w-3.5 shrink-0 text-copper" strokeWidth={1.5} />
-                        +1 302 248 9559
-                      </a>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
