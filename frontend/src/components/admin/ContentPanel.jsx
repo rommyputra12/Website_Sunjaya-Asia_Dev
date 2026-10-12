@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, MAX_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
+import { PreviewCtx, SectionPreview } from "./ContentPreview";
 
 const errMsg = (err, fb) => (typeof err?.response?.data?.detail === "string" ? err.response.data.detail : fb);
 const inputCls = "w-full bg-obsidian border border-white/15 px-3 py-2 font-mono text-[12px] text-bone focus:border-copper focus:outline-none";
@@ -50,24 +51,26 @@ const useUpsert = (client, refresh) => async (key, meta, patch) => {
 
 const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete }) => {
   const [showId, setShowId] = useState(!!block?.value_id);
+  const { setActive, setDraft, active } = useContext(PreviewCtx);
+  const focus = () => setActive(testid);
   const len = Math.max((block?.value || "").length, (placeholder || "").length);
   const multi = type === "textarea" || len > 70;
   const Tag = multi ? "textarea" : "input";
   const extra = multi ? { rows: Math.min(8, Math.max(2, Math.ceil(len / 85) + 1)) } : {};
   return (
-    <div data-testid={`content-block-${testid}`} className="bg-obsidian/40 border border-white/10 p-3">
+    <div data-testid={`content-block-${testid}`} className={`bg-obsidian/40 border p-3 transition-colors ${active === testid ? "border-copper/70" : "border-white/10"}`}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="font-mono text-[10px] tracking-[0.12em] text-bone">{label}</span>
+        <span className="font-mono text-[10px] tracking-[0.12em] text-ash">{label}</span>
         <span className="flex items-center gap-3">
           <button type="button" onClick={() => setShowId(!showId)} className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper">{showId ? "− ID" : "+ ID"}</button>
           {onDelete && <button type="button" onClick={onDelete} data-testid={`remove-pointer-${testid}`} className="text-red-400/70 hover:text-red-400"><Trash2 size={12} /></button>}
         </span>
       </div>
       <div className={`grid gap-2 ${showId ? "md:grid-cols-2" : ""}`}>
-        <Tag {...extra} key={`en-${block?.value}`} defaultValue={block?.value || ""} placeholder={placeholder} data-testid={`content-input-${testid}`}
+        <Tag {...extra} key={`en-${block?.value}`} defaultValue={block?.value || ""} placeholder={placeholder} data-testid={`content-input-${testid}`} onFocus={focus} onChange={(e) => setDraft(testid, e.target.value)}
           onBlur={(e) => e.target.value !== (block?.value || "") && onSave({ value: e.target.value })} className={`${inputCls} resize-y`} />
         {showId && (
-          <Tag {...extra} key={`id-${block?.value_id}`} defaultValue={block?.value_id || ""} placeholder="Bahasa Indonesia (opsional)" data-testid={`content-input-${testid}-id`}
+          <Tag {...extra} key={`id-${block?.value_id}`} defaultValue={block?.value_id || ""} placeholder="Bahasa Indonesia (opsional)" data-testid={`content-input-${testid}-id`} onFocus={focus}
             onBlur={(e) => e.target.value !== (block?.value_id || "") && onSave({ value_id: e.target.value })} className={`${inputCls} resize-y border-copper/30`} />
         )}
       </div>
@@ -120,11 +123,16 @@ const Pointers = ({ num, items, client, refresh, upsert }) => {
 };
 
 const OfficesEditor = ({ items, upsert }) => {
+  const { setActive, setDraft } = useContext(PreviewCtx);
   const block = items.find((b) => b.key === OFFICES_KEY);
   const [list, setList] = useState(parseOffices(block?.value) || DEFAULT_OFFICES);
   useEffect(() => { setList(parseOffices(block?.value) || DEFAULT_OFFICES); }, [block?.value]);
   const persist = (next) => upsert(OFFICES_KEY, { block, page: "footer", section: "offices", label: "Kantor & Kontak", type: "json" }, { value: JSON.stringify(next) });
-  const setField = (i, k, v) => setList((l) => l.map((o, j) => (j === i ? { ...o, [k]: v } : o)));
+  const setField = (i, k, v) => setList((l) => {
+    const n = l.map((o, j) => (j === i ? { ...o, [k]: v } : o));
+    setDraft(OFFICES_KEY, JSON.stringify(n));
+    return n;
+  });
   const fields = [["label", "Judul kantor (mis. Head Quarter · Singapore)"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["phone", "Nomor telepon"]];
   return (
     <div className="space-y-3" data-testid="offices-editor">
@@ -139,7 +147,7 @@ const OfficesEditor = ({ items, upsert }) => {
             {fields.map(([k, l]) => (
               <div key={k}>
                 <label className={lbl}>{l}</label>
-                <input value={o[k] || ""} onChange={(e) => setField(i, k, e.target.value)} onBlur={() => persist(list)} data-testid={`office-${i}-${k}`} className={inputCls} />
+                <input value={o[k] || ""} onChange={(e) => setField(i, k, e.target.value)} onFocus={() => setActive(`office-${i}`)} onBlur={() => persist(list)} data-testid={`office-${i}-${k}`} className={inputCls} />
               </div>
             ))}
           </div>
@@ -159,12 +167,12 @@ const Accordion = ({ title, count, level = 0, children, testid }) => {
     <div data-testid={testid} className={level === 0 ? "border border-white/10 bg-ink mb-3" : "border-t border-white/10"}>
       <button onClick={() => setOpen(!open)} data-testid={`${testid}-toggle`}
         className={`w-full flex items-center justify-between text-left hover:bg-white/5 transition-colors ${level === 0 ? "px-5 py-4" : "px-5 py-3 pl-8"}`}>
-        <span className={`font-mono uppercase ${level === 0 ? "text-[11px] tracking-[0.24em] text-copper" : "text-[10px] tracking-[0.2em] text-bone"}`}>
+        <span className={`font-mono uppercase ${level === 0 ? "text-[11px] tracking-[0.24em] text-copper" : "text-[10px] tracking-[0.2em] text-[#7FC8EE] font-bold"}`}>
           {title}{count != null && <span className="text-ash ml-2">· {count}</span>}
         </span>
         <ChevronDown size={14} className={`text-ash transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
-      {open && <div className={level === 0 ? "" : "px-5 pl-8 pb-5 space-y-3"}>{children}</div>}
+      {open && <div className={level === 0 ? "" : "px-5 pl-8 pb-5"}>{children}</div>}
     </div>
   );
 };
@@ -178,14 +186,21 @@ export const ContentPanel = ({ client }) => {
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
   const upsert = useUpsert(client, refresh);
   const byKey = Object.fromEntries(items.map((b) => [b.key, b]));
+  const [draft, setDraftMap] = useState({});
+  const [active, setActive] = useState(null);
+  const setDraft = (k, v) => setDraftMap((d) => ({ ...d, [k]: v }));
+  useEffect(() => { setDraftMap({}); }, [items]);
 
   return (
+    <PreviewCtx.Provider value={{ draft, setDraft, active, setActive, byKey }}>
     <div data-testid="content-panel">
       <p className="text-ash font-mono text-xs max-w-2xl mb-6">Klik halaman lalu section untuk mengedit. Perubahan langsung tayang. Kolom ID (Bahasa Indonesia) opsional — jika kosong memakai teks bawaan.</p>
       {SCHEMA.map((pg) => (
         <Accordion key={pg.page} title={pg.label} count={pg.sections.length} testid={`content-page-${pg.page}`}>
           {pg.sections.map((sec) => (
             <Accordion key={sec.id} level={1} title={sec.label} testid={`content-section-${sec.id}`}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-7 space-y-3">
               {sec.offices ? <OfficesEditor items={items} upsert={upsert} /> : (
                 <>
                   {sec.fields.map((fd, i) => (
@@ -195,10 +210,14 @@ export const ContentPanel = ({ client }) => {
                   {sec.pointers && <Pointers num={sec.pointers} items={items.filter((b) => b.section === sec.id)} client={client} refresh={refresh} upsert={upsert} />}
                 </>
               )}
+              </div>
+              <div className="lg:col-span-5 lg:self-stretch"><SectionPreview sectionId={sec.id} /></div>
+              </div>
             </Accordion>
           ))}
         </Accordion>
       ))}
     </div>
+    </PreviewCtx.Provider>
   );
 };

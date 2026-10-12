@@ -110,3 +110,7 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Home kini memakai key baru home.pillars_intro.{kicker,para1,para2,highlight} (seed = teks yang tampil); 8 blok manifesto.* lama yang tidak dipakai dihapus; Pillars Intro tetap manifesto.overline + manifesto.title
 - Pointer pillar di Home kini dibaca dari CMS (sama dengan halaman Pillars)
 - Field CMS: teks panjang (>70 char) otomatis textarea dengan tinggi menyesuaikan
+
+## Update 2026-06 (Content preview)
+- Tab Content: setiap section punya kartu preview mini (components/admin/ContentPreview.jsx) di kanan (sticky), mockup layout situs; update live saat mengetik; field aktif disorot oranye di preview & border form
+- Judul section accordion berwarna biru muda (#7FC8EE) tebal; label field abu-abu — tidak lagi sama-sama putih
