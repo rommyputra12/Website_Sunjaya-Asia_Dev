@@ -143,3 +143,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Tab Images → section Partners: BulkLogoUpload (components/admin/BulkLogoUpload.jsx) — pilih/drop banyak file, tiap baris: preview, nama (default dari nama file), kategori, tampilan; kategori default; progress upload
 - Auto-contrast: detectTone (canvas) saat pilih file → transparan = "white" (siluet putih), latar terang = "invert" (grayscale+invert+screen blend), latar gelap = "gray"; disimpan di assets.meta.tone, bisa diganti per logo (white/invert/gray/dark/original). File asli tetap disimpan; konversi via CSS filter, warna asli muncul saat hover
 - Tile logo kini warna solid (#0c2635) agar blend invert menyatu
+- Partnership box redesign (2026-06): layout 2 kolom (teks kiri, CTA + email kanan), aksen garis copper kiri, glow & grid halus, font lebih kecil; RichText baris baru hanya di md+

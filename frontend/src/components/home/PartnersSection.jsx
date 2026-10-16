@@ -77,19 +77,36 @@ export const PartnersSection = () => {
         )}
 
         <Reveal>
-          <div id="partnership" className={`${rows.length ? "mt-12 md:mt-16" : ""} border border-copper/40 p-8 md:p-14 bg-gradient-to-br from-ink to-obsidian`}>
-            <span className="font-mono text-sm md:text-base tracking-[0.24em] uppercase text-copper">{t("about.partner.kicker")}</span>
-            <p className="font-sans text-lg md:text-3xl text-bone mt-4 leading-[1.3] tracking-tight max-w-5xl">
-              <RichText text={t("about.partner.text")} accentClass="font-sans text-copper" />
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <button onClick={() => setOpen(true)} data-testid="partnership-cta"
-                className="inline-flex items-center gap-3 px-6 h-12 bg-copper text-obsidian font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-copper-hi transition-colors">
-                {t("about.partner.cta")}
-              </button>
-              <a href={`mailto:${t("about.partner.email")}`} className="inline-flex items-center gap-3 px-6 h-12 border border-white/25 text-bone font-mono text-xs tracking-[0.15em] hover:border-copper transition-colors">
-                OR EMAIL TO: {t("about.partner.email")}
-              </a>
+          <div id="partnership" data-testid="partnership-box"
+            className={`${rows.length ? "mt-12 md:mt-16" : ""} group/box relative overflow-hidden border border-white/10 bg-[#0a2231]`}>
+            {/* accents */}
+            <span className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-copper via-copper/40 to-transparent" />
+            <span className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-copper/10 blur-3xl transition-opacity duration-700 group-hover/box:opacity-80" />
+            <span className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+
+            <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center p-7 md:p-10 lg:p-12">
+              <div className="lg:col-span-8">
+                <div className="flex items-center gap-3">
+                  <span className="h-px w-8 bg-copper" />
+                  <span className="font-mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-copper">{t("about.partner.kicker")}</span>
+                </div>
+                <p className="mt-5 font-serif text-lg md:text-xl lg:text-[1.7rem] text-bone/90 leading-[1.45] tracking-[-0.01em] max-w-3xl">
+                  <RichText text={t("about.partner.text")} accentClass="italic text-copper" />
+                </p>
+              </div>
+
+              <div className="lg:col-span-4 flex flex-col gap-3 lg:border-l lg:border-white/10 lg:pl-10">
+                <button onClick={() => setOpen(true)} data-testid="partnership-cta"
+                  className="group/btn inline-flex items-center justify-between gap-4 h-12 px-5 bg-copper text-obsidian font-mono text-[10px] md:text-[11px] tracking-[0.2em] uppercase hover:bg-copper-hi transition-colors">
+                  <span>{t("about.partner.cta").replace(/\s*→\s*$/, "")}</span>
+                  <span className="transition-transform duration-300 group-hover/btn:translate-x-1">→</span>
+                </button>
+                <a href={`mailto:${t("about.partner.email")}`} data-testid="partnership-email"
+                  className="group/mail flex flex-col gap-1 px-5 py-3 border border-white/15 hover:border-copper/60 transition-colors">
+                  <span className="font-mono text-[9px] tracking-[0.24em] uppercase text-ash">Or email us</span>
+                  <span className="font-mono text-xs md:text-[13px] text-bone group-hover/mail:text-copper transition-colors">{t("about.partner.email")}</span>
+                </a>
+              </div>
             </div>
           </div>
         </Reveal>
