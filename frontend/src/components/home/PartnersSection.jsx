@@ -24,8 +24,8 @@ export const LOGO_TONES = {
 };
 
 const PARTNER_TEXT = {
-  "home.partners.kicker": "Partners & Clients",
-  "home.partners.title": "Trusted by leaders across industries.",
+  "home.partners.kicker": "Partners & Global Alliances",
+  "home.partners.title": "Collaborating with global industry leaders, government stakeholders, R&D institutions, technology pioneers, and civil society organizations.",
 };
 
 // One infinitely scrolling row of logos (list duplicated for a seamless loop)
@@ -68,7 +68,7 @@ export const PartnersSection = () => {
           <>
             <Reveal>
               <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.partners.kicker")}</span>
-              <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">{t("home.partners.title")}</h2>
+              <h2 className="font-serif text-base md:text-xl leading-[1.35] tracking-[-0.02em] text-bone/90 mt-2 max-w-3xl">{t("home.partners.title")}</h2>
             </Reveal>
             <div className="mt-8 md:mt-10 space-y-6 md:space-y-8">
               {rows.map((r, i) => <LogoRow key={r.id} id={r.id} logos={r.logos} reverse={i % 2 === 1} />)}
