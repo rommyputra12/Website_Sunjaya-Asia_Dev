@@ -486,6 +486,8 @@ const ImagesPanel = ({ client }) => {
   const [newKey, setNewKey] = useState("");
   const [newFile, setNewFile] = useState(null);
   const [newSection, setNewSection] = useState("other");
+  const [newCategory, setNewCategory] = useState("partner");
+  const [newName, setNewName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(null); // asset being focal-edited
 
@@ -601,9 +603,12 @@ const ImagesPanel = ({ client }) => {
       // order is automatic: appended at the end of its section
       const inSection = items.filter((a) => (a.section || "other") === newSection).length;
       fd.append("sort_order", String(100 + inSection));
-      await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      toast.success(`Added "${newKey.trim()}"`);
-      setNewKey(""); setNewFile(null); setNewSection("other");
+      const r = await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      if (newSection === "home_partners" && r.data?.id) {
+        await client.put(`/assets/${r.data.id}`, { meta: { category: newCategory }, alt: newName.trim() || autoKey });
+      }
+      toast.success(`Added "${newName.trim() || autoKey}"`);
+      setNewKey(""); setNewFile(null); setNewName("");
       e.target.reset();
       await refresh();
     } catch (err) {
@@ -630,12 +635,27 @@ const ImagesPanel = ({ client }) => {
   return (
     <div data-testid="images-panel">
       {/* Add new asset */}
-      <form onSubmit={addNew} className="bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <form onSubmit={addNew} className={`bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 gap-4 items-end ${newSection === "home_partners" ? "md:grid-cols-5" : "md:grid-cols-4"}`}>
+        {newSection === "home_partners" ? (
+          <>
+            <div>
+              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Kategori logo</label>
+              <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} data-testid="new-logo-category" className={`${inputCls} h-10`}>
+                {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Nama brand / perusahaan / instansi</label>
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="mis. PT Pertamina" data-testid="new-logo-name" className={`${inputCls} h-10`} />
+            </div>
+          </>
+        ) : (
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">New asset key</label>
           <input value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="e.g. home_new_banner"
             data-testid="new-asset-key" className={`${inputCls} h-10`} />
         </div>
+        )}
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Section</label>
           <select value={newSection} onChange={(e) => setNewSection(e.target.value)} data-testid="new-asset-section" className={`${inputCls} h-10`}>
@@ -708,7 +728,7 @@ const ImagesPanel = ({ client }) => {
                         onChange={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), category: e.target.value } }, "Kategori tersimpan")} className={inputCls}>
                         {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                       </select>
-                      <input defaultValue={a.alt || ""} placeholder="Nama perusahaan (alt)" data-testid={`logo-name-${a.key}`}
+                      <input defaultValue={a.alt || ""} placeholder="Nama brand / perusahaan / instansi" data-testid={`logo-name-${a.key}`}
                         onBlur={(e) => e.target.value !== (a.alt || "") && saveMeta({ ...a }, { alt: e.target.value }, "Nama tersimpan")} className={inputCls} />
                     </div>
                   )}

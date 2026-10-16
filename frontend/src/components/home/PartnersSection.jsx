@@ -7,32 +7,34 @@ import { Reveal } from "../motion/Reveal";
 import { ABOUT_TEXT } from "../../data/aboutDefaults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 
+// Categories are for CMS grouping only — each becomes one marquee row (no label shown publicly)
 export const PARTNER_CATEGORIES = [
-  { id: "partner", key: "home.partners.cat_partner", label: "Strategic Partners" },
-  { id: "vendor", key: "home.partners.cat_vendor", label: "Vendors" },
-  { id: "customer", key: "home.partners.cat_customer", label: "Customers" },
+  { id: "partner", label: "Partners — Affiliates/JO Company, Investors, Government, Departments, Organizations" },
+  { id: "vendor", label: "Brand — Producer/Produsen, Principals, Supplier, Distributor" },
+  { id: "customer", label: "Customers / Clients" },
 ];
 
 const PARTNER_TEXT = {
   "home.partners.kicker": "Partners & Clients",
   "home.partners.title": "Trusted by leaders across industries.",
-  ...Object.fromEntries(PARTNER_CATEGORIES.map((c) => [c.key, c.label])),
 };
 
 // One infinitely scrolling row of logos (list duplicated for a seamless loop)
-const LogoRow = ({ label, logos, reverse }) => {
+const LogoRow = ({ id, logos, reverse }) => {
   const loop = logos.length < 6 ? [...logos, ...logos, ...logos] : logos;
   const duration = Math.max(20, loop.length * 4);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-6 items-center" data-testid={`partners-row-${label}`}>
-      <div className="md:col-span-2 font-mono text-[10px] md:text-[11px] tracking-[0.24em] uppercase text-copper">{label}</div>
-      <div className="md:col-span-10 relative overflow-hidden marquee-mask">
+    <div data-testid={`partners-row-${id}`}>
+      <div className="relative overflow-hidden marquee-mask">
         <div className="flex w-max gap-6 md:gap-10 hover:[animation-play-state:paused]"
           style={{ animation: `logo-marquee ${duration}s linear infinite${reverse ? " reverse" : ""}` }}>
           {[0, 1].map((dup) => loop.map((l, i) => (
-            <div key={`${dup}-${i}`} aria-hidden={dup === 1} className="group h-16 md:h-20 w-36 md:w-44 shrink-0 grid place-items-center bg-white/[0.04] border border-white/10 px-4">
-              <img src={l.url} alt={l.alt || l.key} loading="lazy"
-                className="max-h-10 md:max-h-12 max-w-full object-contain grayscale brightness-[1.8] opacity-70 group-hover:grayscale-0 group-hover:brightness-100 group-hover:opacity-100 transition-[filter,opacity] duration-300" />
+            <div key={`${dup}-${i}`} aria-hidden={dup === 1} className="group w-36 md:w-44 shrink-0 flex flex-col items-center gap-2">
+              <div className="h-16 md:h-20 w-full grid place-items-center bg-white/[0.04] border border-white/10 px-4 group-hover:border-copper/50 transition-colors duration-300">
+                <img src={l.url} alt={l.alt || l.key} loading="lazy"
+                  className="max-h-10 md:max-h-12 max-w-full object-contain grayscale brightness-[1.8] opacity-70 group-hover:grayscale-0 group-hover:brightness-100 group-hover:opacity-100 transition-[filter,opacity] duration-300" />
+              </div>
+              {l.alt && <span className="font-mono text-[9px] md:text-[10px] tracking-[0.14em] uppercase text-bone/60 group-hover:text-bone text-center leading-tight line-clamp-2 transition-colors">{l.alt}</span>}
             </div>
           )))}
         </div>
@@ -59,7 +61,7 @@ export const PartnersSection = () => {
               <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">{t("home.partners.title")}</h2>
             </Reveal>
             <div className="mt-8 md:mt-10 space-y-6 md:space-y-8">
-              {rows.map((r, i) => <LogoRow key={r.id} label={t(r.key)} logos={r.logos} reverse={i % 2 === 1} />)}
+              {rows.map((r, i) => <LogoRow key={r.id} id={r.id} logos={r.logos} reverse={i % 2 === 1} />)}
             </div>
           </>
         )}

@@ -27,8 +27,7 @@ const SCHEMA = [
     { id: "stats", url: "/#stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
     { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi (tampil di halaman Subsidiaries)", "textarea"),
       { ...f("presence.stats.branches", "Label statistik — Branches"), auto: "branches" }, { ...f("presence.stats.clients", "Label statistik — Affiliates/Infra"), auto: "clients" }, { ...f("presence.stats.countries", "Label statistik — Countries"), auto: "countries" }, f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
-    { id: "partners", url: "/#partners", label: "Partners, Vendors & Customers (Logo)", fields: [f("home.partners.kicker", "Judul kecil"), f("home.partners.title", "Judul"),
-      f("home.partners.cat_partner", "Label baris 1 — Strategic Partners"), f("home.partners.cat_vendor", "Label baris 2 — Vendors"), f("home.partners.cat_customer", "Label baris 3 — Customers")] },
+    { id: "partners", url: "/#partners", label: "Partners, Vendors & Customers (Logo)", fields: [f("home.partners.kicker", "Judul kecil"), f("home.partners.title", "Judul")] },
     { id: "about_partner", url: "/#partnership", label: "Strategic Partnership Access (CTA)", fields: [f("about.partner.kicker", "Judul kecil"), { ...f("about.partner.text", "Kalimat utama (Enter = baris baru)", "textarea"), hintText: ACCENT_HINT }, f("about.partner.cta", "Tombol"), f("about.partner.email", "Email")] },
   ] },
   { page: "pillars", label: "Pillars Page", sections: [

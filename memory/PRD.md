@@ -137,3 +137,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Logo dikelola di tab Images section "Home — Partners, Vendors & Customers Logos": pilih kategori (assets.meta.category) + nama (alt), key otomatis bila kosong, drag sort, thumbnail object-contain
 - 9 logo CONTOH (sample_logo_*) di-upload sebagai placeholder — hapus via tab Images setelah logo asli di-upload
 - CMS Content → Home: "Partners, Vendors & Customers (Logo)" (home.partners.*) + "Strategic Partnership Access (CTA)" (about.partner.*)
+- Revisi: kategori logo (CMS only): partner = Partners (Affiliates/JO Company, Investors, Government, Departments, Organizations), vendor = Brand (Producer/Produsen, Principals, Supplier, Distributor), customer = Customers/Clients. Form upload menampilkan Kategori + Nama saat section Partners dipilih. Publik: tanpa label kategori, 3 baris full-width selang-seling, tiap logo + nama (alt) di bawahnya. Field label kategori dihapus dari tab Content
