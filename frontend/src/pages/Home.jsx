@@ -8,6 +8,7 @@ import { STATS, PILLARS, SUBSIDIARIES } from "../data/content";
 const SUB_ORDER = [...SUBSIDIARIES].sort((a, b) => (a.tier === "affiliate") - (b.tier === "affiliate"));
 import { useLocations } from "../hooks/useLocations";
 import { useAssets } from "../context/AssetContext";
+import PartnersSection from "../components/home/PartnersSection";
 import AssetImg from "../components/AssetImg";
 import { StaticWorldMap } from "../components/StaticWorldMap";
 import Globe3D from "../components/Globe3D";
@@ -471,6 +472,8 @@ export default function Home() {
           </div>
         </Reveal>
       </section>
+
+      <PartnersSection />
     </div>
   );
 }

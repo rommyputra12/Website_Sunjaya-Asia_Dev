@@ -77,7 +77,7 @@ export const AssetProvider = ({ children }) => {
   }, [assets]);
 
   return (
-    <AssetContext.Provider value={{ byKey, ready }}>
+    <AssetContext.Provider value={{ byKey, ready, assets }}>
       {children}
     </AssetContext.Provider>
   );

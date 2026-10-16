@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useLang } from "../i18n/LanguageContext";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
 import AssetImg from "../components/AssetImg";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 import RichText from "../components/RichText";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
 
@@ -13,7 +12,6 @@ export default function About() {
   const identity = L("about.identity");
   const timeline = L("about.timeline.items");
   const edgeCols = [1, 2, 3].map((n) => ({ title: t(`about.edge.col${n}`), items: L(`about.edge.list${n}`) }));
-  const [partnershipOpen, setPartnershipOpen] = useState(false);
   return (
     <div data-testid="about-page" className="pb-24">
       {/* About the Group — hero section */}
@@ -169,38 +167,6 @@ export default function About() {
           </div>
         </div>
 
-        {/* Partnership CTA */}
-        <Reveal>
-          <div id="partnership" className="mt-32 border border-copper/40 p-10 md:p-16 bg-gradient-to-br from-ink to-obsidian">
-            <span className="font-mono text-sm md:text-base tracking-[0.24em] uppercase text-copper">{t("about.partner.kicker")}</span>
-            <p className="font-sans text-xl md:text-3xl text-bone mt-4 leading-[1.3] tracking-tight max-w-5xl">
-              <RichText text={t("about.partner.text")} accentClass="font-sans text-copper" />
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <button
-                onClick={() => setPartnershipOpen(true)}
-                className="inline-flex items-center gap-3 px-6 h-12 bg-copper text-obsidian font-mono text-[11px] tracking-[0.2em] uppercase hover:bg-copper-hi transition-colors"
-              >
-                {t("about.partner.cta")}
-              </button>
-              <span className="inline-flex items-center gap-3 px-6 h-12 border border-white/25 text-bone font-mono text-xs tracking-[0.15em]">
-                OR EMAIL TO: {t("about.partner.email")}
-              </span>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Partnership Request Panel — placeholder */}
-        <Dialog open={partnershipOpen} onOpenChange={setPartnershipOpen}>
-          <DialogContent className="max-w-xl bg-ink border-copper/30">
-            <DialogHeader>
-              <DialogTitle className="font-mono text-sm tracking-[0.24em] uppercase text-copper">Send Request for Partnership</DialogTitle>
-              <DialogDescription className="font-serif text-bone/80 text-base leading-relaxed">
-                This partnership request form is being prepared. Please check back soon.
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

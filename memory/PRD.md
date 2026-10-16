@@ -131,3 +131,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Penanda warna oranye: tulis *kata* (komponen RichText), Enter = baris baru
 - LanguageContext.tl(key, fallback) membaca list JSON (ID dari value_id jika ada)
 - ContentPanel: ListEditor generik (tambah/hapus/urut, maks, penanda belum tersimpan) — juga dipakai untuk Kantor & Kontak footer
+
+## Update 2026-06 (Partners section di Home)
+- Section baru Home setelah Global Presence (components/home/PartnersSection.jsx, id #partners): 3 baris logo marquee berjalan (Strategic Partners / Vendors / Customers, arah selang-seling, grayscale → warna asli saat hover, pause saat hover, kategori kosong disembunyikan) + kotak Strategic Partnership Access di bawahnya (dipindah dari About; tombol → dialog → link ke /contact; email jadi mailto)
+- Logo dikelola di tab Images section "Home — Partners, Vendors & Customers Logos": pilih kategori (assets.meta.category) + nama (alt), key otomatis bila kosong, drag sort, thumbnail object-contain
+- 9 logo CONTOH (sample_logo_*) di-upload sebagai placeholder — hapus via tab Images setelah logo asli di-upload
+- CMS Content → Home: "Partners, Vendors & Customers (Logo)" (home.partners.*) + "Strategic Partnership Access (CTA)" (about.partner.*)

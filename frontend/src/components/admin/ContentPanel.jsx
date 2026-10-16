@@ -27,6 +27,9 @@ const SCHEMA = [
     { id: "stats", url: "/#stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
     { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi (tampil di halaman Subsidiaries)", "textarea"),
       { ...f("presence.stats.branches", "Label statistik — Branches"), auto: "branches" }, { ...f("presence.stats.clients", "Label statistik — Affiliates/Infra"), auto: "clients" }, { ...f("presence.stats.countries", "Label statistik — Countries"), auto: "countries" }, f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
+    { id: "partners", url: "/#partners", label: "Partners, Vendors & Customers (Logo)", fields: [f("home.partners.kicker", "Judul kecil"), f("home.partners.title", "Judul"),
+      f("home.partners.cat_partner", "Label baris 1 — Strategic Partners"), f("home.partners.cat_vendor", "Label baris 2 — Vendors"), f("home.partners.cat_customer", "Label baris 3 — Customers")] },
+    { id: "about_partner", url: "/#partnership", label: "Strategic Partnership Access (CTA)", fields: [f("about.partner.kicker", "Judul kecil"), { ...f("about.partner.text", "Kalimat utama (Enter = baris baru)", "textarea"), hintText: ACCENT_HINT }, f("about.partner.cta", "Tombol"), f("about.partner.email", "Email")] },
   ] },
   { page: "pillars", label: "Pillars Page", sections: [
     { id: "intro", url: "/pillars", label: "Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title", "Judul intro", "textarea")] },
@@ -43,7 +46,6 @@ const SCHEMA = [
     { id: "about_edge", url: "/about#competitive-edge", label: "Competitive Edge", fields: [f("about.edge.kicker", "Judul section"), f("about.edge.title", "Judul baris 1"), f("about.edge.highlight", "Judul baris 2 (oranye)"), { ...f("about.edge.desc", "Deskripsi", "textarea"), hintText: ACCENT_HINT },
       f("about.edge.col1", "Kolom 1 — Judul"), f("about.edge.col2", "Kolom 2 — Judul"), f("about.edge.col3", "Kolom 3 — Judul")],
       lists: [1, 2, 3].map((n) => lst(`about.edge.list${n}`, `Kolom ${n} — Daftar`, [["text", "Teks"]], { itemLabel: "Baris", sortable: true })) },
-    { id: "about_partner", url: "/about#partnership", label: "Strategic Partnership (CTA)", fields: [f("about.partner.kicker", "Judul kecil"), { ...f("about.partner.text", "Kalimat utama (Enter = baris baru)", "textarea"), hintText: ACCENT_HINT }, f("about.partner.cta", "Tombol"), f("about.partner.email", "Email")] },
   ] },
   { page: "contact", label: "Contact Page", sections: [
     { id: "contact", url: "/contact", label: "Header & Pesan", fields: [f("contact.title", "Judul"), f("contact.sub", "Deskripsi", "textarea"), f("contact.success", "Pesan setelah terkirim", "textarea")] },

@@ -394,3 +394,8 @@ input, textarea, select {
     animation: none;
   }
 }
+
+/* Logo carousel */
+@keyframes logo-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+@media (prefers-reduced-motion: reduce) { [style*="logo-marquee"] { animation: none !important; } }

@@ -4,6 +4,7 @@ import { toast, Toaster } from "sonner";
 import { LocationsPanel } from "../components/admin/LocationsPanel";
 import { ContentPanel } from "../components/admin/ContentPanel";
 import { SUBSIDIARIES } from "../data/content";
+import { PARTNER_CATEGORIES } from "../components/home/PartnersSection";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -391,6 +392,7 @@ const IMAGE_SECTIONS = [
   { id: "home_pillars_intro", label: "Home — Pillars Intro Background" },
   { id: "home_pillar_sections", label: "Home — Pillar Sections (01–03)" },
   { id: "home_subsidiaries", label: "Home — Subsidiaries Grid" },
+  { id: "home_partners", label: "Home — Partners, Vendors & Customers Logos" },
   { id: "pillars_page", label: "Pillars Page — Slides" },
   { id: "about_page", label: "About Page" },
   { id: "footer", label: "Footer" },
@@ -553,7 +555,8 @@ const ImagesPanel = ({ client }) => {
   const onDragEnd = (e) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const grp = groups["home_subsidiaries"] || [];
+    const sec = items.find((a) => a.id === active.id)?.section;
+    const grp = groups[sec] || [];
     const from = grp.findIndex((a) => a.id === active.id);
     const to = grp.findIndex((a) => a.id === over.id);
     if (from < 0 || to < 0) return;
@@ -587,12 +590,13 @@ const ImagesPanel = ({ client }) => {
 
   const addNew = async (e) => {
     e.preventDefault();
-    if (!newKey.trim() || !newFile) { toast.error("Provide a key and a file"); return; }
+    const autoKey = !newKey.trim() && newSection === "home_partners" ? `logo_${Date.now().toString(36)}` : newKey.trim();
+    if (!autoKey || !newFile) { toast.error("Provide a key and a file"); return; }
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append("file", newFile);
-      fd.append("key", newKey.trim());
+      fd.append("key", autoKey);
       fd.append("section", newSection);
       // order is automatic: appended at the end of its section
       const inSection = items.filter((a) => (a.section || "other") === newSection).length;
@@ -662,14 +666,14 @@ const ImagesPanel = ({ client }) => {
           <SortableContext items={groups[secId].map((a) => a.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {groups[secId].map((a) => (
-              <AssetCard key={a.id} a={a} draggable={secId === "home_subsidiaries"}>
+              <AssetCard key={a.id} a={a} draggable={secId === "home_subsidiaries" || secId === "home_partners"}>
                 <button
                   type="button"
                   onClick={() => setEditing(a)}
                   data-testid={`asset-thumb-${a.key}`}
                   title="Klik untuk preview & atur posisi crop"
                   className="relative aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center group cursor-pointer">
-                  <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                  <img src={a.url} alt={a.alt || a.key} className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] ${a.section === "home_partners" ? "object-contain p-8" : "object-cover"}`} loading="lazy" />
                   <span className="absolute inset-0 bg-obsidian/0 group-hover:bg-obsidian/50 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[9px] tracking-[0.2em] uppercase text-bone border border-copper bg-obsidian/70 px-3 py-1.5">Edit crop</span>
                   </span>
@@ -697,6 +701,16 @@ const ImagesPanel = ({ client }) => {
                     className={inputCls}>
                     {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                   </select>
+                  )}
+                  {a.section === "home_partners" && (
+                    <div className="space-y-2" data-testid={`logo-form-${a.key}`}>
+                      <select value={a.meta?.category || "partner"} data-testid={`logo-category-${a.key}`}
+                        onChange={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), category: e.target.value } }, "Kategori tersimpan")} className={inputCls}>
+                        {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                      </select>
+                      <input defaultValue={a.alt || ""} placeholder="Nama perusahaan (alt)" data-testid={`logo-name-${a.key}`}
+                        onBlur={(e) => e.target.value !== (a.alt || "") && saveMeta({ ...a }, { alt: e.target.value }, "Nama tersimpan")} className={inputCls} />
+                    </div>
                   )}
                   {(a.section || "other") === "home_subsidiaries" && (
                     <SubCardTextForm asset={a} inputCls={inputCls} onSave={(meta, extra) => saveMeta({ ...a }, { meta, ...extra }, "Teks kartu tersimpan")} />
