@@ -13,8 +13,8 @@ const SOCIALS = [
 ];
 
 const OfficeBlock = ({ o, i }) => (
-  <div data-testid={`footer-office-${i}`} className="max-w-xs">
-    <div className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:text-xs">{o.label}</div>
+  <div data-testid={`footer-office-${i}`} className="min-w-0">
+    <div data-testid={`footer-office-label-${i}`} className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:whitespace-nowrap sm:text-xs">{o.label}</div>
     {o.line1 && <p>{o.line1}</p>}
     {o.line2 && <p>{o.line2}</p>}
     {o.country && <p>{o.country}</p>}
