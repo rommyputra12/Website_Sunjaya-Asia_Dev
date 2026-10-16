@@ -14,6 +14,15 @@ export const PARTNER_CATEGORIES = [
   { id: "customer", label: "Customers / Clients" },
 ];
 
+// Display tone so every logo reads on the dark background; original colours return on hover
+export const LOGO_TONES = {
+  white: { label: "Putih (auto)", filter: "brightness(0) invert(1)" },
+  invert: { label: "Invert (latar terang)", filter: "grayscale(1) invert(1)", blend: "screen" },
+  gray: { label: "Grayscale", filter: "grayscale(1) brightness(1.3)" },
+  dark: { label: "Gelap", filter: "brightness(0) invert(0.15)" },
+  original: { label: "Warna asli", filter: "none" },
+};
+
 const PARTNER_TEXT = {
   "home.partners.kicker": "Partners & Clients",
   "home.partners.title": "Trusted by leaders across industries.",
@@ -30,9 +39,10 @@ const LogoRow = ({ id, logos, reverse }) => {
           style={{ animation: `logo-marquee ${duration}s linear infinite${reverse ? " reverse" : ""}` }}>
           {[0, 1].map((dup) => loop.map((l, i) => (
             <div key={`${dup}-${i}`} aria-hidden={dup === 1} className="group w-36 md:w-44 shrink-0 flex flex-col items-center gap-2">
-              <div className="h-16 md:h-20 w-full grid place-items-center bg-white/[0.04] border border-white/10 px-4 group-hover:border-copper/50 transition-colors duration-300">
-                <img src={l.url} alt={l.alt || l.key} loading="lazy"
-                  className="max-h-10 md:max-h-12 max-w-full object-contain grayscale brightness-[1.8] opacity-70 group-hover:grayscale-0 group-hover:brightness-100 group-hover:opacity-100 transition-[filter,opacity] duration-300" />
+              <div className="h-16 md:h-20 w-full grid place-items-center bg-[#0c2635] border border-white/10 px-4 group-hover:border-copper/50 transition-colors duration-300">
+                <img src={l.url} alt={l.alt || l.key} loading="lazy" data-tone={l.meta?.tone || "white"}
+                  style={{ "--logo-filter": (LOGO_TONES[l.meta?.tone] || LOGO_TONES.white).filter, mixBlendMode: (LOGO_TONES[l.meta?.tone] || LOGO_TONES.white).blend }}
+                  className="logo-tone max-h-10 md:max-h-12 max-w-full object-contain opacity-80 group-hover:opacity-100 transition-[filter,opacity] duration-300" />
               </div>
               {l.alt && <span className="font-mono text-[9px] md:text-[10px] tracking-[0.14em] uppercase text-bone/60 group-hover:text-bone text-center leading-tight line-clamp-2 transition-colors">{l.alt}</span>}
             </div>

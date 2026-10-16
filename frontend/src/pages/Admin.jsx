@@ -4,7 +4,8 @@ import { toast, Toaster } from "sonner";
 import { LocationsPanel } from "../components/admin/LocationsPanel";
 import { ContentPanel } from "../components/admin/ContentPanel";
 import { SUBSIDIARIES } from "../data/content";
-import { PARTNER_CATEGORIES } from "../components/home/PartnersSection";
+import { PARTNER_CATEGORIES, LOGO_TONES } from "../components/home/PartnersSection";
+import { BulkLogoUpload } from "../components/admin/BulkLogoUpload";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -486,8 +487,6 @@ const ImagesPanel = ({ client }) => {
   const [newKey, setNewKey] = useState("");
   const [newFile, setNewFile] = useState(null);
   const [newSection, setNewSection] = useState("other");
-  const [newCategory, setNewCategory] = useState("partner");
-  const [newName, setNewName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(null); // asset being focal-edited
 
@@ -603,12 +602,9 @@ const ImagesPanel = ({ client }) => {
       // order is automatic: appended at the end of its section
       const inSection = items.filter((a) => (a.section || "other") === newSection).length;
       fd.append("sort_order", String(100 + inSection));
-      const r = await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      if (newSection === "home_partners" && r.data?.id) {
-        await client.put(`/assets/${r.data.id}`, { meta: { category: newCategory }, alt: newName.trim() || autoKey });
-      }
-      toast.success(`Added "${newName.trim() || autoKey}"`);
-      setNewKey(""); setNewFile(null); setNewName("");
+      await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      toast.success(`Added "${autoKey}"`);
+      setNewKey(""); setNewFile(null);
       e.target.reset();
       await refresh();
     } catch (err) {
@@ -635,21 +631,8 @@ const ImagesPanel = ({ client }) => {
   return (
     <div data-testid="images-panel">
       {/* Add new asset */}
-      <form onSubmit={addNew} className={`bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 gap-4 items-end ${newSection === "home_partners" ? "md:grid-cols-5" : "md:grid-cols-4"}`}>
-        {newSection === "home_partners" ? (
-          <>
-            <div>
-              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Kategori logo</label>
-              <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} data-testid="new-logo-category" className={`${inputCls} h-10`}>
-                {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Nama brand / perusahaan / instansi</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="mis. PT Pertamina" data-testid="new-logo-name" className={`${inputCls} h-10`} />
-            </div>
-          </>
-        ) : (
+      <form onSubmit={addNew} className={`bg-ink border border-white/10 p-5 mb-10 grid grid-cols-1 gap-4 items-end ${newSection === "home_partners" ? "md:grid-cols-3" : "md:grid-cols-4"}`}>
+        {newSection === "home_partners" ? null : (
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">New asset key</label>
           <input value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="e.g. home_new_banner"
@@ -662,6 +645,9 @@ const ImagesPanel = ({ client }) => {
             {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </div>
+        {newSection === "home_partners" ? (
+          <BulkLogoUpload client={client} existingCount={items.filter((a) => a.section === "home_partners").length} onDone={refresh} />
+        ) : (<>
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Image file</label>
           <input type="file" accept="image/*" onChange={(e) => setNewFile(e.target.files?.[0] || null)}
@@ -672,6 +658,7 @@ const ImagesPanel = ({ client }) => {
           className="h-10 px-6 bg-copper text-obsidian font-mono text-[10px] tracking-[0.22em] uppercase hover:bg-copper-hi transition-colors disabled:opacity-50">
           {uploading ? "Uploading…" : "Add image"}
         </button>
+        </>)}
       </form>
 
       {/* Grouped by section in page order */}
@@ -693,7 +680,8 @@ const ImagesPanel = ({ client }) => {
                   data-testid={`asset-thumb-${a.key}`}
                   title="Klik untuk preview & atur posisi crop"
                   className="relative aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center group cursor-pointer">
-                  <img src={a.url} alt={a.alt || a.key} className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] ${a.section === "home_partners" ? "object-contain p-8" : "object-cover"}`} loading="lazy" />
+                  <img src={a.url} alt={a.alt || a.key} className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] ${a.section === "home_partners" ? "object-contain p-8" : "object-cover"}`} loading="lazy"
+                    style={a.section === "home_partners" ? { filter: (LOGO_TONES[a.meta?.tone] || LOGO_TONES.white).filter, mixBlendMode: (LOGO_TONES[a.meta?.tone] || LOGO_TONES.white).blend } : undefined} />
                   <span className="absolute inset-0 bg-obsidian/0 group-hover:bg-obsidian/50 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[9px] tracking-[0.2em] uppercase text-bone border border-copper bg-obsidian/70 px-3 py-1.5">Edit crop</span>
                   </span>
@@ -727,6 +715,10 @@ const ImagesPanel = ({ client }) => {
                       <select value={a.meta?.category || "partner"} data-testid={`logo-category-${a.key}`}
                         onChange={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), category: e.target.value } }, "Kategori tersimpan")} className={inputCls}>
                         {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                      </select>
+                      <select value={a.meta?.tone || "white"} data-testid={`logo-tone-${a.key}`}
+                        onChange={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), tone: e.target.value } }, "Tampilan logo tersimpan")} className={inputCls}>
+                        {Object.entries(LOGO_TONES).map(([id, t]) => <option key={id} value={id}>Tampilan: {t.label}</option>)}
                       </select>
                       <input defaultValue={a.alt || ""} placeholder="Nama brand / perusahaan / instansi" data-testid={`logo-name-${a.key}`}
                         onBlur={(e) => e.target.value !== (a.alt || "") && saveMeta({ ...a }, { alt: e.target.value }, "Nama tersimpan")} className={inputCls} />

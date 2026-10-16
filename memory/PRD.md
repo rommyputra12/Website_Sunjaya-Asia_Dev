@@ -138,3 +138,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - 9 logo CONTOH (sample_logo_*) di-upload sebagai placeholder — hapus via tab Images setelah logo asli di-upload
 - CMS Content → Home: "Partners, Vendors & Customers (Logo)" (home.partners.*) + "Strategic Partnership Access (CTA)" (about.partner.*)
 - Revisi: kategori logo (CMS only): partner = Partners (Affiliates/JO Company, Investors, Government, Departments, Organizations), vendor = Brand (Producer/Produsen, Principals, Supplier, Distributor), customer = Customers/Clients. Form upload menampilkan Kategori + Nama saat section Partners dipilih. Publik: tanpa label kategori, 3 baris full-width selang-seling, tiap logo + nama (alt) di bawahnya. Field label kategori dihapus dari tab Content
+
+## Update 2026-06 (bulk logo + auto-contrast)
+- Tab Images → section Partners: BulkLogoUpload (components/admin/BulkLogoUpload.jsx) — pilih/drop banyak file, tiap baris: preview, nama (default dari nama file), kategori, tampilan; kategori default; progress upload
+- Auto-contrast: detectTone (canvas) saat pilih file → transparan = "white" (siluet putih), latar terang = "invert" (grayscale+invert+screen blend), latar gelap = "gray"; disimpan di assets.meta.tone, bisa diganti per logo (white/invert/gray/dark/original). File asli tetap disimpan; konversi via CSS filter, warna asli muncul saat hover
+- Tile logo kini warna solid (#0c2635) agar blend invert menyatu
