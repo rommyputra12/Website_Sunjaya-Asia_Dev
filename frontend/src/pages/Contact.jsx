@@ -47,7 +47,7 @@ export default function Contact() {
               {offices.map((o, i) => (
                 <div key={i} data-testid={`contact-office-${i}`} className="border-t border-white/10 pt-6">
                   <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{o.label}</div>
-                  <p className="text-bone text-base mt-2 max-w-sm">{[o.line1, o.line2].filter(Boolean).join(", ")}</p>
+                  <p className="text-bone text-base mt-2 max-w-sm">{[o.line1, o.line2].filter(Boolean).join(", ")}{o.country && <span className="block">{o.country}</span>}</p>
                   {o.phone && <a href={telHref(o.phone)} className="block text-bone/80 text-sm font-mono mt-1 hover:text-copper transition-colors">{o.phone}</a>}
                 </div>
               ))}

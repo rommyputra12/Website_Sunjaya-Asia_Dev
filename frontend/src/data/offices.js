@@ -4,9 +4,9 @@ export const MAX_OFFICES = 4;
 export const OFFICES_KEY = "footer.offices";
 
 export const DEFAULT_OFFICES = [
-  { label: "Head Quarter · Registered Office", line1: "68 Circular Road, #02-01", line2: "Singapore 049422 Republic of Singapore", phone: "+65 3108 0411" },
-  { label: "Branch & Central Hub · Indonesia", line1: "Sunlife Tower 16th, Kawasan Mega Kuningan", line2: "Jakarta Selatan, DKI Jakarta 12950 Indonesia", phone: "+62 21 2168 9411" },
-  { label: "Branch Investment Hub · United States", line1: "8 The Green, Ste A, Suite B", line2: "Dover, DE 19901, Kent County, Delaware, United States", phone: "+1 302 248 9559" },
+  { label: "Head Quarter · Registered Office", line1: "68 Circular Road, #02-01", line2: "Singapore 049422", country: "Republic of Singapore", phone: "+65 3108 0411" },
+  { label: "Branch & Central Hub · Indonesia", line1: "Sunlife Tower 16th, Kawasan Mega Kuningan", line2: "Jakarta Selatan, DKI Jakarta 12950", country: "Indonesia", phone: "+62 21 2168 9411" },
+  { label: "Branch Investment Hub · United States", line1: "8 The Green, Ste A, Suite B", line2: "Dover, DE 19901, Kent County, Delaware", country: "United States", phone: "+1 302 248 9559" },
 ];
 
 export const parseOffices = (raw) => {

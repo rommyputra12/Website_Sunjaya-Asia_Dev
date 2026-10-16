@@ -144,3 +144,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Auto-contrast: detectTone (canvas) saat pilih file → transparan = "white" (siluet putih), latar terang = "invert" (grayscale+invert+screen blend), latar gelap = "gray"; disimpan di assets.meta.tone, bisa diganti per logo (white/invert/gray/dark/original). File asli tetap disimpan; konversi via CSS filter, warna asli muncul saat hover
 - Tile logo kini warna solid (#0c2635) agar blend invert menyatu
 - Partnership box redesign (2026-06): layout 2 kolom (teks kiri, CTA + email kanan), aksen garis copper kiri, glow & grid halus, font lebih kecil; RichText baris baru hanya di md+
+- Footer offices (2026-06): field baru `country` per kantor, tampil di baris sendiri di Footer, Contact & preview; data DB dimigrasi (koma sebelum negara dihapus); CMS: kolom 'Negara (baris sendiri)'

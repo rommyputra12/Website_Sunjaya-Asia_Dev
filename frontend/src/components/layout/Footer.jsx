@@ -17,6 +17,7 @@ const OfficeBlock = ({ o, i }) => (
     <div className="mb-1 font-mono text-[11px] tracking-[0.16em] uppercase text-copper sm:text-xs">{o.label}</div>
     {o.line1 && <p>{o.line1}</p>}
     {o.line2 && <p>{o.line2}</p>}
+    {o.country && <p>{o.country}</p>}
     {o.phone && (
       <a href={telHref(o.phone)} className="mt-2 flex items-center gap-2 text-[11px] leading-[1.4] text-white/80 transition-colors hover:text-copper sm:text-xs">
         <Phone className="h-3.5 w-3.5 shrink-0 text-copper" strokeWidth={1.5} />

@@ -53,7 +53,7 @@ const SCHEMA = [
     { id: "footer", url: "/#site-footer", label: "Tagline & Perusahaan", fields: [f("footer.tagline", "Tagline besar"), f("footer.description", "Deskripsi singkat", "textarea"), f("footer.company", "Nama perusahaan")] },
     { id: "offices", url: "/#site-footer", label: `Kantor & Kontak (maks. ${MAX_OFFICES})`, fields: [],
       lists: [{ key: OFFICES_KEY, label: "Kantor", defaults: DEFAULT_OFFICES, max: MAX_OFFICES, itemLabel: "Kantor", sortable: true, note: "Kantor 1 tampil sebagai Head Quarter; ikon telepon otomatis",
-        itemTitle: (i) => (i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`), fields: [["label", "Judul kantor"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["phone", "Nomor telepon"]] }] },
+        itemTitle: (i) => (i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`), fields: [["label", "Judul kantor"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["country", "Negara (baris sendiri)"], ["phone", "Nomor telepon"]] }] },
   ] },
 ];
 

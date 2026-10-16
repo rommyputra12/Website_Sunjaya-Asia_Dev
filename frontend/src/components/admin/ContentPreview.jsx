@@ -155,7 +155,7 @@ const Offices = () => {
   const Office = ({ o, i }) => (
     <div data-testid={`preview-office-${i}`} className={`p-1 rounded-[2px] transition-colors ${active === `office-${i}` ? "bg-copper/30 outline outline-1 outline-copper" : ""}`}>
       <div className="font-mono text-[7px] tracking-[0.14em] uppercase text-copper">{o.label}</div>
-      <div className="text-white/80">{o.line1}</div><div className="text-white/80">{o.line2}</div>
+      <div className="text-white/80">{o.line1}</div><div className="text-white/80">{o.line2}</div>{o.country && <div className="text-white/80">{o.country}</div>}
       {o.phone && <div className="mt-1 flex items-center gap-1 text-white/80"><Phone className="w-2.5 h-2.5 text-copper" />{o.phone}</div>}
     </div>
   );
