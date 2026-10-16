@@ -1,0 +1,20 @@
+{
+  "summary": "Footer office-label wrap fix verified (frontend only). At 1920x800, 1366x768 and 1024x768, footer-office-label-0/1/2 are each 16px tall (one line, line-height 16px). 'BRANCH INVESTMENT HUB · UNITED STATES' stays on one line with no overflow. At 768x1024 it's also one line. At 390x844 the labels fit on one line (15.4px) and nothing inside #site-footer extends past the viewport. Office 0, 1 and 2 show their address lines, then the country on its own line ('Republic of Singapore', 'Indonesia', 'United States'), then the correct tel: phone link. The /contact office list (contact-office-0..2) still shows the label, address, country and phone. The bug fix works.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Footer at tablet 768x1024", "issues": ["footer-office-label-2 has scrollWidth 330 and clientWidth 328, so the text runs about 2px past its column because of nowrap plus the trailing letter-spacing. Only cosmetic; it does not cause page overflow. Also, the final 'S' of 'STATES' sits over the copper phoenix background image, so copper text on copper reduces contrast at 768-1024px widths."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": ["Optional: at the sm-lg breakpoints, reduce letter-spacing or add a right margin so the 'UNITED STATES' label doesn't touch the copper phoenix image on tablet."],
+  "critical_code_review_comments": ["sm:whitespace-nowrap on CMS-editable labels can make columns overflow if an admin enters a longer label (sm grid with 3 branches). Consider adding sm:truncate or a max-width safeguard."],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Measured label heights and overflow with page.evaluate at 1920, 1366, 1024, 768 and 390 widths on /contact. All labels are 1 line. The DB was not modified."
+}
