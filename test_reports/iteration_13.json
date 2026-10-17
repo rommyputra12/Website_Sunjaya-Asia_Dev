@@ -1,0 +1,37 @@
+{
+  "summary": "Tested partner-logo upload inside the home_partners group, keeping the section on replace, crop zoom, and how logos display on the Home carousel. Found and fixed 1 critical backend bug: replacing a logo moved it to the 'other' section. All flows pass after the fix.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/assets (replace)", "issue": "FIXED by testing agent. The lookup for the existing asset used filters={'key': f'eq.{key}'}, but sb_select() already adds 'eq.', so the query became key=eq.eq.<key> and matched nothing. Because of that, replacing without a section always reset section to 'other' and sort_order to 100. This was the user's bug 1 (a replaced logo ended up in Custom uploads). Changed to filters={'key': key}.", "priority": "CRITICAL"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/assets", "issue": "The storage object name comes from the uploaded filename and is upserted (x-upsert: true). If two different assets are uploaded with the same filename (e.g. 'logo.png'), the second overwrites the first one's image in storage, so both assets show the same picture. Replacing a file with a same-named file is also served stale because of Cache-Control max-age=31536000. Replace also leaves the old storage object orphaned (qa1.png stayed after replacing with qa2.png). Suggest object_name = f'{key}_{timestamp}{ext}' or appending a hash."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home #partners", "issues": ["Square logos (e.g. 500x500 EVOSMART, 2560x2560 evowaste) are limited by the tile height (77px) under object-contain, so they look smaller than wide logos. This is correct proportionally, but users must use zoom to make them bigger. Could consider trimming transparent padding automatically."]},
+      {"screen": "Admin Images", "issues": ["The Replace file input on the card has no data-testid (e.g. asset-replace-{key})."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_logo_upload_section.py", "/app/test_reports/pytest/pytest_results_iter13.xml"],
+  "action_items": [
+    "Review the backend fix in server.py upload_asset: existing lookup now uses filters={'key': key}",
+    "Make storage object names unique per asset (key + timestamp/hash) to avoid overwriting between assets and stale CDN cache; optionally delete the old object on replace",
+    "Add data-testid to the Replace file input on asset cards",
+    "Admin.jsx is 966 lines; split ImagesPanel and FocalEditorModal into separate modules"
+  ],
+  "critical_code_review_comments": [
+    "sb_select filter misuse (double eq.) caused the section-loss bug. grep found no other filter value passed with a manual 'eq.' prefix.",
+    "BulkLogoUpload makes 2 calls per logo (POST then PUT for alt/meta). If the PUT fails, the logo stays in home_partners with no name or category (defaults to the partner row). It is toasted as a failure but not rolled back.",
+    "BulkLogoUpload: the per-row remove (trash) button has no data-testid."
+  ],
+  "updated_files": ["/app/backend/server.py", "/app/backend/tests/test_logo_upload_section.py"],
+  "success_rate": {"backend": "100% (4/4) after fix; 50% before fix", "frontend": "100%"},
+  "seed_data_creation": "None kept. The QA Test Logo (logo_mvct130t_0) and the TEST_logo_* API assets were deleted.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Verified: bulk-logo-upload is inside image-section-home_partners; new-asset-section no longer lists home_partners; the uploaded logo lands in home_partners with category vendor and its name; replace keeps section/name/category (after fix); the focal-logo-preview shows scale(1.8); on Home the tile img has transform scale(1.8) and its box fills the tile inner area (198x77 inside a 224x103 tile; the scaled img measured 356x139). There are 7 '(contoh)' samples plus 2 real logos (EVOWASTE, EVOSMART) that the user renamed earlier. Do not delete them. Run pytest with -n0 because the module fixture is shared."
+}

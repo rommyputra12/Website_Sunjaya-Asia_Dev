@@ -733,6 +733,27 @@ def _compress_image(data: bytes, content_type: str):
     return out, "image/webp", im.size
 
 
+def _trim_transparent(data: bytes, content_type: str) -> bytes:
+    """Crop empty transparent margins so logos fill their tile."""
+    if content_type in ("image/gif", "image/svg+xml"):
+        return data
+    try:
+        from PIL import Image
+        import io as _io
+        im = Image.open(_io.BytesIO(data)); im.load()
+        if im.mode not in ("RGBA", "LA"):
+            return data
+        bbox = im.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox()
+        if not bbox or bbox == (0, 0, *im.size):
+            return data
+        pad = max(2, int(max(bbox[2] - bbox[0], bbox[3] - bbox[1]) * 0.02))
+        bbox = (max(0, bbox[0] - pad), max(0, bbox[1] - pad), min(im.width, bbox[2] + pad), min(im.height, bbox[3] + pad))
+        buf = _io.BytesIO(); im.crop(bbox).save(buf, "PNG")
+        return buf.getvalue()
+    except Exception:
+        return data
+
+
 async def _asset_usage() -> set:
     """URLs referenced by news covers and location photos."""
     urls = set()
@@ -824,8 +845,11 @@ async def upload_asset(
 
     # Preserve the original filename when provided (keeps Supabase organised like the repo),
     # otherwise derive a stable name from the key.
+    existing = (await sb_select("assets", filters={"key": key}, limit=1, svc=True) or [None])[0]
     width = height = None
     try:
+        if (section or (existing or {}).get("section")) == "home_partners":
+            data = _trim_transparent(data, content_type)
         data, content_type, dims = _compress_image(data, content_type)
         if dims:
             width, height = dims
@@ -834,7 +858,7 @@ async def upload_asset(
         logger.warning(f"image compression skipped: {e}")
     orig = (file.filename or "").strip().replace("/", "_").replace("\\", "_")
     stem = orig.rsplit(".", 1)[0] if orig else key
-    object_name = f"{stem}{ext}"
+    object_name = f"{stem}-{uuid.uuid4().hex[:8]}{ext}"  # unique: avoids overwriting/stale cache
 
     storage_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
     async with httpx.AsyncClient(timeout=120) as c:
@@ -850,7 +874,6 @@ async def upload_asset(
 
     public_url = _asset_public_url(object_name)
     # On replace keep the existing section / order / alt unless explicitly provided
-    existing = (await sb_select("assets", filters={"key": f"eq.{key}"}, limit=1, svc=True) or [None])[0]
     row = {"key": key, "url": public_url, "width": width, "height": height,
            "alt": alt if alt is not None else (existing or {}).get("alt"),
            "section": section or (existing or {}).get("section") or "other",

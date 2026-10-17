@@ -147,3 +147,10 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Footer offices (2026-06): field baru `country` per kantor, tampil di baris sendiri di Footer, Contact & preview; data DB dimigrasi (koma sebelum negara dihapus); CMS: kolom 'Negara (baris sendiri)'
 - Fix (2026-06): label kantor footer tidak lagi turun baris (sm:whitespace-nowrap, tracking dikurangi di tablet) — diverifikasi testing agent iteration_11
 - Fix (2026-06): hero subtitle min-h 4 baris agar tinggi banner tidak berubah saat ganti EN/ID (iteration_12 lulus); angka stat mobile sedikit diperkecil agar tidak mepet tepi
+
+## Update 2026-06 (fix upload logo & crop carousel) — iteration_13
+- Bug: Replace gambar memindahkan aset ke section "other" (lookup existing salah: eq.eq.) → diperbaiki: upload mempertahankan section/alt/sort_order lama bila tidak dikirim
+- Bulk uploader logo kini ada langsung di dalam grup "Home — Partners…" (tanpa pilih section); opsi partners dihapus dari form atas; dropdown section disembunyikan di kartu logo
+- Carousel: tile lebih besar (aspect 13:6, w-44/56), LogoImg mengisi kotak (object-contain) + menerapkan focal & zoom crop CMS; modal crop punya preview "Kotak logo carousel"
+- Upload ke section partners: margin transparan logo otomatis dipangkas (Pillow) agar logo penuh
+- Nama file storage unik (stem-uuid8) agar tidak saling menimpa / cache basi; input replace punya data-testid asset-replace-{key}

@@ -745,7 +745,7 @@ const ImagesPanel = ({ client }) => {
                   <div className="flex gap-2 mt-auto pt-1">
                     <label className={`flex-1 text-center cursor-pointer h-8 leading-8 border border-white/15 font-mono text-[9px] tracking-[0.18em] uppercase ${busyKey === a.key ? "opacity-50" : "text-bone hover:border-copper hover:text-copper"} transition-colors`}>
                       {busyKey === a.key ? "…" : "Replace"}
-                      <input type="file" accept="image/*" className="hidden" disabled={busyKey === a.key}
+                      <input type="file" accept="image/*" data-testid={`asset-replace-${a.key}`} className="hidden" disabled={busyKey === a.key}
                         onChange={(e) => { const f = e.target.files?.[0]; if (f) replaceImage(a.key, f); e.target.value = ""; }} />
                     </label>
                     {a.in_use ? (
