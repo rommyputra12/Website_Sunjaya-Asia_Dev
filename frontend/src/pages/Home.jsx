@@ -375,9 +375,9 @@ export default function Home() {
             <Link
               to="/subsidiaries"
               data-testid="home-subs-link"
-              className="group relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-[#2576ae]/50 bg-[#2576ae]/15 backdrop-blur-md text-[#2576ae] hover:text-white transition-all duration-400 font-mono text-[10px] md:text-[11px] tracking-[0.22em] uppercase font-semibold w-fit overflow-hidden"
+              className="group relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-copper/60 bg-[#F9F5EB]/85 backdrop-blur-md text-copper hover:text-[#F9F5EB] hover:border-copper shadow-[0_6px_18px_-10px_rgba(200,98,48,.6)] transition-[color,border-color] duration-500 font-mono text-[10px] md:text-[11px] tracking-[0.22em] uppercase font-semibold w-fit overflow-hidden"
             >
-              <span className="absolute inset-0 bg-[#2576ae] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
+              <span className="absolute inset-0 bg-copper origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
               <span className="relative z-10">{t("home.subs.cta", SUBS_TEASER.cta)}</span>
               <svg className="relative z-10 transition-transform duration-400 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="9" x2="15" y2="9" />

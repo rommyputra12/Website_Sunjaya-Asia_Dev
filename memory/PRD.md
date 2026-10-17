@@ -188,3 +188,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - #F7F2E6 -> #F9F5EB (dasar), #F5EFE0 -> #F7F2E7 (band, overlay Pillar, hover kotak logo)
 
 - Overlay Pillar & hover kotak logo disamakan ke #F9F5EB
+
+- Tombol "View All Subsidiaries" Home: dari biru ke outline copper + isi gading, hover fill copper
