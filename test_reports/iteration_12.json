@@ -1,0 +1,23 @@
+{
+  "summary": "Checked the fix for the hero banner changing size when switching EN to ID on Home. The fix adds min-h-[5.8em] to the hero subtitle. Measured section#hero height and the hero-cta-primary Y position in EN, then in ID, at 1920x800, 1366x768 and 390x844. At all three sizes the difference was 0px. Results: 1920 -> hero 919.6px, button Y 661. 1366 -> hero 916.9px, button Y 658.3. 390 -> hero 819.5px, button Y 451.3. The subtitle is 4 lines in both languages and nothing is cut off (scrollHeight equals clientHeight). The headline is correct in both languages: 'The Power of Innovations' and 'Kekuatan dari Inovasi'. No horizontal overflow at 390px. Switching back to EN also leaves the layout unchanged.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home hero stats (mobile 390)", "issues": ["'USD 750 Million+' stat sits flush against the right edge of the screen (no page overflow, but almost no right padding)"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: add data-testid (e.g. mobile-lang-en / mobile-lang-id) to the EN/ID buttons in the mobile menu, Nav.jsx lines 140-141",
+    "Optional: add a little right padding to the 'USD 750 Million+' stat on mobile"
+  ],
+  "critical_code_review_comments": ["The min-h-[5.8em] fix only works while hero.sub is at most 4 lines. Longer copy in either language would make the hero size differ between EN and ID again."],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Language setting is stored in localStorage key 'sunjaya_lang'. Desktop toggle uses data-testid lang-en / lang-id. On mobile the toggle is inside the nav-toggle menu, with no testid (use button:text-is('ID'))."
+}
