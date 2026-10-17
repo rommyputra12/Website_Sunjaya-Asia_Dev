@@ -177,3 +177,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Root cause: LanguageProvider berada di luar AssetProvider (App.jsx) sehingga t() tidak bisa membaca assets.meta; urutan provider dibalik
 - Daftar per-negara di halaman Subsidiaries kini memakai nama/kota/negara CMS & urutan CMS
 - Audit: semua content_blocks + meta subsidiaries terverifikasi tampil di Home/Subsidiaries/About/Pillars/Contact
+
+## 2026-06 Home Pillar 01-03 background
+- Gambar bg opacity 0.6 -> 0.5, overlay putih/40 diganti gading #F5EFE0/55
