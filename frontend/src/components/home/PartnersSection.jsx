@@ -23,6 +23,17 @@ export const LOGO_TONES = {
   original: { label: "Warna asli", filter: "none" },
 };
 
+// Logo fitted to its tile, honouring the CMS crop (focal point + zoom) and display tone
+export const LogoImg = ({ asset, style }) => {
+  const tone = LOGO_TONES[asset.meta?.tone] || LOGO_TONES.white;
+  const fx = asset.focal_x ?? 50, fy = asset.focal_y ?? 50, zoom = asset.zoom ?? 1;
+  return (
+    <img src={asset.url} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone={asset.meta?.tone || "white"}
+      className="logo-tone absolute inset-0 w-full h-full object-contain"
+      style={{ "--logo-filter": tone.filter, mixBlendMode: tone.blend, objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style }} />
+  );
+};
+
 const PARTNER_TEXT = {
   "home.partners.kicker": "Partners & Global Alliances",
   "home.partners.title": "Collaborating with global industry leaders, government stakeholders, R&D institutions, technology pioneers, and civil society organizations.",
@@ -38,11 +49,9 @@ const LogoRow = ({ id, logos, reverse }) => {
         <div className="flex w-max gap-6 md:gap-10 hover:[animation-play-state:paused]"
           style={{ animation: `logo-marquee ${duration}s linear infinite${reverse ? " reverse" : ""}` }}>
           {[0, 1].map((dup) => loop.map((l, i) => (
-            <div key={`${dup}-${i}`} aria-hidden={dup === 1} className="group w-36 md:w-44 shrink-0 flex flex-col items-center gap-2">
-              <div className="h-16 md:h-20 w-full grid place-items-center bg-[#0c2635] border border-white/10 px-4 group-hover:border-copper/50 transition-colors duration-300">
-                <img src={l.url} alt={l.alt || l.key} loading="lazy" data-tone={l.meta?.tone || "white"}
-                  style={{ "--logo-filter": (LOGO_TONES[l.meta?.tone] || LOGO_TONES.white).filter, mixBlendMode: (LOGO_TONES[l.meta?.tone] || LOGO_TONES.white).blend }}
-                  className="logo-tone max-h-10 md:max-h-12 max-w-full object-contain opacity-80 group-hover:opacity-100 transition-[filter,opacity] duration-300" />
+            <div key={`${dup}-${i}`} aria-hidden={dup === 1} className="group w-44 md:w-56 shrink-0 flex flex-col items-center gap-2">
+              <div data-testid="partner-logo-tile" className="relative aspect-[13/6] w-full overflow-hidden bg-[#0c2635] border border-white/10 group-hover:border-copper/50 transition-colors duration-300">
+                <div className="absolute inset-2 md:inset-3 opacity-90 group-hover:opacity-100 transition-opacity duration-300"><LogoImg asset={l} /></div>
               </div>
               {l.alt && <span className="font-mono text-[9px] md:text-[10px] tracking-[0.14em] uppercase text-bone/60 group-hover:text-bone text-center leading-tight line-clamp-2 transition-colors">{l.alt}</span>}
             </div>

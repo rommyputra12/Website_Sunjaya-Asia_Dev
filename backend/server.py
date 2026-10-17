@@ -849,8 +849,12 @@ async def upload_asset(
             raise HTTPException(502, f"Storage upload failed: {up.text[:200]}")
 
     public_url = _asset_public_url(object_name)
-    row = {"key": key, "url": public_url, "alt": alt, "width": width, "height": height,
-           "section": (section or "other"), "sort_order": sort_order if sort_order is not None else 100,
+    # On replace keep the existing section / order / alt unless explicitly provided
+    existing = (await sb_select("assets", filters={"key": f"eq.{key}"}, limit=1, svc=True) or [None])[0]
+    row = {"key": key, "url": public_url, "width": width, "height": height,
+           "alt": alt if alt is not None else (existing or {}).get("alt"),
+           "section": section or (existing or {}).get("section") or "other",
+           "sort_order": sort_order if sort_order is not None else (existing or {}).get("sort_order", 100),
            "updated_at": now_iso()}
     url = f"{SUPABASE_URL}/rest/v1/assets?on_conflict=key"
     async with httpx.AsyncClient(timeout=30) as c:

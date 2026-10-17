@@ -4,7 +4,7 @@ import { toast, Toaster } from "sonner";
 import { LocationsPanel } from "../components/admin/LocationsPanel";
 import { ContentPanel } from "../components/admin/ContentPanel";
 import { SUBSIDIARIES } from "../data/content";
-import { PARTNER_CATEGORIES, LOGO_TONES } from "../components/home/PartnersSection";
+import { PARTNER_CATEGORIES, LOGO_TONES, LogoImg } from "../components/home/PartnersSection";
 import { BulkLogoUpload } from "../components/admin/BulkLogoUpload";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -356,6 +356,14 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
           {/* Live previews */}
           <div>
             <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-2">3 · Preview hasil di slot layout</p>
+            {asset.section === "home_partners" ? (
+              <>
+                <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Kotak logo carousel (Home)</p>
+                <div data-testid="focal-logo-preview" className="relative aspect-[13/6] w-full max-w-xs bg-[#0c2635] border border-white/10 overflow-hidden">
+                  <div className="absolute inset-3"><LogoImg asset={{ ...asset, focal_x: fx, focal_y: fy, zoom }} /></div>
+                </div>
+              </>
+            ) : (<>
             <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Kartu (4:3) — subsidiary grid</p>
             <div className="relative aspect-[4/3] bg-obsidian border border-white/10 overflow-hidden mb-3">
               <img src={asset.url} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
@@ -364,6 +372,7 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
             <div className="relative aspect-[21/9] bg-obsidian border border-white/10 overflow-hidden">
               <img src={asset.url} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
             </div>
+            </>)}
             <p className="mt-3 text-[10px] text-ash leading-relaxed">Bagian yang ditandai titik tembaga akan selalu terlihat di semua ukuran slot (desktop &amp; mobile).</p>
           </div>
         </div>
@@ -624,6 +633,7 @@ const ImagesPanel = ({ client }) => {
     sec === "home_subsidiaries"
       ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
       : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
+  if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
   const orderedSections = Object.keys(groups).sort((a, b) => sectionIndex(a) - sectionIndex(b) || a.localeCompare(b));
 
   const inputCls = "w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none";
@@ -642,7 +652,7 @@ const ImagesPanel = ({ client }) => {
         <div>
           <label className="block font-mono text-[9px] tracking-[0.2em] uppercase text-ash mb-1.5">Section</label>
           <select value={newSection} onChange={(e) => setNewSection(e.target.value)} data-testid="new-asset-section" className={`${inputCls} h-10`}>
-            {IMAGE_SECTIONS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+            {IMAGE_SECTIONS.filter((s) => s.id !== "home_partners").map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </div>
         {newSection === "home_partners" ? (
@@ -670,6 +680,11 @@ const ImagesPanel = ({ client }) => {
             <div className="flex-1 h-px bg-white/10" />
             <span className="font-mono text-[9px] text-ash">{groups[secId].length} image{groups[secId].length > 1 ? "s" : ""}</span>
           </div>
+          {secId === "home_partners" && (
+            <div className="mb-5 border border-copper/30 bg-ink p-4">
+              <BulkLogoUpload client={client} existingCount={groups[secId].length} onDone={refresh} />
+            </div>
+          )}
           <SortableContext items={groups[secId].map((a) => a.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {groups[secId].map((a) => (
@@ -701,7 +716,7 @@ const ImagesPanel = ({ client }) => {
                       <span className="text-copper"> · focal {Math.round(a.focal_x ?? 50)}×{Math.round(a.focal_y ?? 50)}{a.zoom && a.zoom !== 1 ? ` · ${a.zoom}×` : ""}</span>
                     )}
                   </div>
-                  {(a.section || "other") !== "home_subsidiaries" && (
+                  {!["home_subsidiaries", "home_partners"].includes(a.section || "other") && (
                   <select
                     defaultValue={a.section || "other"}
                     onChange={(e) => saveMeta({ ...a }, { section: e.target.value }, "Section updated")}
