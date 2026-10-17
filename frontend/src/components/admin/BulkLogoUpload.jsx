@@ -57,7 +57,7 @@ export const BulkLogoUpload = ({ client, existingCount, onDone }) => {
         fd.append("section", "home_partners");
         fd.append("sort_order", String(100 + existingCount + i));
         const res = await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
-        await client.put(`/assets/${res.data.id}`, { alt: r.name.trim() || r.file.name, meta: { category: r.category, tone: r.tone } });
+        await client.put(`/assets/${res.data.id}`, { alt: (r.name.trim() || r.file.name).toUpperCase(), meta: { category: r.category, tone: r.tone } });
         ok++;
       } catch (e) { toast.error(`Gagal: ${r.file.name}`); }
       setProgress(i + 1);
@@ -90,7 +90,7 @@ export const BulkLogoUpload = ({ client, existingCount, onDone }) => {
               <div className="col-span-2 h-14 bg-[#0a2433] grid place-items-center p-2">
                 <img src={r.preview} alt="" className="max-h-10 max-w-full object-contain" style={{ filter: LOGO_TONES[r.tone]?.filter, mixBlendMode: LOGO_TONES[r.tone]?.blend }} />
               </div>
-              <input value={r.name} onChange={(e) => set(i, "name", e.target.value.toUpperCase())} placeholder="Nama" data-testid={`bulk-name-${i}`} className={`${cls} col-span-4`} />
+              <input value={r.name} onChange={(e) => set(i, "name", e.target.value)} placeholder="Nama" data-testid={`bulk-name-${i}`} className={`${cls} col-span-4 uppercase`} />
               <select value={r.category} onChange={(e) => set(i, "category", e.target.value)} data-testid={`bulk-category-${i}`} className={`${cls} col-span-3`}>
                 {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label.split(" —")[0]}</option>)}
               </select>

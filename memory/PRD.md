@@ -154,3 +154,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Carousel: tile lebih besar (aspect 13:6, w-44/56), LogoImg mengisi kotak (object-contain) + menerapkan focal & zoom crop CMS; modal crop punya preview "Kotak logo carousel"
 - Upload ke section partners: margin transparan logo otomatis dipangkas (Pillow) agar logo penuh
 - Nama file storage unik (stem-uuid8) agar tidak saling menimpa / cache basi; input replace punya data-testid asset-replace-{key}
+
+## Update 2026-06 (logo carousel v3) — iteration_14
+- CMS Partners dibagi sub-grup: Kelompok 1 Brand (vendor), 2 Partners, 3 Customers; drag hanya dalam grup; judul kartu "#N · NAMA" (dari nama logo); input nama otomatis kapital (CSS uppercase + disimpan uppercase)
+- Home: logo dicampur tanpa label, urut Brand→Partners→Customers lalu nomor CMS (tie-break key), dibagi max 3 baris (≥9:3, ≥4:2), arah selang-seling
+- Tile 2:1 lebih besar, inset kecil; marquee GPU (.logo-track translate3d, will-change) kecepatan konstan 40px/s semua baris (desktop & mobile)
+- sort_order logo dinormalisasi 1..n per kategori; alt di-uppercase

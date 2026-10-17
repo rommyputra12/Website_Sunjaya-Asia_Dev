@@ -45,7 +45,8 @@ const PARTNER_TEXT = {
 const TILE_W = 232; // px incl. gap (md)
 const LogoRow = ({ id, logos, reverse }) => {
   const loop = Array.from({ length: Math.max(1, Math.ceil(8 / logos.length)) }, () => logos).flat();
-  const duration = (loop.length * TILE_W) / 40; // 40px per second
+  const tileW = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches ? TILE_W : 192;
+  const duration = (loop.length * tileW) / 40; // 40px per second on every screen
   return (
     <div data-testid={`partners-row-${id}`} className="relative overflow-hidden marquee-mask">
       <div className="logo-track flex w-max" style={{ animationDuration: `${duration}s`, animationDirection: reverse ? "reverse" : "normal" }}>
@@ -73,7 +74,7 @@ export const PartnersSection = () => {
   const [open, setOpen] = useState(false);
   // CMS order: Brand group → Partners → Customers, each by its own number; publicly mixed (no category labels)
   const logos = assets.filter((a) => a.section === "home_partners")
-    .sort((a, b) => (CAT_RANK[a.meta?.category || "partner"] ?? 9) - (CAT_RANK[b.meta?.category || "partner"] ?? 9) || (a.sort_order ?? 100) - (b.sort_order ?? 100));
+    .sort((a, b) => (CAT_RANK[a.meta?.category || "partner"] ?? 9) - (CAT_RANK[b.meta?.category || "partner"] ?? 9) || (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key));
   const rowCount = logos.length >= 9 ? 3 : logos.length >= 4 ? 2 : logos.length ? 1 : 0;
   const per = Math.ceil(logos.length / (rowCount || 1));
   const rows = Array.from({ length: rowCount }, (_, i) => ({ id: `row${i + 1}`, logos: logos.slice(i * per, (i + 1) * per) })).filter((r) => r.logos.length);

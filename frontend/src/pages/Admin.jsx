@@ -754,8 +754,7 @@ const ImagesPanel = ({ client }) => {
                         {Object.entries(LOGO_TONES).map(([id, t]) => <option key={id} value={id}>Tampilan: {t.label}</option>)}
                       </select>
                       <input defaultValue={a.alt || ""} placeholder="Nama brand / perusahaan / instansi" data-testid={`logo-name-${a.key}`}
-                        onInput={(e) => { e.target.value = e.target.value.toUpperCase(); }}
-                        onBlur={(e) => e.target.value !== (a.alt || "") && saveMeta({ ...a }, { alt: e.target.value }, "Nama tersimpan")} className={inputCls} />
+                        onBlur={(e) => { const v = e.target.value.toUpperCase(); if (v !== (a.alt || "")) saveMeta({ ...a }, { alt: v }, "Nama tersimpan"); }} className={`${inputCls} uppercase`} />
                     </div>
                   )}
                   {(a.section || "other") === "home_subsidiaries" && (

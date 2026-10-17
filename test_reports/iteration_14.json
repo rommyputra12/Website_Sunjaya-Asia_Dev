@@ -1,0 +1,35 @@
+{
+  "summary": "Frontend testing of the logo carousel mix/ordering and the CMS logo sub-groups. Passed: Admin home_partners shows 3 sub-groups in order (logo-group-vendor/partner/customer) with headings 'Kelompok 1 · Brand —…', 'Kelompok 2 · Partners —…', 'Kelompok 3 · Customers / Clients'. Card titles show '#N · NAME' in uppercase. Typing lowercase in logo-name-{key} turns uppercase right away and blur saves it ('Nama tersimpan' toast). bulk-name-0 is uppercase (filename prefill 'MY TEST LOGO' and typed text); the bulk upload was not submitted. Changing the category moves the card to the matching group and back. Dragging across groups is ignored. Home has 3 rows of 3, mixed in order Brand→Partners→Customers, with no category labels. The row1 first logo matches CMS vendor #1. Tiles are 208x104 (2:1) and the img is 192x88 (8px inset). Every .logo-track uses animation logo-marquee at 52.2s, so every row moves at exactly 40px/s on desktop. Row2 is reverse. Mobile has no horizontal overflow (scrollWidth 390). CRITICAL BUG FOUND AND FIXED: dragging to reorder wiped the logo names (alt=null) of every card in the dragged group.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "PUT /api/assets/{id}", "issue": "update_asset_meta always wrote alt=payload.alt, so the alt became None whenever it was not sent. Admin persistOrder (drag reorder) sends only {sort_order}, so reordering erased the names of all logos in that group (and subsidiary cards too). FIXED by testing agent: alt is now only updated when not None. Verified the names survive drag + reload.", "priority": "CRITICAL"}
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PartnersSection / Admin ImagesPanel ordering", "issue": "When two logos in the same group share sort_order (current data: EVOSMART ECOSYSTEM and EVOWASTE TECHNOLOGY both 100), the CMS breaks the tie by key (EVOWASTE #3, EVOSMART #4). Home has no tie-breaker and the API orders only by sort_order (row order not deterministic), so Home showed EVOSMART before EVOWASTE. This breaks the requirement that CMS numbers match Home order. Fix: add the same tie-breaker on Home (a.key.localeCompare) or use the CMS index, and/or renumber sort_order 1..n per group after uploads/category changes.", "selector": "[data-testid=partners-row-row1]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home partners (mobile)", "issues": ["TILE_W is fixed at 232 (md size), but mobile tiles are 176+16=192px, so mobile speed is ~33px/s instead of 40. It is the same on every row, so this is minor."]},
+      {"screen": "Admin logo-name input", "issues": ["onInput sets e.target.value to uppercase, which moves the caret to the end when editing in the middle of the text. Consider CSS text-transform plus uppercase on save, or restore selectionStart/End."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Review/keep the backend fix in update_asset_meta (alt only updated when provided)",
+    "Make the Home logo order use the same tie-breaker as the CMS (sort_order then key), or renumber sort_order per group so ties cannot happen",
+    "Optional: compute the marquee duration from the measured tile width so mobile is also 40px/s; keep the caret position in the uppercase inputs"
+  ],
+  "critical_code_review_comments": [
+    "Admin.jsx is 988 lines; split ImagesPanel/AssetCard into their own modules",
+    "After a category change the card keeps its old sort_order, so it can land in the middle of the new group or tie with another logo; renumber the target group to put it at the end"
+  ],
+  "updated_files": ["/app/backend/server.py"],
+  "success_rate": {"backend": "N/A", "frontend": "90%"},
+  "seed_data_creation": "None. All edits were restored: Atlas alt, Meridian category, vendor order (4,5,100,100), and the vendor names that the reorder bug wiped (restored to Vertex Systems (contoh), Helix Tech (contoh), EVOSMART ECOSYSTEM, EVOWASTE TECHNOLOGY).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Current home_partners data: vendor = Vertex(4), Helix(5), EVOSMART(100, zoom 1.2), EVOWASTE(sample_logo_partner_0 recategorized to vendor, 100); partner = Atlas(2), Meridian(3); customer = Civic(7), Terra(8), Blueport(9). The legacy X-Admin-Token sunjaya-admin-2026-secret works for direct PUT /api/assets/{id}. Playwright fill() triggers the uppercase onInput, so restore names via the API."
+}

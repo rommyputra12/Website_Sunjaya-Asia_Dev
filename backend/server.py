@@ -900,7 +900,9 @@ async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
     existing = await sb_select_one("assets", {"id": asset_id})
     if not existing:
         raise HTTPException(404, "Asset not found")
-    update = {"alt": payload.alt, "updated_at": now_iso()}
+    update = {"updated_at": now_iso()}
+    if payload.alt is not None:
+        update["alt"] = payload.alt
     if payload.section is not None:
         update["section"] = payload.section
     if payload.sort_order is not None:
