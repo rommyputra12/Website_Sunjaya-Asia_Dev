@@ -22,6 +22,7 @@ export const LOGO_TONES = {
   gray: { label: "Grayscale", filter: "grayscale(1) brightness(1.3)" },
   dark: { label: "Gelap", filter: "brightness(0) invert(0.15)" },
   original: { label: "Warna asli", filter: "none" },
+  light: { label: "Logo asli putih/terang", filter: "none", hover: "brightness(0) invert(0.15)" },
 };
 
 // Logo fitted to its tile, honouring the CMS crop (focal point + zoom) and display tone
@@ -31,7 +32,7 @@ export const LogoImg = ({ asset, style }) => {
   return (
     <img src={asset.url} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone={asset.meta?.tone || "white"}
       className="logo-tone absolute inset-0 w-full h-full object-contain"
-      style={{ "--logo-filter": tone.filter, mixBlendMode: tone.blend, objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style }} />
+      style={{ "--logo-filter": tone.filter, "--logo-hover": tone.hover || "none", mixBlendMode: tone.blend, objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style }} />
   );
 };
 
@@ -42,10 +43,10 @@ const PARTNER_TEXT = {
 
 // One infinitely scrolling row of logos (list duplicated for a seamless loop)
 // One infinitely scrolling row; constant speed (px/s) on every row, GPU-composited for smoothness
-const TILE_W = 232; // px incl. gap (md)
+const TILE_W = 248; // px incl. gap (md)
 const LogoRow = ({ id, logos, reverse }) => {
   const loop = Array.from({ length: Math.max(1, Math.ceil(8 / logos.length)) }, () => logos).flat();
-  const tileW = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches ? TILE_W : 192;
+  const tileW = typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches ? TILE_W : 208;
   const duration = (loop.length * tileW) / 40; // 40px per second on every screen
   return (
     <div data-testid={`partners-row-${id}`} className="relative overflow-hidden marquee-mask">
@@ -53,9 +54,9 @@ const LogoRow = ({ id, logos, reverse }) => {
         {[0, 1].map((dup) => (
           <div key={dup} aria-hidden={dup === 1} className="flex shrink-0 gap-4 md:gap-6 pr-4 md:pr-6">
             {loop.map((l, i) => (
-              <div key={i} className="group w-44 md:w-52 shrink-0 flex flex-col items-center gap-2">
-                <div data-testid="partner-logo-tile" className="relative aspect-[2/1] w-full overflow-hidden bg-[#0c2635] border border-white/10 group-hover:border-copper/50 transition-colors duration-300">
-                  <div className="absolute inset-1.5 md:inset-2"><LogoImg asset={l} /></div>
+              <div key={i} tabIndex={dup ? -1 : 0} className="group w-48 md:w-56 shrink-0 flex flex-col items-center gap-2 outline-none focus-visible:outline-none cursor-pointer">
+                <div data-testid="partner-logo-tile" className="logo-tile relative aspect-[2/1] w-full overflow-hidden rounded-[10px] border border-white/10">
+                  <div className="absolute inset-[3px]"><LogoImg asset={l} /></div>
                 </div>
                 {l.alt && <span className="font-mono text-[9px] md:text-[10px] tracking-[0.14em] uppercase text-bone/70 group-hover:text-bone text-center leading-tight line-clamp-2 transition-colors">{l.alt}</span>}
               </div>

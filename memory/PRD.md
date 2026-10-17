@@ -160,3 +160,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Home: logo dicampur tanpa label, urut Brand→Partners→Customers lalu nomor CMS (tie-break key), dibagi max 3 baris (≥9:3, ≥4:2), arah selang-seling
 - Tile 2:1 lebih besar, inset kecil; marquee GPU (.logo-track translate3d, will-change) kecepatan konstan 40px/s semua baris (desktop & mobile)
 - sort_order logo dinormalisasi 1..n per kategori; alt di-uppercase
+
+## 2026-06 Partner logo tiles v2
+- Tile radius 10px, tile lebih besar (md 224px / mobile 192px), padding 3px, logo center (ikut focal/zoom CMS)
+- Hover/klik/tap: latar putih gading #F5EFE0 + warna asli logo
+- Tone baru "light" (Logo asli putih/terang): tampil putih di latar gelap, jadi gelap di latar gading; auto-detect saat bulk upload; 6 logo contoh SVG di-set light

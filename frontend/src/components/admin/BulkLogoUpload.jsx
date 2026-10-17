@@ -14,13 +14,14 @@ export const detectTone = (file) => new Promise((resolve) => {
       const ctx = c.getContext("2d");
       ctx.drawImage(img, 0, 0, w, h);
       const d = ctx.getImageData(0, 0, w, h).data;
-      let transparent = 0, edgeLum = 0, edgeN = 0;
+      let transparent = 0, edgeLum = 0, edgeN = 0, inkLum = 0, inkN = 0;
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
         const i = (y * w + x) * 4;
         if (d[i + 3] < 30) transparent++;
+        else { inkLum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; inkN++; }
         if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { edgeLum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; edgeN++; }
       }
-      if (transparent / (w * h) > 0.08) resolve("white");
+      if (transparent / (w * h) > 0.08) resolve(inkN && inkLum / inkN > 215 ? "light" : "white");
       else resolve(edgeLum / edgeN > 140 ? "invert" : "gray");
     } catch { resolve("white"); }
     URL.revokeObjectURL(url);
