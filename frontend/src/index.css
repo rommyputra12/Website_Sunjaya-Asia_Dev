@@ -17,8 +17,8 @@
     --line: 255 255 255;
 
     /* Light-section palette (white/bone) */
-    --light-bg: 245 243 238;      /* warm bone */
-    --light-bg-2: 232 228 220;    /* subtle band */
+    --light-bg: 247 242 230;      /* soft ivory #F7F2E6 */
+    --light-bg-2: 245 239 224;    /* ivory band #F5EFE0 */
     --light-text: 12 25 34;       /* deep ink */
     --light-text-2: 74 90 100;
     --light-line: 12 25 34;

@@ -180,3 +180,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 Home Pillar 01-03 background
 - Gambar bg opacity 0.6 -> 0.5, overlay putih/40 diganti gading #F5EFE0/55
+
+## 2026-06 Ivory light sections
+- --light-bg -> #F7F2E6, --light-bg-2 -> #F5EFE0 (index.css) berlaku semua .section-light; Global Presence (bg-bone) & kartu kaca putih/80 diganti gading
