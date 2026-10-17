@@ -29,12 +29,12 @@ export const detectTone = (file) => new Promise((resolve) => {
   img.src = url;
 });
 
-const nameFromFile = (f) => f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
+const nameFromFile = (f) => f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim().toUpperCase();
 const cls = "w-full h-9 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none";
 
 export const BulkLogoUpload = ({ client, existingCount, onDone }) => {
   const [rows, setRows] = useState([]);
-  const [category, setCategory] = useState("partner");
+  const [category, setCategory] = useState("vendor");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -90,7 +90,7 @@ export const BulkLogoUpload = ({ client, existingCount, onDone }) => {
               <div className="col-span-2 h-14 bg-[#0a2433] grid place-items-center p-2">
                 <img src={r.preview} alt="" className="max-h-10 max-w-full object-contain" style={{ filter: LOGO_TONES[r.tone]?.filter, mixBlendMode: LOGO_TONES[r.tone]?.blend }} />
               </div>
-              <input value={r.name} onChange={(e) => set(i, "name", e.target.value)} placeholder="Nama" data-testid={`bulk-name-${i}`} className={`${cls} col-span-4`} />
+              <input value={r.name} onChange={(e) => set(i, "name", e.target.value.toUpperCase())} placeholder="Nama" data-testid={`bulk-name-${i}`} className={`${cls} col-span-4`} />
               <select value={r.category} onChange={(e) => set(i, "category", e.target.value)} data-testid={`bulk-category-${i}`} className={`${cls} col-span-3`}>
                 {PARTNER_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label.split(" —")[0]}</option>)}
               </select>

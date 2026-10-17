@@ -565,8 +565,9 @@ const ImagesPanel = ({ client }) => {
   const onDragEnd = (e) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const sec = items.find((a) => a.id === active.id)?.section;
-    const grp = groups[sec] || [];
+    const act = items.find((a) => a.id === active.id);
+    const sec = act?.section;
+    const grp = (groups[sec] || []).filter((a) => sec !== "home_partners" || (a.meta?.category || "partner") === (act.meta?.category || "partner"));
     const from = grp.findIndex((a) => a.id === active.id);
     const to = grp.findIndex((a) => a.id === over.id);
     if (from < 0 || to < 0) return;
@@ -634,6 +635,10 @@ const ImagesPanel = ({ client }) => {
       ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
       : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
+  const catOf = (a) => a.meta?.category || "partner";
+  const subGroups = (secId) => secId !== "home_partners"
+    ? [{ id: null, items: groups[secId] }]
+    : PARTNER_CATEGORIES.map((c, i) => ({ id: c.id, n: i + 1, label: c.label, items: groups[secId].filter((a) => catOf(a) === c.id) }));
   const orderedSections = Object.keys(groups).sort((a, b) => sectionIndex(a) - sectionIndex(b) || a.localeCompare(b));
 
   const inputCls = "w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none";
@@ -685,9 +690,18 @@ const ImagesPanel = ({ client }) => {
               <BulkLogoUpload client={client} existingCount={groups[secId].length} onDone={refresh} />
             </div>
           )}
-          <SortableContext items={groups[secId].map((a) => a.id)} strategy={rectSortingStrategy}>
+          {subGroups(secId).map((sg) => (
+          <div key={sg.id || "all"} className={sg.id ? "mb-6" : ""} data-testid={sg.id ? `logo-group-${sg.id}` : undefined}>
+          {sg.id && (
+            <div className="flex items-center gap-3 mb-3">
+              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#7FC8EE] font-bold">Kelompok {sg.n} · {sg.label}</span>
+              <span className="font-mono text-[9px] text-ash">{sg.items.length} logo</span>
+            </div>
+          )}
+          <SortableContext items={sg.items.map((a) => a.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {groups[secId].map((a) => (
+            {sg.items.length === 0 && <p className="col-span-full font-mono text-[10px] text-ash">Belum ada logo di kelompok ini.</p>}
+            {sg.items.map((a, idx) => (
               <AssetCard key={a.id} a={a} draggable={secId === "home_subsidiaries" || secId === "home_partners"}>
                 <button
                   type="button"
@@ -706,6 +720,10 @@ const ImagesPanel = ({ client }) => {
                     <div data-testid={`asset-title-${a.key}`} className="font-mono text-[11px] text-copper tracking-wide">
                       {slotLabel(a, groups["home_subsidiaries"])}
                       {a.meta?.name?.en && <span className="text-bone"> — {a.meta.name.en}</span>}
+                    </div>
+                  ) : a.section === "home_partners" ? (
+                    <div data-testid={`asset-title-${a.key}`} className="font-mono text-[11px] text-copper tracking-wide uppercase break-words">
+                      <span className="text-ash">#{idx + 1} · </span>{a.alt || a.key}
                     </div>
                   ) : (
                     <div className="font-mono text-[11px] text-copper tracking-wide break-all">{a.key}</div>
@@ -736,6 +754,7 @@ const ImagesPanel = ({ client }) => {
                         {Object.entries(LOGO_TONES).map(([id, t]) => <option key={id} value={id}>Tampilan: {t.label}</option>)}
                       </select>
                       <input defaultValue={a.alt || ""} placeholder="Nama brand / perusahaan / instansi" data-testid={`logo-name-${a.key}`}
+                        onInput={(e) => { e.target.value = e.target.value.toUpperCase(); }}
                         onBlur={(e) => e.target.value !== (a.alt || "") && saveMeta({ ...a }, { alt: e.target.value }, "Nama tersimpan")} className={inputCls} />
                     </div>
                   )}
@@ -759,6 +778,8 @@ const ImagesPanel = ({ client }) => {
             ))}
           </div>
           </SortableContext>
+          </div>
+          ))}
         </div>
       ))}
       </DndContext>
