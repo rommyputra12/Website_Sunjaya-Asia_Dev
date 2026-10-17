@@ -43,10 +43,10 @@ const ScrollTop = () => {
 function App() {
   return (
     <div className="App grain">
+      <AssetProvider>
       <LanguageProvider>
         <BrowserRouter>
           <SmoothScroll>
-            <AssetProvider>
               <ScrollTop />
               <Nav />
               <main className="min-h-screen">
@@ -80,10 +80,10 @@ function App() {
             </main>
             <Footer />
             <CookieBanner />
-            </AssetProvider>
           </SmoothScroll>
         </BrowserRouter>
       </LanguageProvider>
+      </AssetProvider>
     </div>
   );
 }

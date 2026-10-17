@@ -172,3 +172,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 CMS Preview Mobile
 - Tombol ikon Desktop/HP di Preview "Tampilan asli" (ContentPreview.jsx useDevice); HP = iframe 390x844 dalam bingkai ponsel; pilihan disimpan localStorage (cms-preview-device) & berlaku semua section
+
+## 2026-06 Fix: teks kartu Subsidiaries dari CMS tidak tampil
+- Root cause: LanguageProvider berada di luar AssetProvider (App.jsx) sehingga t() tidak bisa membaca assets.meta; urutan provider dibalik
+- Daftar per-negara di halaman Subsidiaries kini memakai nama/kota/negara CMS & urutan CMS
+- Audit: semua content_blocks + meta subsidiaries terverifikasi tampil di Home/Subsidiaries/About/Pillars/Contact

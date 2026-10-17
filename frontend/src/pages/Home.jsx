@@ -346,7 +346,7 @@ export default function Home() {
                 <Link to="/subsidiaries" data-testid={`home-sub-card-${s.id}`} className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm cursor-pointer ring-0 hover:ring-2 hover:ring-copper/70 transition-shadow duration-300">
                   <AssetImg
                     k={s.image}
-                    alt={s.name}
+                    alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-obsidian/90 via-obsidian/40 to-transparent" />

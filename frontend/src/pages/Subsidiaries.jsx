@@ -27,10 +27,10 @@ const extractCountry = (city) => {
   return parts[parts.length - 1].trim();
 };
 
-const groupByCountry = (items) => {
+const groupByCountry = (items, countryOf = (s) => extractCountry(s.city)) => {
   const map = new Map();
   items.forEach((s) => {
-    const country = extractCountry(s.city);
+    const country = countryOf(s);
     if (!map.has(country)) map.set(country, []);
     map.get(country).push(s);
   });
@@ -40,14 +40,17 @@ const groupByCountry = (items) => {
   }));
 };
 
-const COUNTRY_GROUPS = groupByCountry(subsidiaryCards);
-const AFFILIATE_GROUPS = groupByCountry(affiliateCards);
 
 export default function Subsidiaries() {
   const { t } = useLang();
   const { byKey } = useAssets();
   const cmsOrder = (s) => byKey[s.image]?.sort_order ?? 100;
   const orderCards = (arr) => [...arr].sort((a, b) => cmsOrder(a) - cmsOrder(b));
+  // Country lists use the CMS card texts (Images tab) so edits show here too
+  const countryOf = (s) => t(`subsidiary.${s.id}.country`, extractCountry(s.city));
+  const placeOf = (s) => [t(`subsidiary.${s.id}.city`, s.city.split(",")[0].trim()), countryOf(s)].filter(Boolean).join(", ");
+  const COUNTRY_GROUPS = groupByCountry(orderCards(subsidiaryCards), countryOf);
+  const AFFILIATE_GROUPS = groupByCountry(orderCards(affiliateCards), countryOf);
 
 
   return (
@@ -87,7 +90,7 @@ export default function Subsidiaries() {
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
                   <AssetImg
                     k={s.image}
-                    alt={s.name}
+                    alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-obsidian/90 via-obsidian/40 to-transparent" />
@@ -132,7 +135,7 @@ export default function Subsidiaries() {
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
                   <AssetImg
                     k={s.image}
-                    alt={s.name}
+                    alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-obsidian/90 via-obsidian/40 to-transparent" />
@@ -185,8 +188,8 @@ export default function Subsidiaries() {
                         <li key={s.id} className="flex items-start gap-2">
                           <span className="text-copper font-mono text-[10px] tracking-[0.2em] shrink-0 mt-1.5">·</span>
                           <div>
-                            <div className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight">{s.name}</div>
-                            <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-0.5">{s.city}</div>
+                            <div className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight">{t(`subsidiary.${s.id}.name`, s.name)}</div>
+                            <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-0.5">{placeOf(s)}</div>
                           </div>
                         </li>
                       ))}
@@ -208,8 +211,8 @@ export default function Subsidiaries() {
                         <li key={s.id} className="flex items-start gap-2">
                           <span className="text-copper font-mono text-[10px] tracking-[0.2em] shrink-0 mt-1.5">·</span>
                           <div>
-                            <div className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight">{s.name}</div>
-                            <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-0.5">{s.city}</div>
+                            <div className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight">{t(`subsidiary.${s.id}.name`, s.name)}</div>
+                            <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-0.5">{placeOf(s)}</div>
                           </div>
                         </li>
                       ))}
