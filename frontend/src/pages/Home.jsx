@@ -312,7 +312,7 @@ export default function Home() {
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover opacity-[0.5]"
                 />
-                <div data-testid={`pillar-${p.num}-ivory-fade`} className="absolute inset-0 bg-[#F7F2E7]/55 pointer-events-none" />
+                <div data-testid={`pillar-${p.num}-ivory-fade`} className="absolute inset-0 bg-[#F9F5EB]/55 pointer-events-none" />
               </>
             )}
             <div className="absolute inset-0 pointer-events-none" />
