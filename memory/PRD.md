@@ -169,3 +169,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## 2026-06 Content CMS preview fix (Partners)
 - Root cause: section partners & about_partner tidak punya mock preview; hanya iframe live yang refresh setelah tersimpan, sehingga teks yang sedang diketik tidak tampil
 - Ditambah mock Partners + Strategic Partnership CTA; preview otomatis pindah ke "Highlight edit" saat mengetik di field section tsb
+
+## 2026-06 CMS Preview Mobile
+- Tombol ikon Desktop/HP di Preview "Tampilan asli" (ContentPreview.jsx useDevice); HP = iframe 390x844 dalam bingkai ponsel; pilihan disimpan localStorage (cms-preview-device) & berlaku semua section

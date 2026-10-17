@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Phone, Star } from "lucide-react";
+import { Monitor, Phone, Smartphone, Star } from "lucide-react";
 import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
 import { ABOUT_TEXT } from "../../data/aboutDefaults";
@@ -196,8 +196,23 @@ const MAP = {
   about: About, contact: Contact, footer: FooterTop, offices: Offices,
 };
 
+// Desktop/HP choice shared by every section preview (remembered in localStorage)
+const DEVICE_KEY = "cms-preview-device";
+const useDevice = () => {
+  const [device, setDevice] = useState(() => localStorage.getItem(DEVICE_KEY) || "desktop");
+  useEffect(() => {
+    const on = () => setDevice(localStorage.getItem(DEVICE_KEY) || "desktop");
+    window.addEventListener("cms-preview-device", on);
+    return () => window.removeEventListener("cms-preview-device", on);
+  }, []);
+  const set = (d) => { localStorage.setItem(DEVICE_KEY, d); window.dispatchEvent(new Event("cms-preview-device")); };
+  return [device, set];
+};
+
+const DEVICES = { desktop: { w: 1440, h: 810 }, mobile: { w: 390, h: 844 } };
+
 // Real capture: the live page scaled down inside an iframe, scrolled to the section anchor
-const LiveFrame = ({ url, version }) => {
+const LiveFrame = ({ url, version, device }) => {
   const box = useRef(null);
   const [w, setW] = useState(560);
   useEffect(() => {
@@ -205,11 +220,21 @@ const LiveFrame = ({ url, version }) => {
     if (box.current) ro.observe(box.current);
     return () => ro.disconnect();
   }, []);
-  const scale = w / 1440;
+  const d = DEVICES[device];
+  const mobile = device === "mobile";
+  const scale = mobile ? Math.min(0.62, (w - 24) / d.w) : w / d.w;
+  const iframe = (
+    <iframe key={`${version}-${device}`} title="Live preview" src={url} data-testid="preview-live-iframe" loading="lazy"
+      className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: d.w, height: d.h, transform: `scale(${scale})` }} />
+  );
   return (
-    <div ref={box} className="relative w-full border border-white/15 overflow-hidden bg-obsidian" style={{ height: 810 * scale }}>
-      <iframe key={version} title="Live preview" src={url} data-testid="preview-live-iframe" loading="lazy"
-        className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: 1440, height: 810, transform: `scale(${scale})` }} />
+    <div ref={box} data-testid={`preview-live-${device}`} className={`relative w-full overflow-hidden ${mobile ? "flex justify-center py-3 bg-black/20 border border-white/10" : "border border-white/15 bg-obsidian"}`} style={mobile ? undefined : { height: d.h * scale }}>
+      {mobile ? (
+        <div className="relative rounded-[22px] border-[6px] border-[#1b2a33] shadow-[0_10px_30px_-12px_rgba(0,0,0,.8)] overflow-hidden bg-obsidian" style={{ width: d.w * scale + 12, height: d.h * scale + 12 }}>
+          <span className="absolute top-1 left-1/2 -translate-x-1/2 z-10 h-1.5 w-12 rounded-full bg-[#1b2a33]" />
+          <div className="relative w-full h-full">{iframe}</div>
+        </div>
+      ) : iframe}
     </div>
   );
 };
@@ -217,6 +242,7 @@ const LiveFrame = ({ url, version }) => {
 export const SectionPreview = ({ sectionId, url, keys = [] }) => {
   const { version, active, draft } = useContext(PreviewCtx);
   const [mode, setMode] = useState("live");
+  const [device, setDevice] = useDevice();
   const m = sectionId.match(/^pillar_(\d+)$/);
   const C = m ? () => <Pillar num={m[1]} /> : MAP[sectionId];
   // Switch to the instant mock while typing so unsaved edits are visible
@@ -230,9 +256,19 @@ export const SectionPreview = ({ sectionId, url, keys = [] }) => {
     <div data-testid={`preview-${sectionId}`} className="lg:sticky lg:top-24">
       <div className="flex items-center justify-between mb-2">
         <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-ash">Preview</span>
-        <span className="flex border border-white/15">{url && tab("live", "Tampilan asli")}{C && tab("mock", "Highlight edit")}</span>
+        <span className="flex items-center gap-2">
+          {mode === "live" && url && (
+            <span className="flex border border-white/15">
+              {[["desktop", Monitor, "Desktop"], ["mobile", Smartphone, "HP"]].map(([id, Icon, label]) => (
+                <button key={id} onClick={() => setDevice(id)} title={label} aria-label={`Preview ${label}`} data-testid={`preview-device-${id}-${sectionId}`}
+                  className={`px-2 py-1 transition-colors ${device === id ? "bg-copper text-obsidian" : "text-ash hover:text-copper"}`}><Icon className="w-3 h-3" /></button>
+              ))}
+            </span>
+          )}
+          <span className="flex border border-white/15">{url && tab("live", "Tampilan asli")}{C && tab("mock", "Highlight edit")}</span>
+        </span>
       </div>
-      {mode === "live" && url ? <LiveFrame url={url} version={version} /> : <C />}
+      {mode === "live" && url ? <LiveFrame url={url} version={version} device={device} /> : <C />}
       <p className="mt-2 font-mono text-[8px] text-smoke">
         {mode === "live" && url ? "Tampilan asli situs — diperbarui setelah teks tersimpan." : "Klik sebuah field — bagian yang diedit disorot oranye, berubah langsung saat mengetik."}
       </p>
