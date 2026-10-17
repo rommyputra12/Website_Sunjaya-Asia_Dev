@@ -165,3 +165,7 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Tile radius 10px, tile lebih besar (md 224px / mobile 192px), padding 3px, logo center (ikut focal/zoom CMS)
 - Hover/klik/tap: latar putih gading #F5EFE0 + warna asli logo
 - Tone baru "light" (Logo asli putih/terang): tampil putih di latar gelap, jadi gelap di latar gading; auto-detect saat bulk upload; 6 logo contoh SVG di-set light
+
+## 2026-06 Content CMS preview fix (Partners)
+- Root cause: section partners & about_partner tidak punya mock preview; hanya iframe live yang refresh setelah tersimpan, sehingga teks yang sedang diketik tidak tampil
+- Ditambah mock Partners + Strategic Partnership CTA; preview otomatis pindah ke "Highlight edit" saat mengetik di field section tsb

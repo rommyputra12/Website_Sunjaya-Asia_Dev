@@ -285,7 +285,7 @@ export const ContentPanel = ({ client }) => {
                 </>
               )}
               </div>
-              <div className="lg:col-span-5 lg:self-stretch"><SectionPreview sectionId={sec.id} url={sec.url} /></div>
+              <div className="lg:col-span-5 lg:self-stretch"><SectionPreview sectionId={sec.id} url={sec.url} keys={(sec.fields || []).map((x) => x.key)} /></div>
               </div>
             </Accordion>
           ))}

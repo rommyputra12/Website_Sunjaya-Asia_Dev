@@ -36,7 +36,7 @@ export const LogoImg = ({ asset, style }) => {
   );
 };
 
-const PARTNER_TEXT = {
+export const PARTNER_TEXT = {
   "home.partners.kicker": "Partners & Global Alliances",
   "home.partners.title": "Collaborating with global industry leaders, government stakeholders, R&D institutions, technology pioneers, and civil society organizations.",
 };

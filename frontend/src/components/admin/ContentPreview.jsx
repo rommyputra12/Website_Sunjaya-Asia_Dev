@@ -2,12 +2,16 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { Phone, Star } from "lucide-react";
 import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
+import { ABOUT_TEXT } from "../../data/aboutDefaults";
+import { PARTNER_TEXT } from "../home/PartnersSection";
 
 export const PreviewCtx = createContext({ draft: {}, active: null, byKey: {} });
 
 const FALLBACK = {
   "footer.description": "Empowering global industries by bridging essential resources with next-generation technology, sustainable infrastructure, and transformative enterprise solutions.",
   "footer.company": "Sunjaya Asia Group Limited",
+  ...ABOUT_TEXT,
+  ...PARTNER_TEXT,
 };
 const defaultOf = (key) => key.split(".").reduce((c, p) => (c && typeof c === "object" ? c[p] : undefined), translations.en) || FALLBACK[key] || "";
 
@@ -168,7 +172,26 @@ const Offices = () => {
   );
 };
 
+const Partners = () => (
+  <Frame>
+    <Kicker k="home.partners.kicker" />
+    <T k="home.partners.title" as="p" className="mt-1 font-serif text-[11px] text-bone/90 max-w-[85%]" />
+    {[0, 1, 2].map((r) => (
+      <div key={r} className="mt-2 grid grid-cols-5 gap-1 opacity-50">{[0, 1, 2, 3, 4].map((i) => <div key={i} className="h-6 rounded-[3px] border border-white/15 bg-[#0c2635]" />)}</div>
+    ))}
+  </Frame>
+);
+
+const PartnerCta = () => (
+  <Frame className="bg-[#0a2231] border-l-2 border-l-copper">
+    <Kicker k="about.partner.kicker" />
+    <T k="about.partner.text" as="p" className="mt-2 font-serif text-[11px] text-bone/90 whitespace-pre-line" />
+    <div className="mt-3 flex items-center gap-2"><Btn k="about.partner.cta" /><T k="about.partner.email" className="font-mono text-[8px] text-bone/80" /></div>
+  </Frame>
+);
+
 const MAP = {
+  partners: Partners, about_partner: PartnerCta,
   hero: Hero, pillars_intro: PillarsIntro, subsidiaries_teaser: SubsTeaser, stats: Stats, global_presence: Presence, intro: PillarsPageIntro,
   about: About, contact: Contact, footer: FooterTop, offices: Offices,
 };
@@ -191,11 +214,13 @@ const LiveFrame = ({ url, version }) => {
   );
 };
 
-export const SectionPreview = ({ sectionId, url }) => {
-  const { version } = useContext(PreviewCtx);
+export const SectionPreview = ({ sectionId, url, keys = [] }) => {
+  const { version, active, draft } = useContext(PreviewCtx);
   const [mode, setMode] = useState("live");
   const m = sectionId.match(/^pillar_(\d+)$/);
   const C = m ? () => <Pillar num={m[1]} /> : MAP[sectionId];
+  // Switch to the instant mock while typing so unsaved edits are visible
+  useEffect(() => { if (C && keys.includes(active) && draft[active] !== undefined) setMode("mock"); }, [active, draft]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!C && !url) return null;
   const tab = (id, label) => (
     <button onClick={() => setMode(id)} data-testid={`preview-mode-${id}-${sectionId}`}
