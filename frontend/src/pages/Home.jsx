@@ -312,7 +312,7 @@ export default function Home() {
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover opacity-[0.5]"
                 />
-                <div data-testid={`pillar-${p.num}-ivory-fade`} className="absolute inset-0 bg-[#F5EFE0]/55 pointer-events-none" />
+                <div data-testid={`pillar-${p.num}-ivory-fade`} className="absolute inset-0 bg-[#F7F2E7]/55 pointer-events-none" />
               </>
             )}
             <div className="absolute inset-0 pointer-events-none" />
@@ -438,7 +438,7 @@ export default function Home() {
             <Globe3D />
 
               {/* Locations panel — adapted from Subsidiaries map legend, restyled for light bg */}
-              <div className="absolute bottom-28 md:bottom-32 left-4 md:left-10 z-10 border border-copper/30 bg-[#F7F2E6]/85 backdrop-blur-md px-4 py-3 md:px-5 md:py-4 shadow-md rounded-lg max-w-[70vw] md:max-w-none">
+              <div className="absolute bottom-28 md:bottom-32 left-4 md:left-10 z-10 border border-copper/30 bg-[#F9F5EB]/85 backdrop-blur-md px-4 py-3 md:px-5 md:py-4 shadow-md rounded-lg max-w-[70vw] md:max-w-none">
                 <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-copper mb-2 md:mb-2.5 font-bold">Locations</div>
                 <div data-testid="home-locations-list" className="flex flex-col gap-1 md:gap-1.5 max-h-[22vh] md:max-h-[34vh] overflow-y-auto overscroll-contain pr-2">
                   {locations.map((l) => (
@@ -458,7 +458,7 @@ export default function Home() {
                 </div>
                 <Link
                   to="/subsidiaries#global-presence"
-                  className="group inline-flex items-center gap-2 px-4 py-2 border border-copper/60 bg-[#F7F2E6]/85 backdrop-blur-md hover:bg-copper hover:border-copper transition-all duration-300 w-fit rounded-md"
+                  className="group inline-flex items-center gap-2 px-4 py-2 border border-copper/60 bg-[#F9F5EB]/85 backdrop-blur-md hover:bg-copper hover:border-copper transition-all duration-300 w-fit rounded-md"
                 >
                   <span className="font-mono text-[10px] md:text-xs tracking-[0.2em] uppercase text-copper group-hover:text-white transition-colors font-bold">
                     {t("presence.cta")}

@@ -183,3 +183,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 Ivory light sections
 - --light-bg -> #F7F2E6, --light-bg-2 -> #F5EFE0 (index.css) berlaku semua .section-light; Global Presence (bg-bone) & kartu kaca putih/80 diganti gading
+
+## 2026-06 Ivory warmth turun 7% -> 5.5%
+- #F7F2E6 -> #F9F5EB (dasar), #F5EFE0 -> #F7F2E7 (band, overlay Pillar, hover kotak logo)
