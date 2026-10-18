@@ -22,6 +22,7 @@ export const LOGO_TONES = {
   gray: { label: "Grayscale", filter: "grayscale(1) brightness(1.3)" },
   dark: { label: "Gelap", filter: "brightness(0) invert(0.15)" },
   original: { label: "Warna asli", filter: "none" },
+  mono: { label: "Monokrom (detail tetap)", filter: "grayscale(1) contrast(1.25) brightness(1.75)" },
   light: { label: "Logo asli putih/terang", filter: "none", hover: "brightness(0) invert(0.15)" },
 };
 

@@ -196,3 +196,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Home: gambar opacity 0.5 + overlay gading #F9F5EB/55 (sama dgn Pillar); tanpa gambar = warna gading
 
 - Overlay gading Pillar 01-03 & Subsidiaries bg: 55% -> 60%
+
+## 2026-06 Logo tone "Monokrom (detail tetap)"
+- LOGO_TONES.mono: grayscale(1) contrast(1.25) brightness(1.75) untuk logo ikon padat/3D (mis. Hyperione); hover = warna asli di latar gading. Hyperione di-set mono
