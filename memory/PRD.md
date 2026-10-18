@@ -206,3 +206,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 Monokrom putih v3
 - Aturan seragam: warna -> putih; abu netral dipisah ambang otomatis (Otsu): lebih terang -> transparan, lebih gelap -> putih (flat 2D). meta.mono_adj (-30..30) slider "Ambang putih" di CMS; thumbnail CMS logo kini pakai LogoImg (sama dgn situs)
+
+## 2026-06 Logo optical sizing
+- LogoImg: trim margin transparan otomatis (canvas, cache), ukuran optik h=0.62*ratio^-0.4 dari tinggi kotak, maks 78% kotak, selalu center; zoom Edit Crop partners 0.5x-2.5x (focal tidak dipakai utk partners)

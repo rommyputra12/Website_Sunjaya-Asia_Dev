@@ -347,7 +347,7 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
 
             <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-4 mb-2">2 · Zoom</p>
             <div className="flex items-center gap-3">
-              <input type="range" min="1" max="2.5" step="0.05" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))}
+              <input type="range" min={asset.section === "home_partners" ? 0.5 : 1} max="2.5" step="0.05" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))}
                 data-testid="focal-zoom" className="flex-1 accent-[#B87F3D]" />
               <span className="font-mono text-[10px] text-bone w-10">{zoom.toFixed(2)}×</span>
             </div>

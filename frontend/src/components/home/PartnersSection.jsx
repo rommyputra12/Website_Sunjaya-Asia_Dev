@@ -40,8 +40,10 @@ const otsu = (hist, n) => {
   }
   return t / 255;
 };
-const toMono = (url, adj = 0) => {
-  const key = `${url}|${adj}`;
+// Trim transparent margins (and optionally apply "Monokrom putih") once per image; cached by URL.
+// Mono: colours -> white; neutral greys split at an auto (Otsu) threshold: lighter -> cut-out, darker -> white.
+const processLogo = (url, mono, adj = 0) => {
+  const key = `${url}|${mono ? adj : "-"}`;
   if (monoCache.has(key)) return monoCache.get(key);
   const p = new Promise((resolve) => {
     const img = new Image();
@@ -49,27 +51,39 @@ const toMono = (url, adj = 0) => {
     img.onload = () => {
       try {
         const sc = Math.min(1, 900 / Math.max(img.width, img.height));
-        const w = Math.round(img.width * sc), h = Math.round(img.height * sc);
-        const c = document.createElement("canvas"); c.width = w; c.height = h;
-        const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
-        const id = ctx.getImageData(0, 0, w, h), d = id.data;
-        const hist = new Uint32Array(256); let n = 0;
-        for (let i = 0; i < d.length; i += 4) {
-          const r = d[i], g = d[i + 1], b = d[i + 2];
-          if (d[i + 3] > 128 && Math.max(r, g, b) - Math.min(r, g, b) < 51) { hist[Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b)]++; n++; }
+        const W = Math.round(img.width * sc), H = Math.round(img.height * sc);
+        const c = document.createElement("canvas"); c.width = W; c.height = H;
+        const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
+        const all = ctx.getImageData(0, 0, W, H).data;
+        let x0 = W, y0 = H, x1 = -1, y1 = -1;
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (all[(y * W + x) * 4 + 3] > 16) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+        if (x1 < 0) { x0 = 0; y0 = 0; x1 = W - 1; y1 = H - 1; }
+        const w = x1 - x0 + 1, h = y1 - y0 + 1;
+        const t = document.createElement("canvas"); t.width = w; t.height = h;
+        const tc = t.getContext("2d"); tc.drawImage(c, x0, y0, w, h, 0, 0, w, h);
+        const orig = t.toDataURL("image/png");
+        let monoSrc = null;
+        if (mono) {
+          const id = tc.getImageData(0, 0, w, h), d = id.data;
+          const hist = new Uint32Array(256); let n = 0;
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i], g = d[i + 1], b = d[i + 2];
+            if (d[i + 3] > 128 && Math.max(r, g, b) - Math.min(r, g, b) < 51) { hist[Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b)]++; n++; }
+          }
+          const pct = (q) => { let acc = 0; for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= q * n) return v / 255; } return 1; };
+          const hi = n > 50 ? pct(0.98) : 1;
+          const th = (n > 50 && hi - pct(0.05) > 0.35 ? otsu(hist, n) : hi - 0.175) + adj / 100;
+          const soft = 0.06;
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+            const sat = Math.max(r, g, b) - Math.min(r, g, b);
+            const f = sat >= 0.2 ? 1 : Math.min(1, Math.max(0, (th + soft - (0.2126 * r + 0.7152 * g + 0.0722 * b)) / (2 * soft)));
+            d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = Math.round(d[i + 3] * f);
+          }
+          tc.putImageData(id, 0, 0);
+          monoSrc = t.toDataURL("image/png");
         }
-        const pct = (q) => { let acc = 0; for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= q * n) return v / 255; } return 1; };
-        const hi = n > 50 ? pct(0.98) : 1;
-        const t = (n > 50 && hi - pct(0.05) > 0.35 ? otsu(hist, n) : hi - 0.175) + adj / 100;
-        const soft = 0.06;
-        for (let i = 0; i < d.length; i += 4) {
-          const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
-          const sat = Math.max(r, g, b) - Math.min(r, g, b);
-          const f = sat >= 0.2 ? 1 : Math.min(1, Math.max(0, (t + soft - (0.2126 * r + 0.7152 * g + 0.0722 * b)) / (2 * soft)));
-          d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = Math.round(d[i + 3] * f);
-        }
-        ctx.putImageData(id, 0, 0);
-        resolve(c.toDataURL("image/png"));
+        resolve({ orig, mono: monoSrc, ratio: w / h });
       } catch { resolve(null); }
     };
     img.onerror = () => resolve(null);
@@ -79,28 +93,44 @@ const toMono = (url, adj = 0) => {
   return p;
 };
 
-const useMono = (url, on, adj) => {
-  const [src, setSrc] = useState(null);
-  useEffect(() => { if (!on) return; let live = true; toMono(url, adj).then((u) => live && setSrc(u || "fail")); return () => { live = false; }; }, [url, on, adj]);
-  return src;
+const useLogo = (url, mono, adj) => {
+  const [res, setRes] = useState(null);
+  useEffect(() => { let live = true; processLogo(url, mono, adj).then((r) => live && setRes(r || "fail")); return () => { live = false; }; }, [url, mono, adj]);
+  return res;
+};
+
+// Optical sizing inside a 2:1 tile: equal visual weight for every logo shape.
+// Square/tall logos get less height, wide logos never touch the edges. Values are % of the tile.
+const LOGO_FILL = 0.78;
+const opticalBox = (ratio) => {
+  const h = Math.min(LOGO_FILL, 0.62 * Math.pow(ratio, -0.4)); // share of tile height
+  const w = Math.min(LOGO_FILL, (h * ratio) / 2);             // share of tile width (tile is 2:1)
+  return { w: w * 100, h: (Math.min(h, (w * 2) / ratio)) * 100 };
 };
 
 export const LogoImg = ({ asset, style }) => {
   const isMono = asset.meta?.tone === "mono";
-  const mono = useMono(asset.url, isMono, Number(asset.meta?.mono_adj) || 0);
+  const res = useLogo(asset.url, isMono, Number(asset.meta?.mono_adj) || 0);
   const tone = LOGO_TONES[asset.meta?.tone] || LOGO_TONES.white;
-  const fx = asset.focal_x ?? 50, fy = asset.focal_y ?? 50, zoom = asset.zoom ?? 1;
-  const base = { objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style };
-  if (isMono && mono !== "fail") return (
-    <>
-      {mono && <img src={mono} alt="" aria-hidden="true" draggable={false} className="logo-mono-proc absolute inset-0 w-full h-full object-contain" style={base} />}
-      <img src={asset.url} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone="mono" className="logo-mono-orig absolute inset-0 w-full h-full object-contain" style={base} />
-    </>
-  );
+  const zoom = asset.zoom ?? 1;
+  const ready = res && res !== "fail";
+  const box = ready ? opticalBox(res.ratio) : { w: LOGO_FILL * 100, h: LOGO_FILL * 100 };
+  const wrap = { width: `${box.w}%`, height: `${box.h}%`, transform: `translate(-50%, -50%) scale(${zoom})`, ...style };
+  const cls = "absolute inset-0 w-full h-full object-contain";
+  const src = ready ? res.orig : asset.url;
   return (
-    <img src={asset.url} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone={asset.meta?.tone || "white"}
-      className="logo-tone absolute inset-0 w-full h-full object-contain"
-      style={{ "--logo-filter": tone.filter, "--logo-hover": tone.hover || "none", mixBlendMode: tone.blend, ...base }} />
+    <div data-testid="partner-logo-box" className="absolute left-1/2 top-1/2" style={wrap}>
+      {isMono && ready && res.mono ? (
+        <>
+          <img src={res.mono} alt="" aria-hidden="true" draggable={false} className={`logo-mono-proc ${cls}`} />
+          <img src={src} alt={asset.alt || asset.key} draggable={false} data-tone="mono" className={`logo-mono-orig ${cls}`} />
+        </>
+      ) : (
+        <img src={src} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone={asset.meta?.tone || "white"}
+          className={`logo-tone ${cls} ${isMono && !ready && res !== "fail" ? "opacity-0" : ""}`}
+          style={{ "--logo-filter": isMono ? "none" : tone.filter, "--logo-hover": tone.hover || "none", mixBlendMode: isMono ? undefined : tone.blend }} />
+      )}
+    </div>
   );
 };
 
