@@ -27,11 +27,22 @@ export const LOGO_TONES = {
 };
 
 // Logo fitted to its tile, honouring the CMS crop (focal point + zoom) and display tone
-// "Monokrom putih": colour areas -> solid white, grey shading -> white with matching opacity,
-// already-white details -> cut-outs. Computed once per image on a canvas, cached by URL.
+// "Monokrom putih": colours -> solid white; neutral greys split at an auto (Otsu) threshold:
+// lighter than it (white/silver) -> transparent cut-out, darker -> white. adj shifts the threshold.
 const monoCache = new Map();
-const toMono = (url) => {
-  if (monoCache.has(url)) return monoCache.get(url);
+const otsu = (hist, n) => {
+  let sum = 0; for (let v = 0; v < 256; v++) sum += v * hist[v];
+  let sB = 0, wB = 0, best = 0, t = 128;
+  for (let v = 0; v < 256; v++) {
+    wB += hist[v]; if (!wB) continue; const wF = n - wB; if (!wF) break;
+    sB += v * hist[v]; const d = sB / wB - (sum - sB) / wF, between = wB * wF * d * d;
+    if (between > best) { best = between; t = v; }
+  }
+  return t / 255;
+};
+const toMono = (url, adj = 0) => {
+  const key = `${url}|${adj}`;
+  if (monoCache.has(key)) return monoCache.get(key);
   const p = new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -48,11 +59,13 @@ const toMono = (url) => {
           if (d[i + 3] > 128 && Math.max(r, g, b) - Math.min(r, g, b) < 51) { hist[Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b)]++; n++; }
         }
         const pct = (q) => { let acc = 0; for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= q * n) return v / 255; } return 1; };
-        const hi = n > 50 ? pct(0.98) : 1, lo = Math.min(n > 50 ? pct(0.05) : 0, hi - 0.35);
+        const hi = n > 50 ? pct(0.98) : 1;
+        const t = (n > 50 && hi - pct(0.05) > 0.35 ? otsu(hist, n) : hi - 0.175) + adj / 100;
+        const soft = 0.06;
         for (let i = 0; i < d.length; i += 4) {
           const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
           const sat = Math.max(r, g, b) - Math.min(r, g, b);
-          const f = sat >= 0.2 ? 1 : Math.pow(Math.min(1, Math.max(0, (hi - (0.2126 * r + 0.7152 * g + 0.0722 * b)) / (hi - lo))), 0.6);
+          const f = sat >= 0.2 ? 1 : Math.min(1, Math.max(0, (t + soft - (0.2126 * r + 0.7152 * g + 0.0722 * b)) / (2 * soft)));
           d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = Math.round(d[i + 3] * f);
         }
         ctx.putImageData(id, 0, 0);
@@ -62,19 +75,19 @@ const toMono = (url) => {
     img.onerror = () => resolve(null);
     img.src = url;
   });
-  monoCache.set(url, p);
+  monoCache.set(key, p);
   return p;
 };
 
-const useMono = (url, on) => {
+const useMono = (url, on, adj) => {
   const [src, setSrc] = useState(null);
-  useEffect(() => { if (!on) return; let live = true; toMono(url).then((u) => live && setSrc(u || "fail")); return () => { live = false; }; }, [url, on]);
+  useEffect(() => { if (!on) return; let live = true; toMono(url, adj).then((u) => live && setSrc(u || "fail")); return () => { live = false; }; }, [url, on, adj]);
   return src;
 };
 
 export const LogoImg = ({ asset, style }) => {
   const isMono = asset.meta?.tone === "mono";
-  const mono = useMono(asset.url, isMono);
+  const mono = useMono(asset.url, isMono, Number(asset.meta?.mono_adj) || 0);
   const tone = LOGO_TONES[asset.meta?.tone] || LOGO_TONES.white;
   const fx = asset.focal_x ?? 50, fy = asset.focal_y ?? 50, zoom = asset.zoom ?? 1;
   const base = { objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style };

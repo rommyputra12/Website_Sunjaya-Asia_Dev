@@ -203,3 +203,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## 2026-06 Monokrom putih (detail tetap) v2
 - Diproses di canvas (PartnersSection toMono, cache per URL): area berwarna -> putih solid, gradasi abu -> putih dgn opacity sesuai, detail putih asli -> cut-out; hover = warna asli di latar gading; fallback warna asli bila gagal
 - Hyperione & FPT Software pakai mono
+
+## 2026-06 Monokrom putih v3
+- Aturan seragam: warna -> putih; abu netral dipisah ambang otomatis (Otsu): lebih terang -> transparan, lebih gelap -> putih (flat 2D). meta.mono_adj (-30..30) slider "Ambang putih" di CMS; thumbnail CMS logo kini pakai LogoImg (sama dgn situs)

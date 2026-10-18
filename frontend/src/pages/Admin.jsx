@@ -734,8 +734,9 @@ const ImagesPanel = ({ client }) => {
                   data-testid={`asset-thumb-${a.key}`}
                   title="Klik untuk preview & atur posisi crop"
                   className="relative aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center group cursor-pointer">
-                  <img src={a.url} alt={a.alt || a.key} className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] ${a.section === "home_partners" ? "object-contain p-8" : "object-cover"}`} loading="lazy"
-                    style={a.section === "home_partners" ? { filter: (LOGO_TONES[a.meta?.tone] || LOGO_TONES.white).filter, mixBlendMode: (LOGO_TONES[a.meta?.tone] || LOGO_TONES.white).blend } : undefined} />
+                  {a.section === "home_partners"
+                    ? <div className="absolute inset-8"><LogoImg asset={{ ...a, focal_x: 50, focal_y: 50, zoom: 1 }} /></div>
+                    : <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />}
                   <span className="absolute inset-0 bg-obsidian/0 group-hover:bg-obsidian/50 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[9px] tracking-[0.2em] uppercase text-bone border border-copper bg-obsidian/70 px-3 py-1.5">Edit crop</span>
                   </span>
@@ -778,6 +779,15 @@ const ImagesPanel = ({ client }) => {
                         onChange={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), tone: e.target.value } }, "Tampilan logo tersimpan")} className={inputCls}>
                         {Object.entries(LOGO_TONES).map(([id, t]) => <option key={id} value={id}>Tampilan: {t.label}</option>)}
                       </select>
+                      {a.meta?.tone === "mono" && (
+                        <label className="flex items-center gap-2 font-mono text-[9px] text-ash" title="Geser kiri: lebih banyak area jadi transparan. Geser kanan: lebih banyak area jadi putih.">
+                          <span className="shrink-0">Ambang putih</span>
+                          <input type="range" min="-30" max="30" step="2" defaultValue={Number(a.meta?.mono_adj) || 0} data-testid={`logo-mono-adj-${a.key}`} className="flex-1 accent-copper"
+                            onPointerUp={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), mono_adj: Number(e.target.value) } }, "Ambang tersimpan")}
+                            onKeyUp={(e) => saveMeta({ ...a }, { meta: { ...(a.meta || {}), mono_adj: Number(e.target.value) } }, "Ambang tersimpan")} />
+                          <span className="w-6 text-right">{Number(a.meta?.mono_adj) || 0}</span>
+                        </label>
+                      )}
                       <input defaultValue={a.alt || ""} placeholder="Nama brand / perusahaan / instansi" data-testid={`logo-name-${a.key}`}
                         onBlur={(e) => { const v = e.target.value.toUpperCase(); if (v !== (a.alt || "")) saveMeta({ ...a }, { alt: v }, "Nama tersimpan"); }} className={`${inputCls} uppercase`} />
                     </div>
