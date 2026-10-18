@@ -379,12 +379,12 @@ input, textarea, select {
 
 /* Cinematic hero entrance — fade + subtle scale-up, GPU-accelerated (no JS overhead) */
 @keyframes heroFadeIn {
-  0%   { opacity: 0; transform: scale(1.08); }
-  100% { opacity: 1; transform: scale(1); }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 .hero-banner-enter {
   animation: heroFadeIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: opacity, transform;
+  will-change: opacity;
 }
 
 /* Respect reduced-motion preference */

@@ -81,7 +81,7 @@ export default function Home() {
     const names = listBlocks(`pillar.${p.num}.div.`).filter((b) => b.key.endsWith(".name"));
     return names.length ? names.map((b) => t(b.key, b.value)) : p.lines;
   };
-  const { byKey } = useAssets();
+  const { byKey, ready: assetsReady } = useAssets();
   const subCards = SUB_ORDER.slice().sort((a, b) => (byKey[a.image]?.sort_order ?? 100) - (byKey[b.image]?.sort_order ?? 100));
   const locations = useLocations();
   const infraCount = locations.filter((l) => l.type === "infra").length;
@@ -97,7 +97,7 @@ export default function Home() {
       {/* HERO */}
       <section ref={heroRef} id="hero" className="relative pt-20 md:pt-24 overflow-hidden isolate flex flex-col">
         {/* Parallax image — displayed at 100% (no overlays); text uses shadow effects for legibility */}
-        <div className="absolute inset-0 z-0 overflow-hidden hero-banner-enter">
+        <div key={assetsReady ? "ready" : "wait"} className={`absolute inset-0 z-0 overflow-hidden ${assetsReady ? "hero-banner-enter" : "opacity-0"}`}>
         <motion.div
           style={{ y: parallaxY, scale: parallaxScale, opacity: parallaxOpacity }}
           className="absolute inset-0"

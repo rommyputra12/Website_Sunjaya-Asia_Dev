@@ -209,3 +209,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 Logo optical sizing
 - LogoImg: trim margin transparan otomatis (canvas, cache), ukuran optik h=0.62*ratio^-0.4 dari tinggi kotak, maks 78% kotak, selalu center; zoom Edit Crop partners 0.5x-2.5x (focal tidak dipakai utk partners)
+
+## 2026-06 Hero tanpa efek zoom saat loading
+- heroFadeIn kini fade saja (tanpa scale 1.08); AssetImg menunggu data CMS (ready) sebelum render sehingga crop/zoom berlaku sejak frame pertama (tidak ada lompatan fallback->crop) di semua gambar CMS

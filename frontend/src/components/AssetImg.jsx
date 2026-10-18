@@ -8,7 +8,7 @@ import { useAssets } from "../context/AssetContext";
  * size always fills the layout slot neatly.
  */
 const AssetImg = ({ k, className = "", style = {}, alt, ...rest }) => {
-  const { byKey } = useAssets();
+  const { byKey, ready } = useAssets();
   const asset = byKey[k] || {};
   const fx = asset.focal_x ?? 50;
   const fy = asset.focal_y ?? 50;
@@ -20,6 +20,9 @@ const AssetImg = ({ k, className = "", style = {}, alt, ...rest }) => {
       ? { transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%` }
       : {}),
   };
+
+  // Wait for CMS data so the crop/zoom is applied from the first frame (no fallback-then-jump)
+  if (!ready) return <span className={className} style={style} aria-hidden="true" />;
 
   return (
     <img
