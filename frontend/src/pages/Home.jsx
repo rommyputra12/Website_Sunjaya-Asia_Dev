@@ -312,7 +312,7 @@ export default function Home() {
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full object-cover opacity-[0.5]"
                 />
-                <div data-testid={`pillar-${p.num}-ivory-fade`} className="absolute inset-0 bg-[#F9F5EB]/55 pointer-events-none" />
+                <div data-testid={`pillar-${p.num}-ivory-fade`} className="absolute inset-0 bg-[#F9F5EB]/60 pointer-events-none" />
               </>
             )}
             <div className="absolute inset-0 pointer-events-none" />
@@ -330,7 +330,7 @@ export default function Home() {
         {byKey.homeSubsBg?.url && (
           <>
             <AssetImg k="homeSubsBg" alt="" data-testid="home-subs-bg" className="absolute inset-0 h-full w-full object-cover opacity-[0.5] pointer-events-none" />
-            <div className="absolute inset-0 bg-[#F9F5EB]/55 pointer-events-none" />
+            <div className="absolute inset-0 bg-[#F9F5EB]/60 pointer-events-none" />
           </>
         )}
         <div className="relative z-10 max-w-[1700px] mx-auto px-4 md:px-8 w-full flex-1 flex flex-col justify-center pt-4 md:pt-6 pb-2 md:pb-4">

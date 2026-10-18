@@ -429,7 +429,7 @@ const SubsBgUpload = ({ client, onDone }) => {
   return (
     <label data-testid="subs-bg-upload" className="flex flex-col items-center justify-center gap-2 border border-dashed border-copper/40 bg-ink p-8 cursor-pointer hover:border-copper transition-colors">
       <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{busy ? "Uploading…" : "Upload background image"}</span>
-      <span className="font-mono text-[9px] text-ash">Opsional — tanpa gambar, section memakai warna gading. Gambar otomatis dipudarkan 55% dengan lapisan gading.</span>
+      <span className="font-mono text-[9px] text-ash">Opsional — tanpa gambar, section memakai warna gading. Gambar otomatis dipudarkan 60% dengan lapisan gading.</span>
       <input type="file" accept="image/*" className="hidden" disabled={busy} data-testid="subs-bg-file" onChange={(e) => upload(e.target.files?.[0])} />
     </label>
   );

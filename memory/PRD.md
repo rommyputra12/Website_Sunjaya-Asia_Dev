@@ -194,3 +194,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## 2026-06 CMS Background Subsidiaries Home
 - Slot Images "Home — Subsidiaries Background" (key home_subsidiaries_bg, opsional, bisa dihapus); empty-state uploader SubsBgUpload di Admin.jsx
 - Home: gambar opacity 0.5 + overlay gading #F9F5EB/55 (sama dgn Pillar); tanpa gambar = warna gading
+
+- Overlay gading Pillar 01-03 & Subsidiaries bg: 55% -> 60%
