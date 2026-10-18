@@ -401,6 +401,7 @@ const IMAGE_SECTIONS = [
   { id: "home_hero", label: "Home — Hero Cover" },
   { id: "home_pillars_intro", label: "Home — Pillars Intro Background" },
   { id: "home_pillar_sections", label: "Home — Pillar Sections (01–03)" },
+  { id: "home_subsidiaries_bg", label: "Home — Subsidiaries Background" },
   { id: "home_subsidiaries", label: "Home — Subsidiaries Grid" },
   { id: "home_partners", label: "Home — Partners, Vendors & Customers Logos" },
   { id: "pillars_page", label: "Pillars Page — Slides" },
@@ -412,6 +413,28 @@ const sectionIndex = (id) => {
   const i = IMAGE_SECTIONS.findIndex((s) => s.id === id);
   return i === -1 ? IMAGE_SECTIONS.length : i;
 };
+// Empty-state uploader for the optional Home Subsidiaries background
+const SubsBgUpload = ({ client, onDone }) => {
+  const [busy, setBusy] = useState(false);
+  const upload = async (file) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file); fd.append("key", "home_subsidiaries_bg"); fd.append("section", "home_subsidiaries_bg"); fd.append("sort_order", "100");
+      await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      toast.success("Background uploaded"); await onDone();
+    } catch (err) { toast.error(errMsg(err, "Upload failed")); } finally { setBusy(false); }
+  };
+  return (
+    <label data-testid="subs-bg-upload" className="flex flex-col items-center justify-center gap-2 border border-dashed border-copper/40 bg-ink p-8 cursor-pointer hover:border-copper transition-colors">
+      <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{busy ? "Uploading…" : "Upload background image"}</span>
+      <span className="font-mono text-[9px] text-ash">Opsional — tanpa gambar, section memakai warna gading. Gambar otomatis dipudarkan 55% dengan lapisan gading.</span>
+      <input type="file" accept="image/*" className="hidden" disabled={busy} data-testid="subs-bg-file" onChange={(e) => upload(e.target.files?.[0])} />
+    </label>
+  );
+};
+
 const sectionLabel = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.label || id;
 
 // Card slot titles: ordered by tier (branch -> subsidiary -> affiliate), then CMS sort order
@@ -635,6 +658,7 @@ const ImagesPanel = ({ client }) => {
       ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
       : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
+  if (!groups.home_subsidiaries_bg) groups.home_subsidiaries_bg = []; // optional background slot
   const catOf = (a) => a.meta?.category || "partner";
   const subGroups = (secId) => secId !== "home_partners"
     ? [{ id: null, items: groups[secId] }]
@@ -685,6 +709,7 @@ const ImagesPanel = ({ client }) => {
             <div className="flex-1 h-px bg-white/10" />
             <span className="font-mono text-[9px] text-ash">{groups[secId].length} image{groups[secId].length > 1 ? "s" : ""}</span>
           </div>
+          {secId === "home_subsidiaries_bg" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} />}
           {secId === "home_partners" && (
             <div className="mb-5 border border-copper/30 bg-ink p-4">
               <BulkLogoUpload client={client} existingCount={groups[secId].length} onDone={refresh} />
@@ -700,7 +725,7 @@ const ImagesPanel = ({ client }) => {
           )}
           <SortableContext items={sg.items.map((a) => a.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {sg.items.length === 0 && <p className="col-span-full font-mono text-[10px] text-ash">Belum ada logo di kelompok ini.</p>}
+            {sg.id && sg.items.length === 0 && <p className="col-span-full font-mono text-[10px] text-ash">Belum ada logo di kelompok ini.</p>}
             {sg.items.map((a, idx) => (
               <AssetCard key={a.id} a={a} draggable={secId === "home_subsidiaries" || secId === "home_partners"}>
                 <button

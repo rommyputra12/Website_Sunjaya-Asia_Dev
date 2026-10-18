@@ -326,8 +326,14 @@ export default function Home() {
       })}
 
       {/* SUBSIDIARIES TEASER — grid fills available space (big photos) with a min-height floor so cards never squash or spill over the button */}
-      <section id="subsidiaries-teaser" className="snap-section section-light border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-0 flex flex-col overflow-hidden">
-        <div className="max-w-[1700px] mx-auto px-4 md:px-8 w-full flex-1 flex flex-col justify-center pt-4 md:pt-6 pb-2 md:pb-4">
+      <section id="subsidiaries-teaser" className="snap-section section-light relative border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-0 flex flex-col overflow-hidden">
+        {byKey.homeSubsBg?.url && (
+          <>
+            <AssetImg k="homeSubsBg" alt="" data-testid="home-subs-bg" className="absolute inset-0 h-full w-full object-cover opacity-[0.5] pointer-events-none" />
+            <div className="absolute inset-0 bg-[#F9F5EB]/55 pointer-events-none" />
+          </>
+        )}
+        <div className="relative z-10 max-w-[1700px] mx-auto px-4 md:px-8 w-full flex-1 flex flex-col justify-center pt-4 md:pt-6 pb-2 md:pb-4">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4 mb-5 md:mb-6">
             <Reveal className="max-w-4xl">
               <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.subs.kicker", SUBS_TEASER.kicker)}</span>

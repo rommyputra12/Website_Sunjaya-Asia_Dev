@@ -20,6 +20,7 @@ export const ASSET_DB_KEYS = {
   tsn: "tsn",
   san: "san",
   kgi: "kgi",
+  homeSubsBg: "home_subsidiaries_bg",
   homePillar01Bg: "home_pillar_01_bg",
   homePillar02Bg: "home_pillar_02_bg",
   homePillar03Bg: "home_pillar_03_bg",
