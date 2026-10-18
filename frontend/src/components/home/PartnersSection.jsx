@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAssets } from "../../context/AssetContext";
 import { useLang } from "../../i18n/LanguageContext";
@@ -22,18 +22,72 @@ export const LOGO_TONES = {
   gray: { label: "Grayscale", filter: "grayscale(1) brightness(1.3)" },
   dark: { label: "Gelap", filter: "brightness(0) invert(0.15)" },
   original: { label: "Warna asli", filter: "none" },
-  mono: { label: "Monokrom (detail tetap)", filter: "grayscale(1) contrast(1.25) brightness(1.75)" },
+  mono: { label: "Monokrom putih (detail tetap)", filter: "none" },
   light: { label: "Logo asli putih/terang", filter: "none", hover: "brightness(0) invert(0.15)" },
 };
 
 // Logo fitted to its tile, honouring the CMS crop (focal point + zoom) and display tone
+// "Monokrom putih": colour areas -> solid white, grey shading -> white with matching opacity,
+// already-white details -> cut-outs. Computed once per image on a canvas, cached by URL.
+const monoCache = new Map();
+const toMono = (url) => {
+  if (monoCache.has(url)) return monoCache.get(url);
+  const p = new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const sc = Math.min(1, 900 / Math.max(img.width, img.height));
+        const w = Math.round(img.width * sc), h = Math.round(img.height * sc);
+        const c = document.createElement("canvas"); c.width = w; c.height = h;
+        const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+        const id = ctx.getImageData(0, 0, w, h), d = id.data;
+        const hist = new Uint32Array(256); let n = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          if (d[i + 3] > 128 && Math.max(r, g, b) - Math.min(r, g, b) < 51) { hist[Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b)]++; n++; }
+        }
+        const pct = (q) => { let acc = 0; for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= q * n) return v / 255; } return 1; };
+        const hi = n > 50 ? pct(0.98) : 1, lo = Math.min(n > 50 ? pct(0.05) : 0, hi - 0.35);
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+          const sat = Math.max(r, g, b) - Math.min(r, g, b);
+          const f = sat >= 0.2 ? 1 : Math.pow(Math.min(1, Math.max(0, (hi - (0.2126 * r + 0.7152 * g + 0.0722 * b)) / (hi - lo))), 0.6);
+          d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = Math.round(d[i + 3] * f);
+        }
+        ctx.putImageData(id, 0, 0);
+        resolve(c.toDataURL("image/png"));
+      } catch { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+  monoCache.set(url, p);
+  return p;
+};
+
+const useMono = (url, on) => {
+  const [src, setSrc] = useState(null);
+  useEffect(() => { if (!on) return; let live = true; toMono(url).then((u) => live && setSrc(u || "fail")); return () => { live = false; }; }, [url, on]);
+  return src;
+};
+
 export const LogoImg = ({ asset, style }) => {
+  const isMono = asset.meta?.tone === "mono";
+  const mono = useMono(asset.url, isMono);
   const tone = LOGO_TONES[asset.meta?.tone] || LOGO_TONES.white;
   const fx = asset.focal_x ?? 50, fy = asset.focal_y ?? 50, zoom = asset.zoom ?? 1;
+  const base = { objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style };
+  if (isMono && mono !== "fail") return (
+    <>
+      {mono && <img src={mono} alt="" aria-hidden="true" draggable={false} className="logo-mono-proc absolute inset-0 w-full h-full object-contain" style={base} />}
+      <img src={asset.url} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone="mono" className="logo-mono-orig absolute inset-0 w-full h-full object-contain" style={base} />
+    </>
+  );
   return (
     <img src={asset.url} alt={asset.alt || asset.key} loading="lazy" draggable={false} data-tone={asset.meta?.tone || "white"}
       className="logo-tone absolute inset-0 w-full h-full object-contain"
-      style={{ "--logo-filter": tone.filter, "--logo-hover": tone.hover || "none", mixBlendMode: tone.blend, objectPosition: `${fx}% ${fy}%`, transform: `scale(${zoom})`, transformOrigin: `${fx}% ${fy}%`, ...style }} />
+      style={{ "--logo-filter": tone.filter, "--logo-hover": tone.hover || "none", mixBlendMode: tone.blend, ...base }} />
   );
 };
 

@@ -199,3 +199,7 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 Logo tone "Monokrom (detail tetap)"
 - LOGO_TONES.mono: grayscale(1) contrast(1.25) brightness(1.75) untuk logo ikon padat/3D (mis. Hyperione); hover = warna asli di latar gading. Hyperione di-set mono
+
+## 2026-06 Monokrom putih (detail tetap) v2
+- Diproses di canvas (PartnersSection toMono, cache per URL): area berwarna -> putih solid, gradasi abu -> putih dgn opacity sesuai, detail putih asli -> cut-out; hover = warna asli di latar gading; fallback warna asli bila gagal
+- Hyperione & FPT Software pakai mono
