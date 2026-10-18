@@ -212,3 +212,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 Hero tanpa efek zoom saat loading
 - heroFadeIn kini fade saja (tanpa scale 1.08); AssetImg menunggu data CMS (ready) sebelum render sehingga crop/zoom berlaku sejak frame pertama (tidak ada lompatan fallback->crop) di semua gambar CMS
+
+- Nama di bawah logo partner: hover/klik -> oranye (copper) + semibold

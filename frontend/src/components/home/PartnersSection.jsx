@@ -156,7 +156,7 @@ const LogoRow = ({ id, logos, reverse }) => {
                 <div data-testid="partner-logo-tile" className="logo-tile relative aspect-[2/1] w-full overflow-hidden rounded-[10px] border border-white/10">
                   <div className="absolute inset-[3px]"><LogoImg asset={l} /></div>
                 </div>
-                {l.alt && <span className="font-mono text-[9px] md:text-[10px] tracking-[0.14em] uppercase text-bone/70 group-hover:text-bone text-center leading-tight line-clamp-2 transition-colors">{l.alt}</span>}
+                {l.alt && <span data-testid="partner-logo-name" className="font-mono text-[9px] md:text-[10px] tracking-[0.14em] uppercase text-bone/70 group-hover:text-copper group-hover:font-semibold group-focus-within:text-copper group-focus-within:font-semibold text-center leading-tight line-clamp-2 transition-colors duration-300">{l.alt}</span>}
               </div>
             ))}
           </div>
