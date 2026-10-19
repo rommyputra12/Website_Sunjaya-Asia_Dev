@@ -33,7 +33,7 @@ export default function About() {
             {/* Title + body stacked on the right, aligned vertically */}
             <div className="grid grid-cols-12 gap-10">
               <div className="col-span-5 col-start-8">
-                <span className="font-mono text-lg tracking-[0.28em] uppercase text-copper">{t("about.overline")}</span>
+                <span data-testid="about-overline" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
                 <h1 className="font-serif text-3xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-bone mt-3">
                   <LineReveal text={t("about.title")} />
                 </h1>
@@ -66,7 +66,7 @@ export default function About() {
 
         {/* Mobile: text section below banner */}
         <div className="md:hidden px-6 pt-10 pb-12 bg-obsidian">
-          <span className="font-mono text-sm tracking-[0.28em] uppercase text-copper">{t("about.overline")}</span>
+          <span data-testid="about-overline-mobile" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
           <h1 className="font-serif text-2xl leading-[1.15] tracking-[-0.02em] text-bone mt-3">
             <LineReveal text={t("about.title")} />
           </h1>
@@ -111,7 +111,7 @@ export default function About() {
         {/* Timeline */}
         <div id="timeline" className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-10 scroll-mt-24">
           <div className="md:col-span-4">
-            <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper">{t("about.timeline.kicker")}</span>
+            <span data-testid="about-timeline-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.timeline.kicker")}</span>
             <h2 className="font-serif text-2xl md:text-3xl text-bone mt-3 tracking-tight">{t("about.timeline.title")}</h2>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function About() {
         <div id="competitive-edge" className="mt-32 -mx-6 md:-mx-10 px-6 md:px-10 py-24 section-light scroll-mt-20">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-16">
             <div className="md:col-span-5">
-              <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper">{t("about.edge.kicker")}</span>
+              <span data-testid="about-edge-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.edge.kicker")}</span>
               <h2 className="font-serif text-xl md:text-3xl text-bone mt-3 tracking-tight leading-[1.15]">
                 <LineReveal text={t("about.edge.title")} />
                 <br />
