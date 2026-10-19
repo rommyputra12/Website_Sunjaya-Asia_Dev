@@ -6,7 +6,7 @@ import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
 import { Fmt, splitAlign } from "../components/FormattedText";
 
 export default function About() {
-  const { t: tr, tl } = useLang();
+  const { t: tr, tl, contentReady } = useLang();
   const t = (k) => tr(k, ABOUT_TEXT[k]);
   const L = (k) => tl(k, ABOUT_LISTS[k]);
   const identity = L("about.identity");
@@ -45,7 +45,7 @@ export default function About() {
                 </h1>
                 {/* Body text pushed down so title has breathing room */}
                 <div data-testid="about-body" className="mt-10 space-y-8 text-bone/90 text-sm md:text-base leading-[1.75]">
-                  {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
+                  {(contentReady ? bodyParas : []).map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default function About() {
             <LineReveal text={t("about.title")} />
           </h1>
           <div data-testid="about-body-mobile" className="mt-6 space-y-6 text-bone/85 text-sm leading-[1.75]">
-            {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
+            {(contentReady ? bodyParas : []).map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
           </div>
           {/* Mobile corporate identity */}
           <Reveal>

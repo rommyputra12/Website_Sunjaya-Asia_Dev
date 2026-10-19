@@ -7,11 +7,25 @@ const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 const LanguageContext = createContext({ lang: "en", setLang: () => {}, t: (k) => k });
 
+const CONTENT_CACHE = "sunjaya_content_v1";
+const toOverrides = (rows) => {
+  const map = { en: {}, id: {} };
+  rows.forEach((b) => {
+    if (!b.key) return;
+    if ((b.value ?? "") !== "") map.en[b.key] = b.value;
+    if ((b.value_id ?? "") !== "") map.id[b.key] = b.value_id;
+  });
+  return map;
+};
+
 export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState(() => localStorage.getItem("sunjaya_lang") || "en");
   // CMS text overrides: { "hero.line1": "...", ... } (EN-first; ID overrides come in a later phase)
-  const [overrides, setOverrides] = useState({ en: {}, id: {} });
-  const [blocks, setBlocks] = useState([]);
+  // Last CMS payload is cached locally so returning visitors see CMS text instantly (refreshed in background)
+  const cached = (() => { try { return JSON.parse(localStorage.getItem(CONTENT_CACHE) || "null"); } catch { return null; } })();
+  const [blocks, setBlocks] = useState(() => cached || []);
+  const [overrides, setOverrides] = useState(() => toOverrides(cached || []));
+  const [contentReady, setContentReady] = useState(!!cached);
   const { byKey } = useAssets();
 
   useEffect(() => {
@@ -25,16 +39,13 @@ export const LanguageProvider = ({ children }) => {
       try {
         const r = await axios.get(`${API}/content`);
         if (cancelled) return;
-        const map = { en: {}, id: {} };
-        (r.data || []).forEach((b) => {
-          if (!b.key) return;
-          if ((b.value ?? "") !== "") map.en[b.key] = b.value;
-          if ((b.value_id ?? "") !== "") map.id[b.key] = b.value_id;
-        });
-        setOverrides(map);
+        setOverrides(toOverrides(r.data || []));
         setBlocks(r.data || []);
+        try { localStorage.setItem(CONTENT_CACHE, JSON.stringify(r.data || [])); } catch { /* quota */ }
       } catch {
         // silently fall back to bundled translations
+      } finally {
+        if (!cancelled) setContentReady(true);
       }
     })();
     return () => { cancelled = true; };
@@ -82,7 +93,7 @@ export const LanguageProvider = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t, tl, blocks, listBlocks }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, tl, blocks, listBlocks, contentReady }}>
       {children}
     </LanguageContext.Provider>
   );

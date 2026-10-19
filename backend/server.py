@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFi
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
+import json
 import logging
 import httpx
 from pathlib import Path
@@ -57,8 +58,30 @@ def now_iso() -> str:
 
 # ============ SUPABASE HELPERS ============
 
+# Short-lived read cache (per table) so public pages don't wait on a Supabase round-trip every request.
+# Any write through sb_insert/sb_update/sb_delete clears that table's entries.
+_READ_CACHE: dict = {}
+_READ_TTL = 60.0
+
+
+def _cache_clear(table: str):
+    for k in [k for k in _READ_CACHE if k[0] == table]:
+        _READ_CACHE.pop(k, None)
+
+
 async def sb_select(table: str, filters: dict | None = None, order: str | None = None, limit: int = 200, svc: bool = False) -> list:
     """Query rows from Supabase via REST API. svc=True uses the service-role key."""
+    import time as _t
+    ck = (table, json.dumps(filters, sort_keys=True, default=str), order, limit, svc)
+    hit = _READ_CACHE.get(ck)
+    if hit and _t.monotonic() - hit[0] < _READ_TTL:
+        return [dict(r) for r in hit[1]]
+    rows = await _sb_select_raw(table, filters, order, limit, svc)
+    _READ_CACHE[ck] = (_t.monotonic(), rows)
+    return [dict(r) for r in rows]
+
+
+async def _sb_select_raw(table: str, filters: dict | None, order: str | None, limit: int, svc: bool) -> list:
     hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?select=*"
     if filters:
@@ -88,6 +111,7 @@ async def sb_select_one(table: str, filters: dict, svc: bool = False) -> dict | 
 
 async def sb_insert(table: str, row: dict, svc: bool = False) -> dict:
     """Insert a row and return it."""
+    _cache_clear(table)
     hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?select=*"
     async with httpx.AsyncClient(timeout=30) as c:
@@ -98,6 +122,7 @@ async def sb_insert(table: str, row: dict, svc: bool = False) -> dict:
 
 async def sb_update(table: str, row_id: str, update: dict, svc: bool = False) -> dict | None:
     """Update a row by id and return it."""
+    _cache_clear(table)
     hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?id=eq.{row_id}&select=*"
     async with httpx.AsyncClient(timeout=30) as c:
@@ -109,6 +134,7 @@ async def sb_update(table: str, row_id: str, update: dict, svc: bool = False) ->
 
 async def sb_delete(table: str, row_id: str, svc: bool = False) -> bool:
     """Delete a row by id."""
+    _cache_clear(table)
     hdrs = SB_SERVICE_HEADERS if svc else SB_HEADERS
     url = f"{SUPABASE_URL}/rest/v1/{table}?id=eq.{row_id}"
     async with httpx.AsyncClient(timeout=30) as c:
@@ -932,6 +958,7 @@ async def upload_asset(
            "meta": {**((existing or {}).get("meta") or {}), "_variants": variants},
            "updated_at": now_iso()}
     url = f"{SUPABASE_URL}/rest/v1/assets?on_conflict=key"
+    _cache_clear("assets")
     async with httpx.AsyncClient(timeout=30) as c:
         r = await c.post(url, headers={**SB_SERVICE_HEADERS,
                          "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
