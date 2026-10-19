@@ -227,3 +227,7 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Frontend: lib/media.js buildSrcSet/variantUrl; AssetImg srcset + sizes (default 100vw; kartu/logo nav/footer punya sizes sendiri); LogoImg memproses varian 640
 - Hasil Home: HP ~1.2MB, desktop ~3.8MB (sebelumnya ~40MB desktop)
 - News cover (URL teks) belum memakai varian
+
+## 2026-06 Audit CDN final
+- Runtime audit 8 halaman publik + semua tab Admin + crop editor: 150 request gambar, 0 langsung ke Supabase Storage; host gambar hanya workers.dev + tile.openstreetmap.org (peta lokasi)
+- News cover via toCdnUrl (belum ada berita utk uji runtime); Contact hanya memakai gambar footer (AssetImg)
