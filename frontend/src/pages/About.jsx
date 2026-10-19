@@ -11,6 +11,8 @@ export default function About() {
   const L = (k) => tl(k, ABOUT_LISTS[k]);
   const identity = L("about.identity");
   const timeline = L("about.timeline.items");
+  // Each CMS line break starts a new paragraph so spacing stays identical after edits
+  const bodyParas = [t("about.body1"), t("about.body2")].flatMap((v) => String(v || "").split(/\n+/)).map((v) => v.trim()).filter(Boolean);
   const edgeCols = [1, 2, 3].map((n) => ({ title: t(`about.edge.col${n}`), items: L(`about.edge.list${n}`) }));
   return (
     <div data-testid="about-page" className="pb-24">
@@ -38,9 +40,8 @@ export default function About() {
                   <LineReveal text={t("about.title")} />
                 </h1>
                 {/* Body text pushed down so title has breathing room */}
-                <div className="mt-10 space-y-5 text-bone/90 text-sm md:text-base leading-[1.75]">
-                  <Reveal delay={0.1}><p>{t("about.body1")}</p></Reveal>
-                  <Reveal delay={0.15}><p>{t("about.body2")}</p></Reveal>
+                <div data-testid="about-body" className="mt-10 space-y-8 text-bone/90 text-sm md:text-base leading-[1.75]">
+                  {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p>{para}</p></Reveal>)}
                 </div>
               </div>
             </div>
@@ -70,9 +71,8 @@ export default function About() {
           <h1 data-testid="about-title-mobile" className="tight-reveal font-serif text-2xl leading-[1.15] tracking-[-0.02em] text-bone mt-3">
             <LineReveal text={t("about.title")} />
           </h1>
-          <div className="mt-6 space-y-4 text-bone/85 text-sm leading-[1.75]">
-            <Reveal delay={0.1}><p>{t("about.body1")}</p></Reveal>
-            <Reveal delay={0.15}><p>{t("about.body2")}</p></Reveal>
+          <div data-testid="about-body-mobile" className="mt-6 space-y-6 text-bone/85 text-sm leading-[1.75]">
+            {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p>{para}</p></Reveal>)}
           </div>
           {/* Mobile corporate identity */}
           <Reveal>
