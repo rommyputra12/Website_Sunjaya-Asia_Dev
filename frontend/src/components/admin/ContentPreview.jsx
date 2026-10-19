@@ -216,15 +216,18 @@ const DEVICES = { desktop: { w: 1440, h: 810 }, mobile: { w: 390, h: 844 } };
 const LiveFrame = ({ url, version, device }) => {
   const box = useRef(null);
   const [w, setW] = useState(560);
+  const [seen, setSeen] = useState(false);
   useEffect(() => {
     const ro = new ResizeObserver(([e]) => setW(e.contentRect.width));
-    if (box.current) ro.observe(box.current);
-    return () => ro.disconnect();
+    // Mount the (heavy) live iframe only once it scrolls into view
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect(); } }, { rootMargin: "200px" });
+    if (box.current) { ro.observe(box.current); io.observe(box.current); }
+    return () => { ro.disconnect(); io.disconnect(); };
   }, []);
   const d = DEVICES[device];
   const mobile = device === "mobile";
   const scale = mobile ? Math.min(0.62, (w - 24) / d.w) : w / d.w;
-  const iframe = (
+  const iframe = seen && (
     <iframe key={`${version}-${device}`} title="Live preview" src={url} data-testid="preview-live-iframe" loading="lazy"
       className="absolute top-0 left-0 origin-top-left pointer-events-none" style={{ width: d.w, height: d.h, transform: `scale(${scale})` }} />
   );

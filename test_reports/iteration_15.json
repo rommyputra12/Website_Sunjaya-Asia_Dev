@@ -1,0 +1,33 @@
+{
+  "summary": "Frontend testing of the CMS rich-text toolbar (Bold/Italic/Underline, 4-colour palette, alignment) and how it renders on the public site. ALL PASSED. Admin About > Tentang Kami: rich-toolbar-about.body1/body2 are present with 11 buttons. Selecting text and clicking a button wraps it correctly: rt-bold gives **x**, rt-italic gives _x_, rt-underline gives ++x++, rt-color-sky and rt-color-copper give [c=id]x[/c]. rt-align-center then rt-align-justify replace the [align=] prefix (no stacking). rt-align-left removes it. Focus stays in the textarea and the inner text stays selected. The 'belum tersimpan' badge shows. Blur saves with toast 'Tersimpan: Paragraf 1'. preview-about.body1 renders strong / em.italic / underline span / coloured spans (#7FC8EE, #C86230) / text-align:justify. Public /about [data-testid=about-body] p has text-align:justify, all formats render, and no raw markers show. The toolbar is present on hero.sub, home.pillars_intro.para1/para2, home.subs.desc, presence.sub, pillar.01.body, about.edge.desc, contact.sub, footer.description, 5 pillar pointer desc fields, and about-timeline-items-0-body (list toolbar wraps it with [c=gray] and persists, toast 'Tersimpan: Milestone'). The toolbar is correctly absent on short fields (hero.line1, contact.success, about.partner.text). The toolbar applies to the ID column when that column has focus (contact.sub-id became **Halo** dunia; EN was untouched). Public spot-checks done via API values: Home hero subtitle (center + bold/italic/underline/sky), /contact subtitle (right + bold + copper), /pillars pillar 01 body (justify + underline/italic/bold/gray) all render correctly with no raw markers. The *accent* syntax still works: about.edge.desc on /about and about.partner.text (5 copper accents) on Home. No raw ** / [c= / ++ / [align / * text on Home, About, Contact or Pillars. No JS console errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ContentPanel BiField (load race)", "issue": "Right after login the content list can take ~2s to load. During that time the textareas are empty (block undefined), so clicking a toolbar button inserts '**teks**' into an empty field. If the user blurs then, upsert POSTs a new block because meta.block is undefined, which can create a duplicate key or overwrite with near-empty text. Seen once in testing (not saved because there was no blur). Suggest a loading state/skeleton until the first /content fetch resolves, or disable inputs while loading.", "selector": "[data-testid=content-input-about.body1]", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Admin content with many sections open", "issue": "Opening ~11 sections at once mounts many live-preview iframes. This hits rate limits (HTTP 429 in the console) and refresh() then fails with the toast 'Gagal memuat konten' after a save. The saves themselves succeeded. Consider lazy-loading iframes only for the active section, or defaulting to highlight mode.", "affected_selectors": ["[data-testid^=preview-live-]"]}
+    ],
+    "design_issues": [
+      {"screen": "Contact page (light background)", "issues": ["The palette colour 'Gading/ivory' (#F3EAD3) would be nearly invisible on the light contact header, and 'Abu' has low contrast there. Consider a hint in the CMS or a per-surface palette."]},
+      {"screen": "Home pillars intro para2", "issues": ["If para2 gets an [align=] prefix, Fmt returns a block span, so the inline orange highlight span after it drops to a new line."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/restore_content.py", "/app/tests/set_fmt.py"],
+  "action_items": [
+    "Optional: block editing/toolbar until the initial /content fetch resolves (prevents the empty-field POST race)",
+    "Optional: lazy-mount live preview iframes to avoid 429s and the 'Gagal memuat konten' toast",
+    "Optional: warn about ivory/gray colours on light-background fields (contact.sub)"
+  ],
+  "critical_code_review_comments": [
+    "RichToolbar.wrap uses the placeholder 'teks' when nothing is selected. That is fine, but it is not localised/explained to the user.",
+    "ListEditor toolbar getEl uses document.querySelector by testid. This works but is fragile if the same list is rendered twice; a ref is preferred.",
+    "Two parsers coexist (RichText for about.partner.text and Fmt for everything else). Consider merging them into Fmt for consistency."
+  ],
+  "updated_files": ["/app/tests/restore_content.py", "/app/tests/set_fmt.py"],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "None. A snapshot of /api/content was taken before testing. Edited fields (about.body1, contact.sub value + value_id, about.timeline.items, hero.sub, pillar.01.body) were all restored exactly; restore_content.py reports 'remaining diffs: [] new keys: []'.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Content toolbar testids: rich-toolbar-<key>, rt-bold|italic|underline-<key>, rt-color-{copper,ivory,sky,gray}-<key>, rt-align-{left,center,right,justify}-<key>; list fields use <list-tid>-<i>-<field> (e.g. about-timeline-items-0-body). Wait until content-input-* has a non-empty value before editing (the content fetch is slow). Use X-Admin-Token sunjaya-admin-2026-secret with PUT /api/content/{id} to set or restore values; /tmp/content_orig.json + /app/tests/restore_content.py restores from the snapshot. footer.description has no DB block yet (it uses the default text)."
+}

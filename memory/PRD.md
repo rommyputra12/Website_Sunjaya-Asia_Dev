@@ -236,3 +236,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Desktop: foto aboutBanner di setengah kiri (w-1/2), kanan bg obsidian solid di belakang teks; mobile: foto square. Asset about_banner di-set focal_x=0, zoom=1.14 (file asli komposit foto kiri + area gelap kanan)
 
 - About foto desktop dilebarkan ke 55%; Edit Crop about_banner punya preview khusus Desktop (foto 55% + mock teks) & Mobile (1:1). Foto baru user 1024x1024, crop di-reset focal 55/50 zoom 1
+
+## 2026-06 Rich text toolbar CMS
+- components/FormattedText.jsx (Fmt, splitAlign): **bold**, _italic_, ++underline++, [c=copper|ivory|sky|gray]..[/c], *accent*, prefix [align=left|center|right|justify]
+- components/admin/RichToolbar.jsx: B/I/U, 4 warna tema, 4 perataan; dipasang di semua kolom paragraf (rf() di ContentPanel SCHEMA, pointer desc, timeline body). Berlaku utk kolom EN & ID yg sedang fokus
+- Render Fmt di Home (hero.sub, pillars intro, pillar body, subs desc), Pillars, Contact, Subsidiaries, Footer, About (body, timeline, edge desc), preview CMS
+- Fix dari iteration_15: loading state Content CMS (cegah tulis ke field kosong), live iframe preview hanya dimount saat terlihat (IntersectionObserver, cegah 429), para2 align di parent, label warna gading/abu "untuk latar gelap"

@@ -4,9 +4,9 @@ import React from "react";
 // optional "[align=left|right|center|justify]" prefix for the whole field.
 export const TEXT_COLORS = {
   copper: { label: "Oranye", value: "#C86230" },
-  ivory: { label: "Gading", value: "#F3EAD3" },
+  ivory: { label: "Gading (untuk latar gelap)", value: "#F3EAD3" },
   sky: { label: "Biru muda", value: "#7FC8EE" },
-  gray: { label: "Abu", value: "#9AA6AE" },
+  gray: { label: "Abu (untuk latar gelap)", value: "#9AA6AE" },
 };
 
 const ALIGN_RE = /^\[align=(left|right|center|justify)\]\s*/;
@@ -39,11 +39,12 @@ const inline = (str, accentClass, key = "r") => {
 };
 
 // Inline renderer for text that already sits inside a <p>/<div>; line breaks become <br/>
-export const Fmt = ({ text, accentClass = "text-copper" }) => {
+// inline: ignore alignment (caller aligns the parent so following inline content stays on the same line)
+export const Fmt = ({ text, accentClass = "text-copper", inline: inlineOnly = false }) => {
   const { align, body } = splitAlign(text);
   const lines = body.split("\n");
   const nodes = lines.map((l, i) => <React.Fragment key={i}>{i > 0 && <br />}{inline(l, accentClass, `l${i}`)}</React.Fragment>);
-  return align ? <span className="block" style={{ textAlign: align }}>{nodes}</span> : <>{nodes}</>;
+  return align && !inlineOnly ? <span className="block" style={{ textAlign: align }}>{nodes}</span> : <>{nodes}</>;
 };
 
 export default Fmt;

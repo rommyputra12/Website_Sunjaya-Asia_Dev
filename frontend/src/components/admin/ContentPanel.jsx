@@ -240,8 +240,9 @@ const matchText = (q, ...vals) => vals.some((v) => (v || "").toLowerCase().inclu
 
 export const ContentPanel = ({ client }) => {
   const [items, setItems] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const refresh = async () => {
-    try { const r = await client.get("/content"); setItems(r.data || []); }
+    try { const r = await client.get("/content"); setItems(r.data || []); setLoaded(true); }
     catch (e) { toast.error(errMsg(e, "Gagal memuat konten")); }
   };
   useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
@@ -282,7 +283,8 @@ export const ContentPanel = ({ client }) => {
         {query && <button onClick={() => setQuery("")} data-testid="content-search-clear" className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-copper"><X size={14} /></button>}
       </div>
       {q && SCHEMA.every((pg) => !pg.sections.some((sec) => sectionHit(pg, sec))) && <p data-testid="content-search-empty" className="font-mono text-xs text-ash mb-6">Tidak ada teks yang cocok dengan "{query}".</p>}
-      {SCHEMA.filter((pg) => pg.sections.some((sec) => sectionHit(pg, sec))).map((pg) => (
+      {!loaded && <p data-testid="content-loading" className="font-mono text-xs text-ash animate-pulse">Memuat konten…</p>}
+      {loaded && SCHEMA.filter((pg) => pg.sections.some((sec) => sectionHit(pg, sec))).map((pg) => (
         <Accordion key={pg.page} title={pg.label} count={pg.sections.length} testid={`content-page-${pg.page}`} forceOpen={!!q}>
           {pg.sections.filter((sec) => sectionHit(pg, sec)).map((sec) => (
             <Accordion key={sec.id} level={1} title={sec.label} testid={`content-section-${sec.id}`} forceOpen={!!q} href={sec.url}>

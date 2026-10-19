@@ -14,7 +14,7 @@ import { StaticWorldMap } from "../components/StaticWorldMap";
 import Globe3D from "../components/Globe3D";
 import { tzAbbrev } from "../lib/timezones";
 import { Star } from "lucide-react";
-import { Fmt } from "../components/FormattedText";
+import { Fmt, splitAlign } from "../components/FormattedText";
 
 const HeroClock = () => {
   const [display, setDisplay] = React.useState("");
@@ -225,8 +225,8 @@ export default function Home() {
             <p className="mt-3 md:ml-[42%] text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
               <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
             </p>
-            <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
-              <Fmt text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
+            <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
+              <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
         </div>
