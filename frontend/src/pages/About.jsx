@@ -34,7 +34,7 @@ export default function About() {
             <div className="grid grid-cols-12 gap-10">
               <div className="col-span-5 col-start-8">
                 <span data-testid="about-overline" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
-                <h1 className="font-serif text-3xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-bone mt-3">
+                <h1 data-testid="about-title" className="tight-reveal font-serif text-3xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-bone mt-3">
                   <LineReveal text={t("about.title")} />
                 </h1>
                 {/* Body text pushed down so title has breathing room */}
@@ -67,7 +67,7 @@ export default function About() {
         {/* Mobile: text section below banner */}
         <div className="md:hidden px-6 pt-10 pb-12 bg-obsidian">
           <span data-testid="about-overline-mobile" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
-          <h1 className="font-serif text-2xl leading-[1.15] tracking-[-0.02em] text-bone mt-3">
+          <h1 data-testid="about-title-mobile" className="tight-reveal font-serif text-2xl leading-[1.15] tracking-[-0.02em] text-bone mt-3">
             <LineReveal text={t("about.title")} />
           </h1>
           <div className="mt-6 space-y-4 text-bone/85 text-sm leading-[1.75]">

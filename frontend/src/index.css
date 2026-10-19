@@ -258,6 +258,7 @@ body {
 }
 
 /* Reveal utilities */
+.tight-reveal .line-mask { line-height: 1.12; }
 .line-mask {
   overflow: hidden;
   display: inline-block;
