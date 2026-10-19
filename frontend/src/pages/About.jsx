@@ -92,15 +92,15 @@ export default function About() {
       <section id="company-history" className="section-light mt-16">
         <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
           <div className="flex items-baseline justify-between mb-8">
-            <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper">{t("about.history.kicker")}</span>
-            <span className="hidden md:inline font-mono text-[10px] tracking-[0.22em] uppercase text-ash">{t("about.history.since")}</span>
+            <span data-testid="about-history-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.history.kicker")}</span>
+            <span data-testid="about-history-since" className="hidden md:inline font-mono text-sm tracking-[0.22em] uppercase text-ash">{t("about.history.since")}</span>
           </div>
           <Reveal>
             <div className="relative aspect-[16/9] overflow-hidden clip-frame border border-black/10">
               <AssetImg k="aboutCompanyHistory" alt="Sunjaya Asia Group company history timeline" className="w-full h-full object-cover" />
             </div>
             <div className="mt-6 max-w-lg">
-              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{t("about.history.journey_kicker")}</span>
+              <span data-testid="about-journey-kicker" className="font-mono text-xs md:text-sm font-semibold tracking-[0.22em] uppercase text-copper">{t("about.history.journey_kicker")}</span>
               <p className="font-serif text-lg md:text-xl text-ink tracking-tight mt-2">{t("about.history.journey")}</p>
             </div>
           </Reveal>
