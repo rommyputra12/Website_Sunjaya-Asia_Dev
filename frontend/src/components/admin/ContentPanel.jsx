@@ -6,6 +6,7 @@ import { DEFAULT_OFFICES, MAX_OFFICES, OFFICES_KEY } from "../../data/offices";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../../data/aboutDefaults";
 import { PreviewCtx, SectionPreview } from "./ContentPreview";
 import { useLocations } from "../../hooks/useLocations";
+import { RichToolbar } from "./RichToolbar";
 
 const errMsg = (err, fb) => (typeof err?.response?.data?.detail === "string" ? err.response.data.detail : fb);
 const inputCls = "w-full bg-obsidian border border-white/15 px-3 py-2 font-mono text-[12px] text-bone focus:border-copper focus:outline-none";
@@ -15,17 +16,19 @@ const lst = (key, label, fields, extra = {}) => ({ key, label, fields, defaults:
 const ACCENT_HINT = "Tulis *kata* untuk warna oranye";
 
 const f = (key, label, type = "text") => ({ key, label, type });
+// Long paragraph with B/I/U, colour & alignment toolbar
+const rf = (key, label) => ({ ...f(key, label, "textarea"), rich: true });
 const stat = (n, id, name) => [f(`stats.value.${id}`, `Statistik ${n} — Angka (${name})`), f(`stats.${id}`, `Statistik ${n} — Keterangan`)];
 
 // Only fields listed here are editable; everything else (nav, form labels, copyright…) is locked
 const SCHEMA = [
   { page: "home", label: "Home Page", sections: [
-    { id: "hero", url: "/#hero", label: "Hero (Banner Utama)", fields: [f("hero.overline", "Teks kecil atas"), f("hero.line1", "Judul baris 1"), f("hero.line2", "Judul baris 2"), f("hero.sub", "Deskripsi", "textarea"), f("hero.cta_primary", "Tombol utama"), f("hero.cta_secondary", "Tombol kedua")] },
-    { id: "pillars_intro", url: "/#business-pillars", label: "Business Pillars Intro", fields: [f("home.pillars_intro.kicker", "Judul kecil (Business Pillars)"), f("home.pillars_intro.para1", "Paragraf 1", "textarea"),
-      f("home.pillars_intro.para2", "Paragraf 2", "textarea"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)")] },
-    { id: "subsidiaries_teaser", url: "/#subsidiaries-teaser", label: "Subsidiaries & Affiliates (Teaser)", fields: [f("home.subs.kicker", "Judul kecil"), f("home.subs.title", "Judul"), f("home.subs.desc", "Deskripsi", "textarea"), f("home.subs.cta", "Tombol")] },
+    { id: "hero", url: "/#hero", label: "Hero (Banner Utama)", fields: [f("hero.overline", "Teks kecil atas"), f("hero.line1", "Judul baris 1"), f("hero.line2", "Judul baris 2"), rf("hero.sub", "Deskripsi"), f("hero.cta_primary", "Tombol utama"), f("hero.cta_secondary", "Tombol kedua")] },
+    { id: "pillars_intro", url: "/#business-pillars", label: "Business Pillars Intro", fields: [f("home.pillars_intro.kicker", "Judul kecil (Business Pillars)"), rf("home.pillars_intro.para1", "Paragraf 1"),
+      rf("home.pillars_intro.para2", "Paragraf 2"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)")] },
+    { id: "subsidiaries_teaser", url: "/#subsidiaries-teaser", label: "Subsidiaries & Affiliates (Teaser)", fields: [f("home.subs.kicker", "Judul kecil"), f("home.subs.title", "Judul"), rf("home.subs.desc", "Deskripsi"), f("home.subs.cta", "Tombol")] },
     { id: "stats", url: "/#stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
-    { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), f("presence.sub", "Deskripsi (tampil di halaman Subsidiaries)", "textarea"),
+    { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), rf("presence.sub", "Deskripsi (tampil di halaman Subsidiaries)"),
       { ...f("presence.stats.branches", "Label statistik — Branches"), auto: "branches" }, { ...f("presence.stats.clients", "Label statistik — Affiliates/Infra"), auto: "clients" }, { ...f("presence.stats.countries", "Label statistik — Countries"), auto: "countries" }, f("presence.cta", "Tombol"), f("presence.hub", "Label hub")] },
     { id: "partners", url: "/#partners", label: "Partners, Vendors & Customers (Logo)", fields: [f("home.partners.kicker", "Judul kecil"), f("home.partners.title", "Judul")] },
     { id: "about_partner", url: "/#partnership", label: "Strategic Partnership Access (CTA)", fields: [f("about.partner.kicker", "Judul kecil"), { ...f("about.partner.text", "Kalimat utama (Enter = baris baru)", "textarea"), hintText: ACCENT_HINT }, f("about.partner.cta", "Tombol"), f("about.partner.email", "Email")] },
@@ -33,24 +36,24 @@ const SCHEMA = [
   { page: "pillars", label: "Pillars Page", sections: [
     { id: "intro", url: "/pillars", label: "Intro", fields: [f("manifesto.overline", "Teks kecil atas"), f("manifesto.title", "Judul intro", "textarea")] },
     ...["01", "02", "03"].map((n, i) => ({ id: `pillar_${n}`, url: `/pillars#pillar-${n}`, label: `Pillar ${n} — ${["The Foundation", "The Core", "The Future"][i]}`, pointers: n,
-      fields: [f(`pillar.${n}.kicker`, "Kicker"), f(`pillar.${n}.title`, "Judul"), f(`pillar.${n}.body`, "Deskripsi", "textarea")] })),
+      fields: [f(`pillar.${n}.kicker`, "Kicker"), f(`pillar.${n}.title`, "Judul"), rf(`pillar.${n}.body`, "Deskripsi")] })),
   ] },
   { page: "about", label: "About Page", sections: [
-    { id: "about", url: "/about", label: "Tentang Kami", fields: [f("about.overline", "Teks kecil atas"), f("about.title", "Judul", "textarea"), f("about.body1", "Paragraf 1", "textarea"), f("about.body2", "Paragraf 2", "textarea")] },
+    { id: "about", url: "/about", label: "Tentang Kami", fields: [f("about.overline", "Teks kecil atas"), f("about.title", "Judul", "textarea"), rf("about.body1", "Paragraf 1"), rf("about.body2", "Paragraf 2")] },
     { id: "about_identity", url: "/about", label: "Identitas Perusahaan (Kotak UEN, Established…)", fields: [],
       lists: [lst("about.identity", "Kotak identitas", [["label", "Label (mis. UEN)"], ["value", "Isi"]], { max: 4, itemLabel: "Kotak", sortable: true })] },
     { id: "about_history", url: "/about#company-history", label: "Company History", fields: [f("about.history.kicker", "Judul section"), f("about.history.since", "Teks kanan (Since…)"), f("about.history.journey_kicker", "Judul kecil di bawah foto"), f("about.history.journey", "Kalimat di bawah foto")] },
     { id: "about_timeline", url: "/about#timeline", label: "Timeline", fields: [f("about.timeline.kicker", "Judul section"), f("about.timeline.title", "Sub-judul")],
-      lists: [lst("about.timeline.items", "Milestone", [["year", "Tahun"], ["title", "Judul"], ["body", "Deskripsi", "textarea"]], { itemLabel: "Milestone", sortable: true })] },
-    { id: "about_edge", url: "/about#competitive-edge", label: "Competitive Edge", fields: [f("about.edge.kicker", "Judul section"), f("about.edge.title", "Judul baris 1"), f("about.edge.highlight", "Judul baris 2 (oranye)"), { ...f("about.edge.desc", "Deskripsi", "textarea"), hintText: ACCENT_HINT },
+      lists: [lst("about.timeline.items", "Milestone", [["year", "Tahun"], ["title", "Judul"], ["body", "Deskripsi", "textarea", true]], { itemLabel: "Milestone", sortable: true })] },
+    { id: "about_edge", url: "/about#competitive-edge", label: "Competitive Edge", fields: [f("about.edge.kicker", "Judul section"), f("about.edge.title", "Judul baris 1"), f("about.edge.highlight", "Judul baris 2 (oranye)"), { ...rf("about.edge.desc", "Deskripsi"), hintText: ACCENT_HINT },
       f("about.edge.col1", "Kolom 1 — Judul"), f("about.edge.col2", "Kolom 2 — Judul"), f("about.edge.col3", "Kolom 3 — Judul")],
       lists: [1, 2, 3].map((n) => lst(`about.edge.list${n}`, `Kolom ${n} — Daftar`, [["text", "Teks"]], { itemLabel: "Baris", sortable: true })) },
   ] },
   { page: "contact", label: "Contact Page", sections: [
-    { id: "contact", url: "/contact", label: "Header & Pesan", fields: [f("contact.title", "Judul"), f("contact.sub", "Deskripsi", "textarea"), f("contact.success", "Pesan setelah terkirim", "textarea")] },
+    { id: "contact", url: "/contact", label: "Header & Pesan", fields: [f("contact.title", "Judul"), rf("contact.sub", "Deskripsi"), f("contact.success", "Pesan setelah terkirim", "textarea")] },
   ] },
   { page: "footer", label: "Footer", sections: [
-    { id: "footer", url: "/#site-footer", label: "Tagline & Perusahaan", fields: [f("footer.tagline", "Tagline besar"), f("footer.description", "Deskripsi singkat", "textarea"), f("footer.company", "Nama perusahaan")] },
+    { id: "footer", url: "/#site-footer", label: "Tagline & Perusahaan", fields: [f("footer.tagline", "Tagline besar"), rf("footer.description", "Deskripsi singkat"), f("footer.company", "Nama perusahaan")] },
     { id: "offices", url: "/#site-footer", label: `Kantor & Kontak (maks. ${MAX_OFFICES})`, fields: [],
       lists: [{ key: OFFICES_KEY, label: "Kantor", defaults: DEFAULT_OFFICES, max: MAX_OFFICES, itemLabel: "Kantor", sortable: true, note: "Kantor 1 tampil sebagai Head Quarter; ikon telepon otomatis",
         itemTitle: (i) => (i === 0 ? "Kantor 1 — Head Quarter" : `Kantor ${i + 1}`), fields: [["label", "Judul kantor"], ["line1", "Alamat baris 1"], ["line2", "Alamat baris 2"], ["country", "Negara (baris sendiri)"], ["phone", "Nomor telepon"]] }] },
@@ -66,7 +69,7 @@ const useUpsert = (client, refresh) => async (key, meta, patch) => {
   } catch (e) { toast.error(errMsg(e, "Gagal menyimpan")); }
 };
 
-const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete, hint }) => {
+const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete, hint, rich }) => {
   const [showId, setShowId] = useState(!!block?.value_id);
   const { setActive, setDraft, active } = useContext(PreviewCtx);
   const focus = () => setActive(testid);
@@ -77,6 +80,14 @@ const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete, hi
   const multi = type === "textarea" || len > 70;
   const Tag = multi ? "textarea" : "input";
   const extra = multi ? { rows: Math.min(8, Math.max(2, Math.ceil(len / 85) + 1)) } : {};
+  const enRef = React.useRef(null), idRef = React.useRef(null), last = React.useRef("value");
+  const applyRich = (v) => {
+    const el = last.current === "value_id" ? idRef.current : enRef.current;
+    if (!el) return;
+    el.value = v;
+    if (last.current === "value") setDraft(testid, v);
+    mark(last.current, v);
+  };
   return (
     <div data-testid={`content-block-${testid}`} className={`bg-obsidian/40 border p-3 transition-colors ${active === testid ? "border-copper/70" : "border-white/10"}`}>
       <div className="flex items-center justify-between mb-1.5">
@@ -87,11 +98,12 @@ const BiField = ({ label, type, block, placeholder, onSave, testid, onDelete, hi
           {onDelete && <button type="button" onClick={onDelete} data-testid={`remove-pointer-${testid}`} className="text-red-400/70 hover:text-red-400"><Trash2 size={12} /></button>}
         </span>
       </div>
+      {rich && <RichToolbar testid={testid} getEl={() => (last.current === "value_id" ? idRef.current : enRef.current)} apply={applyRich} />}
       <div className={`grid gap-2 ${showId ? "md:grid-cols-2" : ""}`}>
-        <Tag {...extra} key={`en-${block?.value}`} defaultValue={block?.value || ""} placeholder={placeholder} data-testid={`content-input-${testid}`} onFocus={focus} onChange={(e) => { setDraft(testid, e.target.value); mark("value", e.target.value); }}
+        <Tag {...extra} ref={enRef} onFocusCapture={() => { last.current = "value"; }} key={`en-${block?.value}`} defaultValue={block?.value || ""} placeholder={placeholder} data-testid={`content-input-${testid}`} onFocus={focus} onChange={(e) => { setDraft(testid, e.target.value); mark("value", e.target.value); }}
           onBlur={(e) => { if (e.target.value !== (block?.value || "")) onSave({ value: e.target.value }); setDirty((d) => ({ ...d, value: false })); }} className={`${inputCls} resize-y`} />
         {showId && (
-          <Tag {...extra} key={`id-${block?.value_id}`} defaultValue={block?.value_id || ""} placeholder="Bahasa Indonesia (opsional)" data-testid={`content-input-${testid}-id`} onFocus={focus} onChange={(e) => mark("value_id", e.target.value)}
+          <Tag {...extra} ref={idRef} onFocusCapture={() => { last.current = "value_id"; }} key={`id-${block?.value_id}`} defaultValue={block?.value_id || ""} placeholder="Bahasa Indonesia (opsional)" data-testid={`content-input-${testid}-id`} onFocus={focus} onChange={(e) => mark("value_id", e.target.value)}
             onBlur={(e) => { if (e.target.value !== (block?.value_id || "")) onSave({ value_id: e.target.value }); setDirty((d) => ({ ...d, value_id: false })); }} className={`${inputCls} resize-y border-copper/30`} />
         )}
       </div>
@@ -133,7 +145,7 @@ const Pointers = ({ num, items, client, refresh, upsert }) => {
             <div key={nb.id} className="border border-white/10 p-3 space-y-2">
               <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash">Pointer {i + 1}</div>
               <BiField label="Nama" block={nb} testid={nb.key} onDelete={() => remove(nb)} onSave={(p) => upsert(nb.key, { block: nb, label: `Pointer ${i + 1} — Nama` }, p)} />
-              <BiField label="Deskripsi" type="textarea" block={desc} testid={nb.key.replace(/\.name$/, ".desc")}
+              <BiField label="Deskripsi" type="textarea" rich block={desc} testid={nb.key.replace(/\.name$/, ".desc")}
                 onSave={(p) => upsert(nb.key.replace(/\.name$/, ".desc"), { block: desc, page: "pillars", section: `pillar_${num}`, label: `Pointer ${i + 1} — Deskripsi`, type: "textarea" }, p)} />
             </div>
           );
@@ -174,12 +186,15 @@ const ListEditor = ({ items, upsert, list: cfg, page, section }) => {
             </span>
           </div>
           <div className={`grid gap-2 ${cfg.fields.length > 1 ? "md:grid-cols-2" : ""}`}>
-            {cfg.fields.map(([k, l, type]) => {
+            {cfg.fields.map(([k, l, type, rich]) => {
               const Tag = type === "textarea" ? "textarea" : "input";
+              const fid = `${tid}-${i}-${k}`;
               return (
                 <div key={k} className={type === "textarea" ? "md:col-span-2" : ""}>
                   <label className={lbl}>{l}</label>
-                  <Tag rows={type === "textarea" ? 3 : undefined} value={o[k] || ""} data-testid={`${tid}-${i}-${k}`}
+                  {rich && <RichToolbar testid={fid} getEl={() => document.querySelector(`[data-testid="${fid}"]`)}
+                    apply={(v) => update(list.map((x, j) => (j === i ? { ...x, [k]: v } : x)), i)} />}
+                  <Tag rows={type === "textarea" ? 3 : undefined} value={o[k] || ""} data-testid={fid}
                     onChange={(e) => update(list.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)), i)}
                     onFocus={() => setActive(`${cfg.key}-${i}`)} onBlur={() => { if (dirtyIdx === i) persist(list); setDirtyIdx(null); }}
                     className={`${inputCls} resize-y`} />
@@ -276,7 +291,7 @@ export const ContentPanel = ({ client }) => {
               {(
                 <>
                   {sectionFields(pg, sec).map((fd, i) => (
-                    <BiField key={fd.key} label={fd.label} type={fd.type} block={byKey[fd.key]} placeholder={defaultOf(fd.key)} testid={fd.key}
+                    <BiField key={fd.key} label={fd.label} type={fd.type} rich={fd.rich} block={byKey[fd.key]} placeholder={defaultOf(fd.key)} testid={fd.key}
                       hint={fd.auto ? `(angka otomatis dari Locations — ${AUTO_DESC[fd.auto]}: ${counts[fd.auto]})` : fd.hintText && `(${fd.hintText})`}
                       onSave={(p) => upsert(fd.key, { block: byKey[fd.key], page: pg.page, section: sec.id, label: fd.label, type: fd.type, sort: i + 1 }, p)} />
                   ))}

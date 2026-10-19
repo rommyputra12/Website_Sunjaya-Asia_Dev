@@ -4,6 +4,7 @@ import { translations } from "../../i18n/translations";
 import { DEFAULT_OFFICES, OFFICES_KEY, parseOffices } from "../../data/offices";
 import { ABOUT_TEXT } from "../../data/aboutDefaults";
 import { PARTNER_TEXT } from "../home/PartnersSection";
+import { Fmt } from "../FormattedText";
 
 export const PreviewCtx = createContext({ draft: {}, active: null, byKey: {} });
 
@@ -27,7 +28,7 @@ const T = ({ k, as: Tag = "span", className = "" }) => {
   const on = active === k;
   return (
     <Tag data-testid={`preview-${k}`} className={`${className} transition-colors duration-200 rounded-[2px] ${on ? "bg-copper/30 outline outline-1 outline-copper text-white" : ""}`}>
-      {val || <span className="opacity-40 italic">(kosong)</span>}
+      {val ? <Fmt text={val} /> : <span className="opacity-40 italic">(kosong)</span>}
     </Tag>
   );
 };

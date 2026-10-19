@@ -4,6 +4,7 @@ import { ArrowUpRight, Phone } from "lucide-react";
 import { useLang } from "../../i18n/LanguageContext";
 import AssetImg from "../AssetImg";
 import { useOffices, telHref } from "../../data/offices";
+import { Fmt } from "../FormattedText";
 
 const SOCIALS = [
   { href: "https://www.linkedin.com/company/sunjayaasiagroup/", imageKey: "footerLinkedin", label: "LinkedIn", external: true },
@@ -62,7 +63,7 @@ export const Footer = () => {
                 {t("footer.tagline")}
               </h2>
               <p className="mt-3 ml-32 max-w-[min(100%,540px)] border-l border-copper/70 pl-5 text-[11px] leading-[1.5] text-white/70 sm:ml-36 sm:pl-6 sm:text-xs lg:ml-40 lg:pl-7 lg:text-sm">
-                {t("footer.description", "Empowering global industries by bridging essential resources with next-generation technology, sustainable infrastructure, and transformative enterprise solutions.")}
+                <Fmt text={t("footer.description", "Empowering global industries by bridging essential resources with next-generation technology, sustainable infrastructure, and transformative enterprise solutions.")} />
               </p>
 
               <div className="mt-8 w-fit max-w-full border-t border-white/15 pt-3 md:mt-10 md:pt-4 lg:mt-12 lg:pt-5">

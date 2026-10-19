@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useLang } from "../i18n/LanguageContext";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
 import AssetImg from "../components/AssetImg";
-import RichText from "../components/RichText";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
+import { Fmt, splitAlign } from "../components/FormattedText";
 
 export default function About() {
   const { t: tr, tl } = useLang();
@@ -12,7 +12,10 @@ export default function About() {
   const identity = L("about.identity");
   const timeline = L("about.timeline.items");
   // Each CMS line break starts a new paragraph so spacing stays identical after edits
-  const bodyParas = [t("about.body1"), t("about.body2")].flatMap((v) => String(v || "").split(/\n+/)).map((v) => v.trim()).filter(Boolean);
+  const bodyParas = [t("about.body1"), t("about.body2")].flatMap((v) => {
+    const { align, body } = splitAlign(v);
+    return body.split(/\n+/).map((x) => x.trim()).filter(Boolean).map((x) => ({ text: x, align }));
+  });
   const edgeCols = [1, 2, 3].map((n) => ({ title: t(`about.edge.col${n}`), items: L(`about.edge.list${n}`) }));
   return (
     <div data-testid="about-page" className="pb-24">
@@ -42,7 +45,7 @@ export default function About() {
                 </h1>
                 {/* Body text pushed down so title has breathing room */}
                 <div data-testid="about-body" className="mt-10 space-y-8 text-bone/90 text-sm md:text-base leading-[1.75]">
-                  {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p>{para}</p></Reveal>)}
+                  {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
                 </div>
               </div>
             </div>
@@ -73,7 +76,7 @@ export default function About() {
             <LineReveal text={t("about.title")} />
           </h1>
           <div data-testid="about-body-mobile" className="mt-6 space-y-6 text-bone/85 text-sm leading-[1.75]">
-            {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p>{para}</p></Reveal>)}
+            {bodyParas.map((para, i) => <Reveal key={i} delay={0.1 + i * 0.05}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
           </div>
           {/* Mobile corporate identity */}
           <Reveal>
@@ -127,7 +130,7 @@ export default function About() {
                 <div className="col-span-9 md:col-span-4">
                   <h3 className="font-serif text-xl md:text-2xl text-bone tracking-tight leading-tight">{m.title}</h3>
                 </div>
-                <p className="col-span-12 md:col-span-6 text-bone/75 text-sm md:text-base leading-relaxed">{m.body}</p>
+                <p className="col-span-12 md:col-span-6 text-bone/75 text-sm md:text-base leading-relaxed"><Fmt text={m.body} /></p>
               </div>
             </Reveal>
           ))}
@@ -146,7 +149,7 @@ export default function About() {
             </div>
             <div className="md:col-span-6 md:col-start-7 self-end">
               <p className="text-bone/80 text-lg leading-relaxed">
-                <RichText text={t("about.edge.desc")} />
+                <Fmt text={t("about.edge.desc")} />
               </p>
             </div>
           </div>

@@ -6,6 +6,7 @@ import AssetImg from "../components/AssetImg";
 import { InteractiveWorldMap } from "../components/InteractiveWorldMap";
 import { useLang } from "../i18n/LanguageContext";
 import { useAssets } from "../context/AssetContext";
+import { Fmt } from "../components/FormattedText";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
@@ -241,7 +242,7 @@ export default function Subsidiaries() {
             </h2>
           </div>
           <div className="md:col-span-5 md:col-start-8 self-end">
-            <p className="text-bone/80 text-lg leading-relaxed">{t("presence.sub")}</p>
+            <p className="text-bone/80 text-lg leading-relaxed"><Fmt text={t("presence.sub")} /></p>
           </div>
         </div>
 

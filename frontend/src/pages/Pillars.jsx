@@ -3,6 +3,7 @@ import { useLang } from "../i18n/LanguageContext";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
 import { PILLARS } from "../data/content";
 import AssetImg from "../components/AssetImg";
+import { Fmt } from "../components/FormattedText";
 
 const DIVISIONS = {
   "01": [
@@ -61,7 +62,7 @@ export default function Pillars() {
                   <h2 className="font-serif text-2xl md:text-3xl text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h2>
                 </div>
                 <div className="md:col-span-4 text-bone/80 text-base leading-relaxed text-justify">
-                  {t(`pillar.${p.num}.body`, p.body)}
+                  <Fmt text={t(`pillar.${p.num}.body`, p.body)} />
                 </div>
               </div>
             </Reveal>
@@ -85,7 +86,7 @@ export default function Pillars() {
                         <span className="font-mono text-[10px] tracking-[0.22em] text-copper">{p.num}.{i + 1}</span>
                         <h3 className="font-serif text-2xl md:text-3xl text-bone tracking-tight">{d.name}</h3>
                       </div>
-                      <p className="text-bone/75 text-sm md:text-base leading-relaxed">{d.desc}</p>
+                      <p className="text-bone/75 text-sm md:text-base leading-relaxed"><Fmt text={d.desc} /></p>
                     </div>
                   </Reveal>
                 ))}

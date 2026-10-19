@@ -4,6 +4,7 @@ import { Reveal, LineReveal } from "../components/motion/Reveal";
 import { useLang } from "../i18n/LanguageContext";
 import { useOffices, telHref } from "../data/offices";
 import { toast, Toaster } from "sonner";
+import { Fmt } from "../components/FormattedText";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
@@ -41,7 +42,7 @@ export default function Contact() {
             <h1 className="font-serif text-2xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-bone mt-3">
               <LineReveal text={t("contact.title")} />
             </h1>
-            <p className="mt-6 text-bone/80 text-lg leading-relaxed max-w-md">{t("contact.sub")}</p>
+            <p className="mt-6 text-bone/80 text-lg leading-relaxed max-w-md"><Fmt text={t("contact.sub")} /></p>
 
             <div className="mt-16 space-y-8">
               {offices.map((o, i) => (

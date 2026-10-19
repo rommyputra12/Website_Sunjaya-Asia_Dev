@@ -14,6 +14,7 @@ import { StaticWorldMap } from "../components/StaticWorldMap";
 import Globe3D from "../components/Globe3D";
 import { tzAbbrev } from "../lib/timezones";
 import { Star } from "lucide-react";
+import { Fmt } from "../components/FormattedText";
 
 const HeroClock = () => {
   const [display, setDisplay] = React.useState("");
@@ -140,7 +141,7 @@ export default function Home() {
               transition={{ delay: 1.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
               className="md:col-span-6 md:col-start-6 text-bone text-[13px] md:text-xl leading-[1.45] tracking-[-0.005em] max-w-xl min-h-[5.8em] md:min-h-[5.8em] font-serif font-light hero-body-glow text-justify md:text-left"
             >
-              {t("hero.sub")}
+              <Fmt text={t("hero.sub")} />
             </motion.p>
           </div>
 
@@ -222,10 +223,10 @@ export default function Home() {
               <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
             </div>
             <p className="mt-3 md:ml-[42%] text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
-              {t("home.pillars_intro.para1", PILLARS_INTRO.para1)}
+              <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
             </p>
             <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
-              {t("home.pillars_intro.para2", PILLARS_INTRO.para2)} <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
+              <Fmt text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
         </div>
@@ -243,7 +244,7 @@ export default function Home() {
                   <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-obsidian mb-2 font-bold">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
                   <h3 className="font-serif text-[1.5rem] md:text-[2rem] text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h3>
                 </div>
-                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-justify">{t(`pillar.${p.num}.body`, p.body)}</p>
+                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-justify"><Fmt text={t(`pillar.${p.num}.body`, p.body)} /></p>
                 <ul className="mt-5 space-y-2.5 [&>li]:text-sm md:[&>li]:text-base [&>li]:tracking-wide">
                   {pillarLines(p).map((l) => (
                     <li key={l} className="flex items-start gap-2.5 font-mono text-[11px] md:text-xs text-bone font-bold">
@@ -342,7 +343,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-[#1d538f] text-xs md:text-sm leading-[1.35] md:text-right md:max-w-[40rem]">
-                {t("home.subs.desc", SUBS_TEASER.desc)}
+                <Fmt text={t("home.subs.desc", SUBS_TEASER.desc)} />
               </p>
             </Reveal>
           </div>
