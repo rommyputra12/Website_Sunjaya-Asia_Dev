@@ -153,7 +153,7 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
             {edgeCols.map((col, ci) => (
               <div key={ci} className="bg-obsidian p-8">
-                <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper mb-4">{col.title}</div>
+                <div data-testid={`edge-col-title-${ci}`} className="font-mono text-sm md:text-base font-bold tracking-[0.18em] uppercase text-copper mb-5">{col.title}</div>
                 <ul className="space-y-3">
                   {col.items.map((it, i) => (
                     <li key={i} data-testid={`edge-item-${ci}-${i}`} className="flex gap-3 items-start">
