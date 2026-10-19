@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { IMAGES, LOGO } from "../data/content";
+import { toCdnUrl } from "../lib/media";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
@@ -65,7 +66,7 @@ export const AssetProvider = ({ children }) => {
     Object.entries(ASSET_DB_KEYS).forEach(([camelKey, dbKey]) => {
       const a = dbByKey[dbKey];
       map[camelKey] = {
-        url: a?.url || FALLBACK_URLS[camelKey],
+        url: toCdnUrl(a?.url) || FALLBACK_URLS[camelKey],
         focal_x: a?.focal_x ?? 50,
         focal_y: a?.focal_y ?? 50,
         zoom: a?.zoom ?? 1,

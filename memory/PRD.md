@@ -214,3 +214,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - heroFadeIn kini fade saja (tanpa scale 1.08); AssetImg menunggu data CMS (ready) sebelum render sehingga crop/zoom berlaku sejak frame pertama (tidak ada lompatan fallback->crop) di semua gambar CMS
 
 - Nama di bawah logo partner: hover/klik -> oranye (copper) + semibold
+
+## 2026-06 Cloudflare Worker CDN untuk media
+- frontend/.env VITE_CDN_URL=https://website-sunjayaasia.rommy-putra12.workers.dev
+- src/lib/media.js: getPublicImageUrl(bucket,path) & toCdnUrl(url) (rewrite URL Supabase public -> CDN/{bucket}/{path}); DB tetap menyimpan URL Supabase
+- Diterapkan: data/content.js (fallback), AssetContext (semua AssetImg), PartnersSection (logo+canvas), News cover, Admin thumbnails/crop editor. Upload tetap langsung ke Supabase
+- Verifikasi: 62 request gambar via workers.dev, 0 ke supabase.co, 0 broken

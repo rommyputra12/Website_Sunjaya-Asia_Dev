@@ -9,6 +9,7 @@ import { BulkLogoUpload } from "../components/admin/BulkLogoUpload";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { toCdnUrl } from "../lib/media";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const TOKEN_KEY = "sunjaya_admin_token";
@@ -336,7 +337,7 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
               onPointerMove={(e) => { if (dragging.current) setFromPointer(e); }}
               onPointerUp={() => { dragging.current = false; }}
             >
-              <img src={asset.url} alt={asset.alt || asset.key} className="w-full h-full object-contain pointer-events-none" draggable={false} />
+              <img src={toCdnUrl(asset.url)} alt={asset.alt || asset.key} className="w-full h-full object-contain pointer-events-none" draggable={false} />
               {/* crosshair */}
               <div className="absolute w-6 h-6 -ml-3 -mt-3 pointer-events-none" style={{ left: `${fx}%`, top: `${fy}%` }}>
                 <div className="absolute inset-0 rounded-full border-2 border-copper bg-copper/20" />
@@ -366,11 +367,11 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
             ) : (<>
             <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Kartu (4:3) — subsidiary grid</p>
             <div className="relative aspect-[4/3] bg-obsidian border border-white/10 overflow-hidden mb-3">
-              <img src={asset.url} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
             </div>
             <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Banner lebar (21:9) — hero / background</p>
             <div className="relative aspect-[21/9] bg-obsidian border border-white/10 overflow-hidden">
-              <img src={asset.url} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
             </div>
             </>)}
             <p className="mt-3 text-[10px] text-ash leading-relaxed">Bagian yang ditandai titik tembaga akan selalu terlihat di semua ukuran slot (desktop &amp; mobile).</p>
@@ -736,7 +737,7 @@ const ImagesPanel = ({ client }) => {
                   className="relative aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center group cursor-pointer">
                   {a.section === "home_partners"
                     ? <div className="absolute inset-8"><LogoImg asset={{ ...a, focal_x: 50, focal_y: 50, zoom: 1 }} /></div>
-                    : <img src={a.url} alt={a.alt || a.key} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />}
+                    : <img src={toCdnUrl(a.url)} alt={a.alt || a.key} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />}
                   <span className="absolute inset-0 bg-obsidian/0 group-hover:bg-obsidian/50 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[9px] tracking-[0.2em] uppercase text-bone border border-copper bg-obsidian/70 px-3 py-1.5">Edit crop</span>
                   </span>

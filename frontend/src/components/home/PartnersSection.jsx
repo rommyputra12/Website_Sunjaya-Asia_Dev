@@ -6,6 +6,7 @@ import RichText from "../RichText";
 import { Reveal } from "../motion/Reveal";
 import { ABOUT_TEXT } from "../../data/aboutDefaults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { toCdnUrl } from "../../lib/media";
 
 // Categories are for CMS grouping only — each becomes one marquee row (no label shown publicly)
 export const PARTNER_CATEGORIES = [
@@ -110,14 +111,15 @@ const opticalBox = (ratio) => {
 
 export const LogoImg = ({ asset, style }) => {
   const isMono = asset.meta?.tone === "mono";
-  const res = useLogo(asset.url, isMono, Number(asset.meta?.mono_adj) || 0);
+  const cdnUrl = toCdnUrl(asset.url);
+  const res = useLogo(cdnUrl, isMono, Number(asset.meta?.mono_adj) || 0);
   const tone = LOGO_TONES[asset.meta?.tone] || LOGO_TONES.white;
   const zoom = asset.zoom ?? 1;
   const ready = res && res !== "fail";
   const box = ready ? opticalBox(res.ratio) : { w: LOGO_FILL * 100, h: LOGO_FILL * 100 };
   const wrap = { width: `${box.w}%`, height: `${box.h}%`, transform: `translate(-50%, -50%) scale(${zoom})`, ...style };
   const cls = "absolute inset-0 w-full h-full object-contain";
-  const src = ready ? res.orig : asset.url;
+  const src = ready ? res.orig : cdnUrl;
   return (
     <div data-testid="partner-logo-box" className="absolute left-1/2 top-1/2" style={wrap}>
       {isMono && ready && res.mono ? (

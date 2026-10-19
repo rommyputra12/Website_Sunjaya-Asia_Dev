@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Reveal, LineReveal } from "../components/motion/Reveal";
 import { useLang } from "../i18n/LanguageContext";
+import { toCdnUrl } from "../lib/media";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
@@ -36,7 +37,7 @@ export default function News() {
           <p className="font-mono text-xs text-ash mt-6">{new Date(selected.created_at).toLocaleDateString()}</p>
           {selected.cover_image && (
             <div className="mt-10 aspect-[16/9] overflow-hidden clip-frame">
-              <img src={selected.cover_image} alt="" className="w-full h-full object-cover" />
+              <img src={toCdnUrl(selected.cover_image)} alt="" className="w-full h-full object-cover" />
             </div>
           )}
           <div className="mt-10 text-bone/85 text-lg leading-[1.75] whitespace-pre-wrap font-serif">

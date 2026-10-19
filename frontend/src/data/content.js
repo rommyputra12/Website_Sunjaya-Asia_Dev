@@ -1,11 +1,11 @@
+import { getPublicImageUrl } from "../lib/media";
 // ============================================================================
 // Image assets — served from Supabase Storage (bucket: website-images).
 // Binaries no longer live in the repo. The CMS (/admin -> Images) manages these
 // via the backend; replacing an image keeps the same filename/URL so the site
 // reflects the change automatically. Keys here mirror the asset keys in the DB.
 // ============================================================================
-const SUPA_IMG = "https://gtgkmjazuljesliaurcb.supabase.co/storage/v1/object/public/website-images";
-const img = (file) => `${SUPA_IMG}/${file}`;
+const img = (file) => getPublicImageUrl("website-images", file);
 
 export const LOGO = img("logo_sunjaya.png");
 
