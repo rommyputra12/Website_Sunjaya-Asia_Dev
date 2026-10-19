@@ -20,16 +20,17 @@ export default function About() {
       <div className="pt-[72px] md:pt-[88px]">
 
         {/* Mobile: banner image on top */}
-        <div className="md:hidden w-full h-52 overflow-hidden">
-          <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" className="w-full h-full object-cover" />
+        <div data-testid="about-banner-photo-mobile" className="md:hidden relative w-full aspect-square overflow-hidden">
+          <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" className="absolute inset-0 w-full h-full object-cover" />
         </div>
 
-        {/* Desktop: full background image */}
-        <div className="hidden md:block relative">
-          <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" className="absolute inset-0 w-full h-full object-cover" />
-          {/* Gradient at bottom to ensure corporate identity grid is legible */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#051e2b]/30" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-obsidian/80 to-transparent" />
+        {/* Desktop: photo on the left half, solid background on the right half behind the text */}
+        <div className="hidden md:block relative bg-obsidian">
+          <div data-testid="about-banner-photo" className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
+            <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" sizes="50vw" className="absolute inset-0 w-full h-full object-cover" />
+            {/* Bottom fade keeps the corporate identity grid legible */}
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-obsidian/80 to-transparent" />
+          </div>
 
           <div className="relative max-w-[1600px] mx-auto px-10 pt-20 pb-0">
             {/* Title + body stacked on the right, aligned vertically */}

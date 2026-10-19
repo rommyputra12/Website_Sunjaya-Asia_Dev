@@ -231,3 +231,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## 2026-06 Audit CDN final
 - Runtime audit 8 halaman publik + semua tab Admin + crop editor: 150 request gambar, 0 langsung ke Supabase Storage; host gambar hanya workers.dev + tile.openstreetmap.org (peta lokasi)
 - News cover via toCdnUrl (belum ada berita utk uji runtime); Contact hanya memakai gambar footer (AssetImg)
+
+## 2026-06 About hero layout
+- Desktop: foto aboutBanner di setengah kiri (w-1/2), kanan bg obsidian solid di belakang teks; mobile: foto square. Asset about_banner di-set focal_x=0, zoom=1.14 (file asli komposit foto kiri + area gelap kanan)
