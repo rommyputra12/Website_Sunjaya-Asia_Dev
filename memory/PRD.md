@@ -220,3 +220,10 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - src/lib/media.js: getPublicImageUrl(bucket,path) & toCdnUrl(url) (rewrite URL Supabase public -> CDN/{bucket}/{path}); DB tetap menyimpan URL Supabase
 - Diterapkan: data/content.js (fallback), AssetContext (semua AssetImg), PartnersSection (logo+canvas), News cover, Admin thumbnails/crop editor. Upload tetap langsung ke Supabase
 - Verifikasi: 62 request gambar via workers.dev, 0 ke supabase.co, 0 broken
+
+## 2026-06 Responsive images (srcset)
+- Backend: upload membuat varian WebP @640/@1280/@2560 (logo partners hanya @640) disimpan di meta._variants (dipertahankan saat PUT meta, ikut dihapus saat delete). Original berat non-WebP di-encode ulang di ukuran asli sbg varian teratas
+- POST /api/assets/backfill-variants?force=true (admin) untuk migrasi; sudah dijalankan utk 35 aset
+- Frontend: lib/media.js buildSrcSet/variantUrl; AssetImg srcset + sizes (default 100vw; kartu/logo nav/footer punya sizes sendiri); LogoImg memproses varian 640
+- Hasil Home: HP ~1.2MB, desktop ~3.8MB (sebelumnya ~40MB desktop)
+- News cover (URL teks) belum memakai varian

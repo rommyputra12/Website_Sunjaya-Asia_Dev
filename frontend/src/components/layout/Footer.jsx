@@ -117,6 +117,7 @@ export const Footer = () => {
               const inner = (
                 <AssetImg
                   k={s.imageKey}
+                  sizes="96px"
                   alt={s.label}
                   className="h-full w-full object-cover"
                 />

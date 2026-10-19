@@ -71,6 +71,7 @@ export default function Pillars() {
                 <div className="relative sticky top-24 overflow-hidden" style={{ height: "calc(100vh - 7rem)" }}>
                   <AssetImg
                     k={p.image}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     alt={t(`pillar.${p.num}.title`, p.title)}
                     className="absolute inset-0 h-full w-full object-contain"
                   />

@@ -1,5 +1,6 @@
 import React from "react";
 import { useAssets } from "../context/AssetContext";
+import { buildSrcSet } from "../lib/media";
 
 /**
  * AssetImg — renders a CMS-managed image by its camelCase key.
@@ -7,7 +8,7 @@ import { useAssets } from "../context/AssetContext";
  * using object-fit: cover + object-position + scale so any source
  * size always fills the layout slot neatly.
  */
-const AssetImg = ({ k, className = "", style = {}, alt, ...rest }) => {
+const AssetImg = ({ k, className = "", style = {}, alt, sizes = "100vw", ...rest }) => {
   const { byKey, ready } = useAssets();
   const asset = byKey[k] || {};
   const fx = asset.focal_x ?? 50;
@@ -27,6 +28,8 @@ const AssetImg = ({ k, className = "", style = {}, alt, ...rest }) => {
   return (
     <img
       src={asset.url}
+      srcSet={buildSrcSet(asset)}
+      sizes={sizes}
       alt={alt || asset.alt || k}
       className={className}
       style={{ ...focalStyle, ...style }}

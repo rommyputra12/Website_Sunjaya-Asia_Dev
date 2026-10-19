@@ -70,6 +70,7 @@ export const AssetProvider = ({ children }) => {
         focal_x: a?.focal_x ?? 50,
         focal_y: a?.focal_y ?? 50,
         zoom: a?.zoom ?? 1,
+        width: a?.width,
         alt: a?.alt || camelKey,
         meta: a?.meta || {},
         sort_order: a?.sort_order ?? 100,

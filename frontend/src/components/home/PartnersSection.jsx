@@ -6,7 +6,7 @@ import RichText from "../RichText";
 import { Reveal } from "../motion/Reveal";
 import { ABOUT_TEXT } from "../../data/aboutDefaults";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
-import { toCdnUrl } from "../../lib/media";
+import { variantUrl } from "../../lib/media";
 
 // Categories are for CMS grouping only — each becomes one marquee row (no label shown publicly)
 export const PARTNER_CATEGORIES = [
@@ -111,7 +111,7 @@ const opticalBox = (ratio) => {
 
 export const LogoImg = ({ asset, style }) => {
   const isMono = asset.meta?.tone === "mono";
-  const cdnUrl = toCdnUrl(asset.url);
+  const cdnUrl = variantUrl(asset, 640);
   const res = useLogo(cdnUrl, isMono, Number(asset.meta?.mono_adj) || 0);
   const tone = LOGO_TONES[asset.meta?.tone] || LOGO_TONES.white;
   const zoom = asset.zoom ?? 1;

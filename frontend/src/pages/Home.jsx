@@ -263,6 +263,7 @@ export default function Home() {
               <div className="relative w-full h-[36vh] md:h-[calc(100vh-11.5rem)] max-w-full overflow-hidden flex items-center justify-center">
                 <AssetImg
                   k={p.image}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   alt={p.title}
                   className="relative z-10 block max-h-full max-w-full object-contain"
                   style={{ filter: "grayscale(0.3) contrast(1.15)" }}
@@ -352,6 +353,7 @@ export default function Home() {
                 <Link to="/subsidiaries" data-testid={`home-sub-card-${s.id}`} className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm cursor-pointer ring-0 hover:ring-2 hover:ring-copper/70 transition-shadow duration-300">
                   <AssetImg
                     k={s.image}
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />

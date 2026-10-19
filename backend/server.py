@@ -754,6 +754,60 @@ def _trim_transparent(data: bytes, content_type: str) -> bytes:
         return data
 
 
+VARIANT_WIDTHS = (640, 1280, 2560)
+LOGO_SECTION = "home_partners"
+
+
+def _variant_name(object_name: str, w: int) -> str:
+    stem = object_name.rsplit(".", 1)[0]
+    return f"{stem}@{w}.webp"
+
+
+def _make_variants(data: bytes, content_type: str, section: str | None) -> list:
+    """Smaller WebP copies for responsive srcset: 640/1280 for photos, only 640 for partner logos."""
+    if content_type in ("image/gif", "image/svg+xml"):
+        return []
+    from PIL import Image
+    import io as _io
+    im = Image.open(_io.BytesIO(data)); im.load()
+    has_alpha = im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info)
+    im = im.convert("RGBA" if has_alpha else "RGB")
+    widths = (640,) if section == LOGO_SECTION else VARIANT_WIDTHS
+    out = []
+    for w in widths:
+        if im.width <= w:
+            # largest size: still re-encode heavy non-WebP originals at native width
+            if w == widths[-1] and len(widths) > 1 and (content_type != "image/webp" or len(data) > 1024 * 1024):
+                buf = _io.BytesIO(); im.save(buf, "WEBP", quality=90 if has_alpha else WEBP_QUALITY, method=6)
+                if len(buf.getvalue()) < len(data):
+                    out.append((im.width, buf.getvalue()))
+            continue
+        v = im.copy(); v.thumbnail((w, 100000), Image.LANCZOS)
+        buf = _io.BytesIO(); v.save(buf, "WEBP", quality=90 if has_alpha else WEBP_QUALITY, method=6)
+        out.append((w, buf.getvalue()))
+    return out
+
+
+async def _put_object(c: httpx.AsyncClient, object_name: str, data: bytes, content_type: str):
+    up = await c.post(
+        f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}",
+        headers={**{k: v for k, v in SB_SERVICE_HEADERS.items() if k != "Content-Type"},
+                 "Content-Type": content_type, "x-upsert": "true", "Cache-Control": "public, max-age=31536000"},
+        content=data,
+    )
+    if up.status_code >= 300:
+        raise HTTPException(502, f"Storage upload failed: {up.text[:200]}")
+
+
+async def _upload_variants(c: httpx.AsyncClient, object_name: str, data: bytes, content_type: str, section: str | None) -> list:
+    variants = []
+    for w, vdata in _make_variants(data, content_type, section):
+        name = _variant_name(object_name, w)
+        await _put_object(c, name, vdata, "image/webp")
+        variants.append({"w": w, "url": _asset_public_url(name)})
+    return variants
+
+
 async def _asset_usage() -> set:
     """URLs referenced by news covers and location photos."""
     urls = set()
@@ -860,17 +914,14 @@ async def upload_asset(
     stem = orig.rsplit(".", 1)[0] if orig else key
     object_name = f"{stem}-{uuid.uuid4().hex[:8]}{ext}"  # unique: avoids overwriting/stale cache
 
-    storage_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
+    final_section = section or (existing or {}).get("section") or "other"
     async with httpx.AsyncClient(timeout=120) as c:
-        up = await c.post(
-            storage_url,
-            headers={**{k: v for k, v in SB_SERVICE_HEADERS.items() if k != "Content-Type"},
-                     "Content-Type": content_type, "x-upsert": "true",
-                     "Cache-Control": "public, max-age=31536000"},
-            content=data,
-        )
-        if up.status_code >= 300:
-            raise HTTPException(502, f"Storage upload failed: {up.text[:200]}")
+        await _put_object(c, object_name, data, content_type)
+        try:
+            variants = await _upload_variants(c, object_name, data, content_type, final_section)
+        except Exception as e:
+            logger.warning(f"variant generation skipped: {e}")
+            variants = []
 
     public_url = _asset_public_url(object_name)
     # On replace keep the existing section / order / alt unless explicitly provided
@@ -878,6 +929,7 @@ async def upload_asset(
            "alt": alt if alt is not None else (existing or {}).get("alt"),
            "section": section or (existing or {}).get("section") or "other",
            "sort_order": sort_order if sort_order is not None else (existing or {}).get("sort_order", 100),
+           "meta": {**((existing or {}).get("meta") or {}), "_variants": variants},
            "updated_at": now_iso()}
     url = f"{SUPABASE_URL}/rest/v1/assets?on_conflict=key"
     async with httpx.AsyncClient(timeout=30) as c:
@@ -885,7 +937,7 @@ async def upload_asset(
                          "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
         if r.status_code >= 300 and "PGRST204" in r.text:
             # section/sort_order/focal columns not migrated yet — retry without them
-            for f in ("section", "sort_order", "focal_x", "focal_y", "zoom"):
+            for f in ("section", "sort_order", "focal_x", "focal_y", "zoom", "meta"):
                 row.pop(f, None)
             r = await c.post(url, headers={**SB_SERVICE_HEADERS,
                              "Prefer": "resolution=merge-duplicates,return=representation"}, json=row)
@@ -908,7 +960,8 @@ async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
     if payload.sort_order is not None:
         update["sort_order"] = payload.sort_order
     if payload.meta is not None:
-        update["meta"] = payload.meta
+        sys_variants = (existing.get("meta") or {}).get("_variants")
+        update["meta"] = {**payload.meta, **({"_variants": sys_variants} if sys_variants is not None else {})}
     focal = {}
     for f in ("focal_x", "focal_y", "zoom"):
         v = getattr(payload, f, None)
@@ -931,6 +984,32 @@ async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
     return _asset_row_to_out(updated)
 
 
+@api_router.post("/assets/backfill-variants", dependencies=[Depends(require_admin)])
+async def backfill_variants(force: bool = False):
+    """Admin: one-time generation of responsive variants for existing images."""
+    from urllib.parse import unquote
+    marker = f"/public/{SUPABASE_BUCKET}/"
+    done, skipped, failed = [], 0, []
+    async with httpx.AsyncClient(timeout=120) as c:
+        for it in await sb_select("assets", limit=500, svc=True):
+            meta = it.get("meta") or {}
+            url = it.get("url") or ""
+            if (not force and "_variants" in meta) or marker not in url:
+                skipped += 1
+                continue
+            try:
+                r = await c.get(url)
+                r.raise_for_status()
+                ctype = (r.headers.get("content-type") or "").split(";")[0].lower()
+                object_name = unquote(url.split(marker, 1)[1])
+                variants = await _upload_variants(c, object_name, r.content, ctype, it.get("section"))
+                await sb_update("assets", str(it["id"]), {"meta": {**meta, "_variants": variants}}, svc=True)
+                done.append({"key": it["key"], "variants": [v["w"] for v in variants]})
+            except Exception as e:
+                failed.append({"key": it["key"], "error": str(e)[:120]})
+    return {"processed": len(done), "skipped": skipped, "failed": failed, "items": done}
+
+
 @api_router.delete("/assets/{asset_id}", dependencies=[Depends(require_admin)])
 async def delete_asset(asset_id: str):
     """Admin: delete an asset (storage object best-effort + DB row)."""
@@ -948,7 +1027,11 @@ async def delete_asset(asset_id: str):
         storage_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
         try:
             async with httpx.AsyncClient(timeout=30) as c:
-                await c.delete(storage_url, headers={k: v for k, v in SB_SERVICE_HEADERS.items() if k != "Content-Type"})
+                hdr = {k: v for k, v in SB_SERVICE_HEADERS.items() if k != "Content-Type"}
+                await c.delete(storage_url, headers=hdr)
+                for v in (existing.get("meta") or {}).get("_variants") or []:
+                    vname = unquote(v["url"].split(marker, 1)[1])
+                    await c.delete(f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{_urlquote(vname, safe='')}", headers=hdr)
         except Exception as e:
             logger.warning(f"Storage delete failed (continuing): {e}")
     await sb_delete("assets", asset_id)

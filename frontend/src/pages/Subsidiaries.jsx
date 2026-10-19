@@ -90,6 +90,7 @@ export default function Subsidiaries() {
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
                   <AssetImg
                     k={s.image}
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
@@ -135,6 +136,7 @@ export default function Subsidiaries() {
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
                   <AssetImg
                     k={s.image}
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />

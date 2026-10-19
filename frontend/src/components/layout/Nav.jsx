@@ -11,6 +11,7 @@ const Logo = () => (
   >
     <AssetImg
       k="logo"
+      sizes="160px"
       alt="Sunjaya Asia Group"
       className="w-16 h-16 md:w-20 md:h-20 object-contain transition-transform duration-500 group-hover:scale-105 -mt-1"
       style={{ mixBlendMode: "normal" }}
