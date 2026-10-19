@@ -242,3 +242,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - components/admin/RichToolbar.jsx: B/I/U, 4 warna tema, 4 perataan; dipasang di semua kolom paragraf (rf() di ContentPanel SCHEMA, pointer desc, timeline body). Berlaku utk kolom EN & ID yg sedang fokus
 - Render Fmt di Home (hero.sub, pillars intro, pillar body, subs desc), Pillars, Contact, Subsidiaries, Footer, About (body, timeline, edge desc), preview CMS
 - Fix dari iteration_15: loading state Content CMS (cegah tulis ke field kosong), live iframe preview hanya dimount saat terlihat (IntersectionObserver, cegah 429), para2 align di parent, label warna gading/abu "untuk latar gelap"
+
+- Toolbar: tombol "Lainnya" color picker (semua warna, [c=#RRGGBB]); warna baru menggantikan warna lama (tidak nested); seleksi tidak memotong marker/prefix align; parser warna mendukung nesting. Data about.body1 rusak "[/c_]" diperbaiki
