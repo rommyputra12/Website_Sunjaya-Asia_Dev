@@ -156,9 +156,11 @@ export default function About() {
                 <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper mb-4">{col.title}</div>
                 <ul className="space-y-3">
                   {col.items.map((it, i) => (
-                    <li key={i} className="flex gap-3 items-baseline">
-                      <span className="w-3 h-px bg-copper flex-shrink-0 translate-y-1" />
-                      <span className="text-bone text-sm">{it.text}</span>
+                    <li key={i} data-testid={`edge-item-${ci}-${i}`} className="flex gap-3 items-start">
+                      <span className="h-5 flex items-center flex-shrink-0" aria-hidden="true">
+                        <span className="w-1.5 h-1.5 rotate-45 bg-copper" />
+                      </span>
+                      <span className="text-bone text-sm leading-5">{it.text}</span>
                     </li>
                   ))}
                 </ul>
