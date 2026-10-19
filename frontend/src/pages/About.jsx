@@ -26,8 +26,8 @@ export default function About() {
 
         {/* Desktop: photo on the left half, solid background on the right half behind the text */}
         <div className="hidden md:block relative bg-obsidian">
-          <div data-testid="about-banner-photo" className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
-            <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" sizes="50vw" className="absolute inset-0 w-full h-full object-cover" />
+          <div data-testid="about-banner-photo" className="absolute inset-y-0 left-0 w-[55%] overflow-hidden">
+            <AssetImg k="aboutBanner" alt="Sunjaya Asia Group office" sizes="55vw" className="absolute inset-0 w-full h-full object-cover" />
             {/* Bottom fade keeps the corporate identity grid legible */}
             <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-obsidian/80 to-transparent" />
           </div>

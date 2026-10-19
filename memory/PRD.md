@@ -234,3 +234,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 About hero layout
 - Desktop: foto aboutBanner di setengah kiri (w-1/2), kanan bg obsidian solid di belakang teks; mobile: foto square. Asset about_banner di-set focal_x=0, zoom=1.14 (file asli komposit foto kiri + area gelap kanan)
+
+- About foto desktop dilebarkan ke 55%; Edit Crop about_banner punya preview khusus Desktop (foto 55% + mock teks) & Mobile (1:1). Foto baru user 1024x1024, crop di-reset focal 55/50 zoom 1

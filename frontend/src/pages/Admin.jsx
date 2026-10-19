@@ -364,7 +364,23 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
                   <div className="absolute inset-3"><LogoImg asset={{ ...asset, focal_x: fx, focal_y: fy, zoom }} /></div>
                 </div>
               </>
-            ) : (<>
+            ) : asset.key === "about_banner" ? (<>
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — About (foto 55% kiri, teks di kanan)</p>
+              <div data-testid="focal-about-desktop-preview" className="relative aspect-[1920/926] bg-obsidian border border-white/10 overflow-hidden mb-3">
+                <div className="absolute inset-y-0 left-0 w-[55%] overflow-hidden">
+                  <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+                </div>
+                <div className="absolute left-[58%] right-[8%] top-[14%] space-y-1.5" aria-hidden="true">
+                  <div className="h-1.5 w-1/2 bg-copper/80" />
+                  <div className="h-1 w-3/4 bg-bone/70" />
+                  {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className="h-[3px] w-full bg-bone/25" style={{ marginTop: i === 0 ? 10 : undefined }} />)}
+                </div>
+              </div>
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Mobile — About (kotak 1:1)</p>
+              <div data-testid="focal-about-mobile-preview" className="relative aspect-square w-40 bg-obsidian border border-white/10 overflow-hidden">
+                <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              </div>
+            </>) : (<>
             <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Kartu (4:3) — subsidiary grid</p>
             <div className="relative aspect-[4/3] bg-obsidian border border-white/10 overflow-hidden mb-3">
               <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
