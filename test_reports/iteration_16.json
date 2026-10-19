@@ -1,0 +1,19 @@
+{
+  "summary": "Tested the fix for the slow About paragraphs. ALL PASSED. Backend (5/5 pytest): cached GET /api/content and /api/assets take about 0.09-0.13s through the proxy (cold after the 60s TTL: 0.68s). Content PUT, POST and DELETE invalidate the cache immediately, and asset PUT alt shows up on the next GET right away; every value was restored. Frontend: a rAF observer measured when the [data-testid=about-body] / about-body-mobile paragraphs appear (ms from navigation start). Desktop 1920x800: first visit with localStorage cleared 894ms, refreshes 1197 / 801ms. Mobile 390x844: first visit 960ms, refreshes 855 / 1034ms. The old default text 'Our approach' NEVER appeared. 'Our strength...' (CMS text) was there in the very first paint every time. CMS UI: changed about.title to orig+' X' and blurred; public /about showed the new title, so the cache was invalidated. Restored through the UI; an API diff against the snapshot shows 0 diffs and 0 new keys. The CMS 'Tampilan asli' live iframe for About showed the paragraphs (CMS text, no default) about 0.95s after the iframe mounted. Regression: Home, Subsidiaries, Pillars and About all render CMS values; no page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_read_cache.py", "/app/test_reports/pytest/pytest_read_cache.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "sb_select cache: _cache_clear runs BEFORE the write. A concurrent public GET during the Supabase write can re-fill the cache with pre-write rows, which then stay stale for up to 60s. Also clear the cache after the write succeeds (in a finally block) in sb_insert/sb_update/sb_delete and in the asset upsert.",
+    "The cache is per-process. That is fine with --workers 1, but invalidation will not reach other workers or replicas if production scales out (60s staleness at most).",
+    "LanguageContext stale-while-revalidate: a returning visitor sees cached (possibly old) CMS text first and it swaps when /api/content returns. This is acceptable, but there is no expiry or version on 'sunjaya_content_v1'.",
+    "If /api/content fails on first load, contentReady becomes true and the bundled default paragraphs show. That is the intended fallback."
+  ],
+  "updated_files": ["/app/backend/tests/test_read_cache.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None. Snapshot /tmp/content_orig_16.json. The temporary TEST_cache.key block was deleted, and about.title and the asset alt were restored (verified).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Read cache TTL is 60s (server.py _READ_CACHE). The localStorage key is sunjaya_content_v1. Paragraph visibility was measured with an add_init_script rAF observer on [data-testid=about-body] p. Admin selectors: admin-tab-content, content-page-about-toggle, content-section-about-toggle, content-input-about.title; blur by clicking content-search to save."
+}

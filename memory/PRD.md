@@ -244,3 +244,9 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Fix dari iteration_15: loading state Content CMS (cegah tulis ke field kosong), live iframe preview hanya dimount saat terlihat (IntersectionObserver, cegah 429), para2 align di parent, label warna gading/abu "untuk latar gelap"
 
 - Toolbar: tombol "Lainnya" color picker (semua warna, [c=#RRGGBB]); warna baru menggantikan warna lama (tidak nested); seleksi tidak memotong marker/prefix align; parser warna mendukung nesting. Data about.body1 rusak "[/c_]" diperbaiki
+
+## 2026-06 Fix: paragraf About lambat muncul
+- Root cause: /api/content 1.3-2.4s (selalu ke Supabase) + paragraf tampil teks default lama dulu lalu berganti
+- Backend: cache baca in-memory sb_select (TTL 60s, dibersihkan tiap insert/update/delete & upsert asset)
+- Frontend: LanguageContext cache localStorage sunjaya_content_v1 + contentReady; About body hanya dirender saat contentReady
+- Verified iteration_16: paragraf muncul ~0.8-1.2s, tanpa flash teks lama; API cache 0.09-0.13s
