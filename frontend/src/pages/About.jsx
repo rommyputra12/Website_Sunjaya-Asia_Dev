@@ -41,11 +41,11 @@ export default function About() {
               <div className="col-span-5 col-start-8">
                 <span data-testid="about-overline" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
                 <h1 data-testid="about-title" className="tight-reveal font-serif text-lg md:text-xl leading-[1.3] tracking-[-0.02em] text-bone mt-3">
-                  <LineReveal text={t("about.title")} />
+                  {t("about.title")}
                 </h1>
                 {/* Body text pushed down so title has breathing room */}
                 <div data-testid="about-body" className="mt-10 space-y-8 text-bone/90 text-sm md:text-base leading-[1.75]">
-                  {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-${i}`} style={{ textAlign: para.align }}><Fmt text={para.text} /></p>)}
+                  {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-${i}`} className={para.align === "justify" ? "text-left md:text-justify" : ""} style={para.align === "justify" ? undefined : { textAlign: para.align }}><Fmt text={para.text} /></p>)}
                 </div>
               </div>
             </div>
@@ -73,10 +73,10 @@ export default function About() {
         <div className="md:hidden px-6 pt-10 pb-12 bg-obsidian">
           <span data-testid="about-overline-mobile" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
           <h1 data-testid="about-title-mobile" className="tight-reveal font-serif text-base leading-[1.3] tracking-[-0.02em] text-bone mt-3">
-            <LineReveal text={t("about.title")} />
+            {t("about.title")}
           </h1>
           <div data-testid="about-body-mobile" className="mt-6 space-y-6 text-bone/85 text-sm leading-[1.75]">
-            {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-mobile-${i}`} style={{ textAlign: para.align }}><Fmt text={para.text} /></p>)}
+            {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-mobile-${i}`} className={para.align === "justify" ? "text-left md:text-justify" : ""} style={para.align === "justify" ? undefined : { textAlign: para.align }}><Fmt text={para.text} /></p>)}
           </div>
           {/* Mobile corporate identity */}
           <Reveal>

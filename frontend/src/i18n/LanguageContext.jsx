@@ -37,7 +37,7 @@ export const LanguageProvider = ({ children }) => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await axios.get(`${API}/content`);
+        const r = await axios.get(`${API}/content`, { timeout: 6000 });
         if (cancelled) return;
         setOverrides(toOverrides(r.data || []));
         setBlocks(r.data || []);

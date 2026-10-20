@@ -1,0 +1,31 @@
+{
+  "summary": "Frontend-only test of the About the Group paragraphs after the animation was removed. The paragraphs are plain <p> elements (opacity 1, transform none, filter none, parent opacity 1, justify alignment, bold/italic/colour spans rendered, no ** or [c= markers). Every normal run passed with CMS text 'Our strength is built on...'. Desktop 1920x800: 10/10 reloads (4 with localStorage cleared), visible in 47-238ms. Home -> navbar ABOUT (client-side) 3/3 in 30-100ms, back/forward 3/3 in about 20ms. Mobile 390x844: 5/5 reloads (2 cleared), 66-148ms. Admin Content > About Page > Tentang Kami > Tampilan asli: iframe /about shows both paragraphs with CMS text. Simulated network faults with no cache: a 4s slow /api/content shows CMS text after about 4.5s; an aborted /api/content falls back to the bundled default 'Our approach...'; a HANGING /api/content leaves the paragraphs missing for good (0 <p> after 12s). The 11th desktop reload hit the preview Cloudflare 'Verify you are human' challenge, which is infra rate limiting, not an app bug.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "LanguageContext / About paragraphs", "issue": "First visit (no sunjaya_content_v1 cache) while GET /api/content stalls: axios.get has no timeout, so the finally block never runs, contentReady stays false and About.jsx renders no paragraphs ((contentReady ? bodyParas : [])). Reproduced in Playwright by holding /api/content open for 20s: 0 about-para elements after 12s. This is the likely real-world cause of 'never appears, refresh again and again'. A refresh only helps once a request succeeds and the cache is filled.", "selector": "[data-testid=about-para-0]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "API failure with no cache", "issue": "When /api/content fails (abort/network error), the paragraphs show the old bundled default 'Founded in Indonesia on May 20, 2013... / Our approach is simple...' instead of the CMS text. This is expected fallback behaviour, but ABOUT_TEXT/translations defaults are out of date compared with the CMS.", "affected_selectors": ["[data-testid=about-para-1]"]}
+    ],
+    "design_issues": [
+      {"screen": "About mobile 390px", "issues": ["Justify alignment on the narrow column creates large word gaps (e.g. 'Founded   in   Indonesia   in   2013'). Consider left-align on mobile.", "The title above the paragraphs (LineReveal) is still animated. The screenshot caught it half-revealed/clipped ('From conventional roots...'), so the same 'slow to appear' complaint may come up for the title."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add a timeout to the content fetch in LanguageContext.jsx (e.g. axios.get(url, {timeout: 6000})) and/or a fallback timer that sets contentReady=true after ~3-5s, so the paragraphs always render even when the API stalls on a first visit.",
+    "Update the bundled defaults for about.body1/about.body2 (aboutDefaults/translations) to match the current CMS text, so the fallback does not show the old 'Our approach' copy.",
+    "Optional: remove/soften the LineReveal animation on the About title as well; consider left alignment for the paragraphs on mobile."
+  ],
+  "critical_code_review_comments": [
+    "LanguageContext.jsx line 40: axios.get without a timeout combined with gating on contentReady means a stalled request leaves the paragraphs missing indefinitely.",
+    "LanguageContext.jsx line 25: the cached JSON is re-parsed from localStorage on every render (the IIFE runs on every render, not only at init). Move it into a useState initializer or useMemo."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% for normal-network scenarios (21/21 loads). Fails only in the simulated hanging-API/no-cache scenario"},
+  "seed_data_creation": "None. No content data was modified.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "About paragraphs: [data-testid=about-para-0/1] (desktop) and about-para-mobile-0/1. Navbar link: [data-testid=nav-link-about]. Admin: #admin-tab-content > #content-page-about-toggle > #content-section-about-toggle > 'Tampilan asli' button; the preview iframe URL is /about. Preview Cloudflare blocks after ~11 rapid reloads, so split reload loops across sessions. To test the hang case: localStorage.clear() and page.route('**/api/content') with a delay that never resolves."
+}
