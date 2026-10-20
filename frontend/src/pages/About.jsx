@@ -45,7 +45,7 @@ export default function About() {
                 </h1>
                 {/* Body text pushed down so title has breathing room */}
                 <div data-testid="about-body" className="mt-10 space-y-8 text-bone/90 text-sm md:text-base leading-[1.75]">
-                  {(contentReady ? bodyParas : []).map((para, i) => <Reveal key={i} delay={i * 0.04} duration={0.3} y={8} blur={2}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
+                  {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-${i}`} style={{ textAlign: para.align }}><Fmt text={para.text} /></p>)}
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default function About() {
             <LineReveal text={t("about.title")} />
           </h1>
           <div data-testid="about-body-mobile" className="mt-6 space-y-6 text-bone/85 text-sm leading-[1.75]">
-            {(contentReady ? bodyParas : []).map((para, i) => <Reveal key={i} delay={i * 0.04} duration={0.3} y={8} blur={2}><p style={{ textAlign: para.align }}><Fmt text={para.text} /></p></Reveal>)}
+            {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-mobile-${i}`} style={{ textAlign: para.align }}><Fmt text={para.text} /></p>)}
           </div>
           {/* Mobile corporate identity */}
           <Reveal>
