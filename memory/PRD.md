@@ -250,3 +250,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Backend: cache baca in-memory sb_select (TTL 60s, dibersihkan tiap insert/update/delete & upsert asset)
 - Frontend: LanguageContext cache localStorage sunjaya_content_v1 + contentReady; About body hanya dirender saat contentReady
 - Verified iteration_16: paragraf muncul ~0.8-1.2s, tanpa flash teks lama; API cache 0.09-0.13s
+
+- Reveal: prop duration & blur; paragraf About body kini durasi 0.3s, geser 8px, blur 2px, jeda 0.04s (sebelumnya 0.9s/40px/10px/0.1s)
