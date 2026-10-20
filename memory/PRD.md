@@ -252,3 +252,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Verified iteration_16: paragraf muncul ~0.8-1.2s, tanpa flash teks lama; API cache 0.09-0.13s
 
 - Reveal: prop duration & blur; paragraf About body kini durasi 0.3s, geser 8px, blur 2px, jeda 0.04s (sebelumnya 0.9s/40px/10px/0.1s)
+
+## 2026-06 About paragraf tanpa animasi
+- Paragraf & judul About tanpa animasi (plain); axios timeout 6s pada /api/content agar contentReady selalu true; default EN about.title/body1/body2 di translations.js disamakan dgn CMS; justify hanya md+ (mobile rata kiri). Verified iteration_17/18

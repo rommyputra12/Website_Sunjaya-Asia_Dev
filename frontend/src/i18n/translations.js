@@ -83,7 +83,7 @@ export const translations = {
     },
     about: {
       overline: "About the Group",
-      title: "From conventional roots to sustainable future growth.",
+      title: "From conventional roots to a sustainable future",
       body1: "[align=justify][c=ivory]Founded in Indonesia in 2013 and strategically restructured through Singapore in 2025,** Sunjaya Asia Group** is a diversified investment holding corporation. We bridge essential global resources with advanced innovation, driving growth across four core sectors: _**strategic investments, global trading, technology, and defense**_. By integrating these industries, we transform traditional markets into resilient, future-ready ecosystems.[/c]",
       body2: "[align=justify]Our strength is built on a powerful, end-to-end approach: [c=#FFFB00]**we own the entire value chain from resource to final product**[/c]. Instead of trading mere commodities, we industrialize and elevate them to ensure high efficiency and self-reliance. Through global partnerships and a commitment to stability, Sunjaya Asia Group does not just participate in markets—we deliver the critical infrastructure shaping tomorrow.",
     },
