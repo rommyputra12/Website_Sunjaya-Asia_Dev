@@ -63,7 +63,7 @@ export default function Pillars() {
             </p>
 
             <div data-testid={`pillar-photo-${p.num}`} className="relative mt-10 md:mt-12 w-full aspect-video overflow-hidden border border-white/10 bg-ink">
-              <AssetImg k={p.image} sizes="(max-width: 1400px) 100vw, 1400px" alt={t(`pillar.${p.num}.title`, p.title)} className="absolute inset-0 h-full w-full object-cover" />
+              <AssetImg k={`pillarsPage${p.num}`} sizes="(max-width: 1400px) 100vw, 1400px" alt={t(`pillar.${p.num}.title`, p.title)} className="absolute inset-0 h-full w-full object-cover" />
             </div>
 
             <div className="mt-10 md:mt-14 grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10">

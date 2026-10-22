@@ -14,6 +14,9 @@ export const IMAGES = {
   foundationSlide: img("pillar_foundation.jpg"),
   coreSlide: img("pillar_core.png"),
   futureSlide: img("pillar_future.jpg"),
+  pillarsPage01: img("pillar_foundation.jpg"),
+  pillarsPage02: img("pillar_core.png"),
+  pillarsPage03: img("pillar_future.jpg"),
   // Subsidiary photos
   sti: img("Subsidiaries_Sunjaya_Teknologi_Indonesia.png"),
   sac: img("Subsidiaries_Sunjaya_America.png"),

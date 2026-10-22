@@ -364,7 +364,7 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
                   <div className="absolute inset-3"><LogoImg asset={{ ...asset, focal_x: fx, focal_y: fy, zoom }} /></div>
                 </div>
               </>
-            ) : ["foundation_slide", "core_slide", "future_slide"].includes(asset.key) ? (<>
+            ) : ["pillars_page_01", "pillars_page_02", "pillars_page_03"].includes(asset.key) ? (<>
               <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — halaman Pillars (landscape 16:9, lebar penuh)</p>
               <div data-testid="focal-pillar-desktop-preview" className="relative aspect-video bg-ink border border-white/10 overflow-hidden mb-3">
                 <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
@@ -431,11 +431,11 @@ const IMAGE_SECTIONS = [
   { id: "nav", label: "Navbar & Brand" },
   { id: "home_hero", label: "Home — Hero Cover" },
   { id: "home_pillars_intro", label: "Home — Pillars Intro Background" },
-  { id: "home_pillar_sections", label: "Home — Pillar Sections (01–03)" },
+  { id: "home_pillar_sections", label: "Home — Pillar Sections 01–03 (foto portrait + background)" },
   { id: "home_subsidiaries_bg", label: "Home — Subsidiaries Background" },
   { id: "home_subsidiaries", label: "Home — Subsidiaries Grid" },
   { id: "home_partners", label: "Home — Partners, Vendors & Customers Logos" },
-  { id: "pillars_page", label: "Pillars Page — Slides" },
+  { id: "pillars_page", label: "Pillars Page — Foto Landscape 16:9 (01–03)" },
   { id: "about_page", label: "About Page" },
   { id: "footer", label: "Footer" },
   { id: "other", label: "Custom Uploads" },

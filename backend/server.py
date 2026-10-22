@@ -727,7 +727,7 @@ WEBP_QUALITY = 82
 SKIP_COMPRESS_BYTES = 300 * 1024
 # Asset keys rendered by the public website (mirror of frontend ASSET_DB_KEYS)
 SITE_ASSET_KEYS = {
-    "logo", "cover", "foundation_slide", "core_slide", "future_slide", "sti", "sac", "sae", "agi",
+    "logo", "cover", "foundation_slide", "core_slide", "future_slide", "pillars_page_01", "pillars_page_02", "pillars_page_03", "sti", "sac", "sae", "agi",
     "ecs", "sm", "tsn", "san", "kgi", "home_pillar_01_bg", "home_pillar_02_bg", "home_pillar_03_bg",
     "bg_business_pillars", "bg_footer", "about_banner", "about_company_history", "footer_call",
     "footer_email", "footer_instagram", "footer_linkedin",
