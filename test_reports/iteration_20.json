@@ -1,0 +1,22 @@
+{
+  "summary": "Verified the Home and Pillars page images are now separate assets. Home /#pillar-01..03 show PORTRAIT images: foundation_slide home1-1459ef01.webp, core_slide core-76353aab.webp, future_slide pillar_future.webp. Each is portrait (naturalWidth < naturalHeight: 960x1200 on desktop, 390x487 on mobile), with the portrait column + text layout unchanged. /pillars [data-testid=pillar-photo-01/02/03] frames are 16:9 (ratio 1.778 on desktop and mobile) and use p1-62f6ec67.webp, p2-d3413845.webp and p3-86cbcbef.webp, which differ from the Home images. 01/02 are landscape and 03 is a portrait placeholder (2025x2531). In CMS Images the section labels and contents are as specified. Edit Crop on pillars_page_01 shows the 16:9 desktop and mobile previews; the images load (1280 variant) and there is no warning. pillars_page_03 shows the portrait warning, and foundation_slide does not show the pillar previews. Pillar assets show the 'Used on site' badge and have no DEL button. API DELETE on pillars_page_01 returns 409 'This image is used on the website...' with an admin token and 401 without one. Neither page overflows at 390px or 1920px. Asset list before and after testing is identical (39 assets, no changes; nothing was saved or deleted).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Admin FocalEditorModal", "issue": "Escape key does not close the crop modal (only the backdrop click, the X button or Cancel do)", "selector": "[data-testid=focal-editor-modal]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Admin crop modal", "issues": ["Cookie consent banner (z-[9999]) covers the modal footer Save/Reset/Cancel buttons until cookies are accepted, so Save is partly hidden"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_pillar_assets_split.py", "/app/test_reports/pytest/pytest_iter20.xml"],
+  "action_items": ["Optional: add an Escape-key handler to FocalEditorModal", "Optional: hide the cookie banner on /admin or raise the modal z-index above it", "User still needs to upload a landscape 16:9 photo for pillars_page_03 (currently a portrait placeholder)"],
+  "critical_code_review_comments": ["The Admin crop-preview branch hardcodes the pillars_page_0X keys; checking asset.section === 'pillars_page' would also cover future assets added to that section"],
+  "updated_files": ["/app/backend/tests/test_pillar_assets_split.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Home pillar images come from foundation_slide/core_slide/future_slide (section home_pillar_sections). The Pillars page uses pillars_page_01..03 (section pillars_page). Asset width/height are top-level fields in /api/assets. Login is via admin-email-input/admin-token-input. Do not delete assets."
+}

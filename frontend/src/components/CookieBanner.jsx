@@ -9,6 +9,7 @@ export function CookieBanner() {
   useEffect(() => {
     const consent = localStorage.getItem(STORAGE_KEY);
     if (window.self !== window.top) return; // hidden inside CMS preview iframe
+    if (window.location.pathname.startsWith("/admin")) return; // not shown in the CMS
     if (!consent) {
       const timer = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(timer);

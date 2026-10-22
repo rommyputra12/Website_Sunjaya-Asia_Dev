@@ -283,6 +283,11 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
   const [zoom, setZoom] = useState(asset.zoom ?? 1);
   const [saving, setSaving] = useState(false);
   const dragging = React.useRef(false);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   const pickerRef = React.useRef(null);
 
   const setFromPointer = (e) => {
