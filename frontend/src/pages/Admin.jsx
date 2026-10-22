@@ -9,7 +9,7 @@ import { BulkLogoUpload } from "../components/admin/BulkLogoUpload";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { toCdnUrl } from "../lib/media";
+import { toCdnUrl, variantUrl } from "../lib/media";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const TOKEN_KEY = "sunjaya_admin_token";
@@ -337,7 +337,7 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
               onPointerMove={(e) => { if (dragging.current) setFromPointer(e); }}
               onPointerUp={() => { dragging.current = false; }}
             >
-              <img src={toCdnUrl(asset.url)} alt={asset.alt || asset.key} className="w-full h-full object-contain pointer-events-none" draggable={false} />
+              <img src={variantUrl(asset, 1280)} alt={asset.alt || asset.key} className="w-full h-full object-contain pointer-events-none" draggable={false} />
               {/* crosshair */}
               <div className="absolute w-6 h-6 -ml-3 -mt-3 pointer-events-none" style={{ left: `${fx}%`, top: `${fy}%` }}>
                 <div className="absolute inset-0 rounded-full border-2 border-copper bg-copper/20" />
@@ -364,11 +364,25 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
                   <div className="absolute inset-3"><LogoImg asset={{ ...asset, focal_x: fx, focal_y: fy, zoom }} /></div>
                 </div>
               </>
-            ) : asset.key === "about_banner" ? (<>
+            ) : ["foundation_slide", "core_slide", "future_slide"].includes(asset.key) ? (<>
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — halaman Pillars (landscape 21:9, lebar penuh)</p>
+              <div data-testid="focal-pillar-desktop-preview" className="relative aspect-[21/9] bg-ink border border-white/10 overflow-hidden mb-3">
+                <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              </div>
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Mobile — halaman Pillars (16:10)</p>
+              <div data-testid="focal-pillar-mobile-preview" className="relative aspect-[16/10] w-56 bg-ink border border-white/10 overflow-hidden">
+                <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              </div>
+              {asset.width && asset.height && asset.width / asset.height < 1.6 && (
+                <p data-testid="focal-pillar-portrait-warning" className="mt-3 font-mono text-[9px] leading-relaxed text-copper">
+                  Gambar ini belum landscape ({asset.width}×{asset.height}). Gunakan foto landscape (disarankan minimal 2560×1100) agar tidak banyak terpotong.
+                </p>
+              )}
+            </>) : asset.key === "about_banner" ? (<>
               <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — About (foto 55% kiri, teks di kanan)</p>
               <div data-testid="focal-about-desktop-preview" className="relative aspect-[1920/926] bg-obsidian border border-white/10 overflow-hidden mb-3">
                 <div className="absolute inset-y-0 left-0 w-[55%] overflow-hidden">
-                  <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+                  <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
                 </div>
                 <div className="absolute left-[58%] right-[8%] top-[14%] space-y-1.5" aria-hidden="true">
                   <div className="h-1.5 w-1/2 bg-copper/80" />
@@ -378,16 +392,16 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
               </div>
               <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Mobile — About (kotak 1:1)</p>
               <div data-testid="focal-about-mobile-preview" className="relative aspect-square w-40 bg-obsidian border border-white/10 overflow-hidden">
-                <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+                <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
               </div>
             </>) : (<>
             <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Kartu (4:3) — subsidiary grid</p>
             <div className="relative aspect-[4/3] bg-obsidian border border-white/10 overflow-hidden mb-3">
-              <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
             </div>
             <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Banner lebar (21:9) — hero / background</p>
             <div className="relative aspect-[21/9] bg-obsidian border border-white/10 overflow-hidden">
-              <img src={toCdnUrl(asset.url)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
             </div>
             </>)}
             <p className="mt-3 text-[10px] text-ash leading-relaxed">Bagian yang ditandai titik tembaga akan selalu terlihat di semua ukuran slot (desktop &amp; mobile).</p>
