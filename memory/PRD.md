@@ -260,3 +260,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Header besar (nomor + kicker oranye + judul 48px) > judul divisi 20px; body rata kiri max-w-3xl; foto landscape full width (21:9 desktop, 16:10 mobile) di bawah body; grid divisi 2 kolom (item ganjil terakhir full); tanpa animasi. Hash scroll offset mengikuti tinggi header. Verified iteration_19. Menunggu user upload foto landscape
 
 - Edit Crop: preview khusus Pillar (foundation/core/future_slide) Desktop 21:9 & Mobile 16:10 + peringatan jika gambar belum landscape; preview crop modal memakai varian 1280 (lebih cepat)
+
+- Frame foto Pillar diubah ke 16:9 (aspect-video) desktop & mobile + preview Edit Crop 16:9; peringatan jika rasio < 1.7

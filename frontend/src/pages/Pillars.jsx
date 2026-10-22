@@ -62,7 +62,7 @@ export default function Pillars() {
               <Fmt text={t(`pillar.${p.num}.body`, p.body)} />
             </p>
 
-            <div data-testid={`pillar-photo-${p.num}`} className="relative mt-10 md:mt-12 w-full aspect-[16/10] md:aspect-[21/9] overflow-hidden border border-white/10 bg-ink">
+            <div data-testid={`pillar-photo-${p.num}`} className="relative mt-10 md:mt-12 w-full aspect-video overflow-hidden border border-white/10 bg-ink">
               <AssetImg k={p.image} sizes="(max-width: 1400px) 100vw, 1400px" alt={t(`pillar.${p.num}.title`, p.title)} className="absolute inset-0 h-full w-full object-cover" />
             </div>
 

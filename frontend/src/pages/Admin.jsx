@@ -365,17 +365,17 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
                 </div>
               </>
             ) : ["foundation_slide", "core_slide", "future_slide"].includes(asset.key) ? (<>
-              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — halaman Pillars (landscape 21:9, lebar penuh)</p>
-              <div data-testid="focal-pillar-desktop-preview" className="relative aspect-[21/9] bg-ink border border-white/10 overflow-hidden mb-3">
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — halaman Pillars (landscape 16:9, lebar penuh)</p>
+              <div data-testid="focal-pillar-desktop-preview" className="relative aspect-video bg-ink border border-white/10 overflow-hidden mb-3">
                 <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
               </div>
-              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Mobile — halaman Pillars (16:10)</p>
-              <div data-testid="focal-pillar-mobile-preview" className="relative aspect-[16/10] w-56 bg-ink border border-white/10 overflow-hidden">
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Mobile — halaman Pillars (16:9)</p>
+              <div data-testid="focal-pillar-mobile-preview" className="relative aspect-video w-56 bg-ink border border-white/10 overflow-hidden">
                 <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
               </div>
-              {asset.width && asset.height && asset.width / asset.height < 1.6 && (
+              {asset.width && asset.height && asset.width / asset.height < 1.7 && (
                 <p data-testid="focal-pillar-portrait-warning" className="mt-3 font-mono text-[9px] leading-relaxed text-copper">
-                  Gambar ini belum landscape ({asset.width}×{asset.height}). Gunakan foto landscape (disarankan minimal 2560×1100) agar tidak banyak terpotong.
+                  Gambar ini belum landscape ({asset.width}×{asset.height}). Gunakan foto landscape (disarankan 16:9, minimal 2560×1440) agar tidak banyak terpotong.
                 </p>
               )}
             </>) : asset.key === "about_banner" ? (<>
