@@ -1,6 +1,5 @@
 import React from "react";
 import { useLang } from "../i18n/LanguageContext";
-import { Reveal, LineReveal } from "../components/motion/Reveal";
 import { PILLARS } from "../data/content";
 import AssetImg from "../components/AssetImg";
 import { Fmt } from "../components/FormattedText";
@@ -41,56 +40,40 @@ export default function Pillars() {
     });
   };
   return (
-    <div data-testid="pillars-page" className="pt-32 pb-24">
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10">
-        <div className="mb-24">
-          <span className="font-mono text-[10px] tracking-[0.24em] uppercase text-copper">{t("manifesto.overline")}</span>
-          <h1 className="font-serif text-2xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-bone mt-3 max-w-4xl">
-            <LineReveal text={t("manifesto.title")} />
+    <div data-testid="pillars-page" className="pt-28 md:pt-32 pb-24">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+        <header className="mb-16 md:mb-24 max-w-4xl">
+          <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("manifesto.overline")}</span>
+          <h1 data-testid="pillars-intro" className="font-serif text-lg md:text-2xl leading-[1.45] tracking-[-0.01em] text-bone/90 mt-4">
+            <Fmt text={t("manifesto.title")} />
           </h1>
-        </div>
+        </header>
 
-        {PILLARS.map((p, idx) => (
-          <section key={p.num} id={`pillar-${p.num}`} className="mb-32 md:mb-40 scroll-mt-20">
-            <Reveal>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mb-12 border-b border-white/10 pb-8">
-                <div className="md:col-span-2">
-                  <span className="chapter-num text-[clamp(2.5rem,6vw,5rem)]">{p.num}</span>
-                </div>
-                <div className="md:col-span-6">
-                  <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-ash mb-2">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
-                  <h2 className="font-serif text-2xl md:text-3xl text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h2>
-                </div>
-                <div className="md:col-span-4 text-bone/80 text-base leading-relaxed text-justify">
-                  <Fmt text={t(`pillar.${p.num}.body`, p.body)} />
-                </div>
+        {PILLARS.map((p) => (
+          <section key={p.num} id={`pillar-${p.num}`} data-testid={`pillar-section-${p.num}`} className="mb-24 md:mb-36 scroll-mt-24">
+            <div className="flex items-end gap-5 md:gap-8 border-b border-white/10 pb-6 md:pb-8">
+              <span className="chapter-num text-[clamp(3rem,7vw,6rem)] leading-none">{p.num}</span>
+              <div className="pb-1 md:pb-2">
+                <div className="font-mono text-[11px] md:text-xs font-semibold tracking-[0.22em] uppercase text-copper mb-2">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
+                <h2 data-testid={`pillar-title-${p.num}`} className="font-serif text-3xl md:text-5xl text-bone tracking-tight leading-[1.05]">{t(`pillar.${p.num}.title`, p.title)}</h2>
               </div>
-            </Reveal>
+            </div>
+            <p data-testid={`pillar-body-${p.num}`} className="mt-6 md:mt-8 max-w-3xl text-bone/80 text-sm md:text-base leading-[1.8]">
+              <Fmt text={t(`pillar.${p.num}.body`, p.body)} />
+            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-              <Reveal className="md:col-span-5" delay={0.1}>
-                <div className="relative sticky top-24 overflow-hidden" style={{ height: "calc(100vh - 7rem)" }}>
-                  <AssetImg
-                    k={p.image}
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    alt={t(`pillar.${p.num}.title`, p.title)}
-                    className="absolute inset-0 h-full w-full object-contain"
-                  />
-                </div>
-              </Reveal>
-              <div className="md:col-span-7 space-y-px bg-white/10">
-                {divisionsFor(p.num).map((d, i) => (
-                  <Reveal key={`${p.num}-${i}`} delay={i * 0.05}>
-                    <div className="bg-obsidian p-6 md:p-8 group hover:bg-ink transition-colors">
-                      <div className="flex items-baseline gap-4 mb-3">
-                        <span className="font-mono text-[10px] tracking-[0.22em] text-copper">{p.num}.{i + 1}</span>
-                        <h3 className="font-serif text-2xl md:text-3xl text-bone tracking-tight">{d.name}</h3>
-                      </div>
-                      <p className="text-bone/75 text-sm md:text-base leading-relaxed"><Fmt text={d.desc} /></p>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
+            <div data-testid={`pillar-photo-${p.num}`} className="relative mt-10 md:mt-12 w-full aspect-[16/10] md:aspect-[21/9] overflow-hidden border border-white/10 bg-ink">
+              <AssetImg k={p.image} sizes="(max-width: 1400px) 100vw, 1400px" alt={t(`pillar.${p.num}.title`, p.title)} className="absolute inset-0 h-full w-full object-cover" />
+            </div>
+
+            <div className="mt-10 md:mt-14 grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10">
+              {divisionsFor(p.num).map((d, i, arr) => (
+                <article key={`${p.num}-${i}`} data-testid={`pillar-division-${p.num}-${i}`} className={`bg-obsidian p-6 md:p-8 transition-colors ${arr.length % 2 && i === arr.length - 1 ? "md:col-span-2" : ""} duration-300 hover:bg-ink`}>
+                  <span className="font-mono text-[11px] tracking-[0.22em] text-copper">{p.num}.{i + 1}</span>
+                  <h3 className="mt-2 font-serif text-lg md:text-xl text-bone tracking-tight leading-snug">{d.name}</h3>
+                  <p className="mt-3 text-bone/70 text-sm leading-[1.75]"><Fmt text={d.desc} /></p>
+                </article>
+              ))}
             </div>
           </section>
         ))}
