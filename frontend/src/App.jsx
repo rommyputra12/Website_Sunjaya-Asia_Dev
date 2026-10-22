@@ -26,7 +26,7 @@ const ScrollTop = () => {
         const el = document.getElementById(id);
         if (el) {
           // Account for fixed nav height
-          const y = el.getBoundingClientRect().top + window.scrollY - 80;
+          const y = el.getBoundingClientRect().top + window.scrollY - ((document.querySelector("header")?.offsetHeight || 80) + 8);
           window.scrollTo({ top: Math.max(0, y), behavior: "auto" });
         } else if (tries < 10) {
           setTimeout(() => attempt(tries + 1), 80);

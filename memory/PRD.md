@@ -255,3 +255,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 ## 2026-06 About paragraf tanpa animasi
 - Paragraf & judul About tanpa animasi (plain); axios timeout 6s pada /api/content agar contentReady selalu true; default EN about.title/body1/body2 di translations.js disamakan dgn CMS; justify hanya md+ (mobile rata kiri). Verified iteration_17/18
+
+## 2026-06 Pillars page redesign
+- Header besar (nomor + kicker oranye + judul 48px) > judul divisi 20px; body rata kiri max-w-3xl; foto landscape full width (21:9 desktop, 16:10 mobile) di bawah body; grid divisi 2 kolom (item ganjil terakhir full); tanpa animasi. Hash scroll offset mengikuti tinggi header. Verified iteration_19. Menunggu user upload foto landscape

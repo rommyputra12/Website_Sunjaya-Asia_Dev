@@ -1,0 +1,29 @@
+{
+  "summary": "Frontend test of the redesigned /pillars page at desktop 1920x800 and mobile 390x844. Every requested item passes except one minor anchor-offset problem. The intro is moderate in size (24px desktop, 18px mobile) with no animation and opacity 1. Pillar titles are 48px on desktop and 30px on mobile, larger than the division h3 (20px and 18px). Bodies are left-aligned (text-align start), max-width 768px, with no raw markers. The photos sit below the body and above the grid, full container width (1320 desktop, 342 mobile), with ratios of 2.333 (21:9) and 1.600 (16:10), object-cover, and naturalWidth about 1400. The grid has 2 columns on desktop and 1 on mobile. Pillar 01 has 5 divisions and the last card spans both columns (1318px wide). Pillars 02 and 03 have 4 divisions each in a 2x2 grid. Cards show 01.1-style numbers, a title and a description. No horizontal overflow at 390px. Direct loads of /pillars#pillar-02 and #pillar-03 land with the section top at 96px, under the 97px header (correct). Home Explore links (/pillars#pillar-01/02/03 and hero-cta-primary) navigate correctly. Content (titles, bodies, kickers, division names) is CMS-driven via t() and listBlocks.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "App.jsx ScrollTop (SPA hash navigation)", "issue": "When clicking 'Explore our Core' on Home (client-side navigation), the section top lands at 80px but the fixed header bottom is at 97px on desktop. The top 17px of the pillar block is hidden under the navbar, and the copper kicker (top 91px) is partly covered. The cause is the hardcoded offset of 80 in App.jsx line 29. Direct page loads are fine.", "selector": "#pillar-02", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Pillars intro", "issues": ["The 'BUSINESS PILLARS' kicker is the same font size as the intro text (24px desktop, 18px mobile) and is wide-tracked bold. It looks heavier than the intro it introduces. Consider about 14-16px."]},
+      {"screen": "Pillar photos (expected, not a bug)", "issues": ["The current images are portrait infographics, so the 21:9 and 16:10 cover crop cuts off their top and bottom text. This is expected until the user uploads landscape photos."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Change the scroll offset in App.jsx ScrollTop from the hardcoded 80 to the real header height (about 100), or use el.scrollIntoView() and rely on the existing scroll-mt (bump it to scroll-mt-28).",
+    "Optional: reduce the size of the 'BUSINESS PILLARS' kicker (text-sm md:text-base)."
+  ],
+  "critical_code_review_comments": [
+    "Pillars.jsx className puts 'duration-300' after the conditional col-span template. It works, but is cleaner if grouped with transition-colors.",
+    "The division h3 renders d.name as plain text without <Fmt>, so CMS formatting markers in division names would show raw. The current names have no markers. Consider wrapping it in <Fmt> for consistency with desc."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "95%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Test ids: pillars-intro, pillar-section-XX, pillar-title-XX, pillar-body-XX, pillar-photo-XX, pillar-division-XX-i. The fixed header is 97px tall on desktop. The cookie banner covers the bottom of the viewport; dismiss it with the 'Accept All' button."
+}
