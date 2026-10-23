@@ -781,6 +781,7 @@ def _trim_transparent(data: bytes, content_type: str) -> bytes:
 
 
 VARIANT_WIDTHS = (640, 1280, 2560)
+VARIANT_QUALITY = 88  # resized copies keep fine text (infographics) crisp
 LOGO_SECTION = "home_partners"
 
 
@@ -803,13 +804,13 @@ def _make_variants(data: bytes, content_type: str, section: str | None) -> list:
     for w in widths:
         if im.width <= w:
             # largest size: still re-encode heavy non-WebP originals at native width
-            if w == widths[-1] and len(widths) > 1 and (content_type != "image/webp" or len(data) > 1024 * 1024):
+            if w == widths[-1] and len(widths) > 1 and len(data) > 1024 * 1024:
                 buf = _io.BytesIO(); im.save(buf, "WEBP", quality=90 if has_alpha else WEBP_QUALITY, method=6)
                 if len(buf.getvalue()) < len(data):
                     out.append((im.width, buf.getvalue()))
             continue
         v = im.copy(); v.thumbnail((w, 100000), Image.LANCZOS)
-        buf = _io.BytesIO(); v.save(buf, "WEBP", quality=90 if has_alpha else WEBP_QUALITY, method=6)
+        buf = _io.BytesIO(); v.save(buf, "WEBP", quality=90 if has_alpha else VARIANT_QUALITY, method=6)
         out.append((w, buf.getvalue()))
     return out
 
@@ -1012,7 +1013,7 @@ async def update_asset_meta(asset_id: str, payload: AssetMetaIn):
 
 
 @api_router.post("/assets/backfill-variants", dependencies=[Depends(require_admin)])
-async def backfill_variants(force: bool = False):
+async def backfill_variants(force: bool = False, key: Optional[str] = None):
     """Admin: one-time generation of responsive variants for existing images."""
     from urllib.parse import unquote
     marker = f"/public/{SUPABASE_BUCKET}/"
@@ -1021,7 +1022,7 @@ async def backfill_variants(force: bool = False):
         for it in await sb_select("assets", limit=500, svc=True):
             meta = it.get("meta") or {}
             url = it.get("url") or ""
-            if (not force and "_variants" in meta) or marker not in url:
+            if (key and it.get("key") != key) or (not force and "_variants" in meta) or marker not in url:
                 skipped += 1
                 continue
             try:

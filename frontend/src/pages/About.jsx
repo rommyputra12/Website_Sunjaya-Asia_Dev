@@ -99,15 +99,15 @@ export default function About() {
             <span data-testid="about-history-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.history.kicker")}</span>
             <span data-testid="about-history-since" className="hidden md:inline font-mono text-sm tracking-[0.22em] uppercase text-ash">{t("about.history.since")}</span>
           </div>
-          <Reveal>
-            <div className="relative aspect-[16/9] overflow-hidden clip-frame border border-black/10">
-              <AssetImg k="aboutCompanyHistory" alt="Sunjaya Asia Group company history timeline" className="w-full h-full object-cover" />
+          <div>
+            <div data-testid="about-history-image" className="relative aspect-video overflow-hidden clip-frame border border-black/10 bg-ink">
+              <AssetImg k="aboutCompanyHistory" sizes="(max-width: 768px) 100vw, 80vw" alt="Sunjaya Asia Group company history timeline" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <div className="mt-6 max-w-lg">
               <span data-testid="about-journey-kicker" className="font-mono text-xs md:text-sm font-semibold tracking-[0.22em] uppercase text-copper">{t("about.history.journey_kicker")}</span>
               <p className="font-serif text-lg md:text-xl text-ink tracking-tight mt-2">{t("about.history.journey")}</p>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 

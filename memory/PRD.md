@@ -270,3 +270,7 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Modal Edit Crop bisa ditutup dgn Escape; cookie banner tidak tampil di /admin. Verified iteration_20
 
 - CMS Images: Home Pillar dipisah jadi "Home — Pillar 01–03 · Foto Pillar (portrait)" (home_pillar_sections: foundation/core/future_slide) dan "Home — Pillar 01–03 · Background" (home_pillar_bg: home_pillar_0X_bg)
+
+## 2026-06 Company History image quality
+- Frame tetap 16:9 (aspect-video), tanpa animasi Reveal (blur), sizes 80vw
+- Backend: varian kini WebP q88 (VARIANT_QUALITY); re-encode ukuran asli hanya jika original >1MB (JPG kecil disajikan asli); backfill-variants dapat param key. about_company_history di-backfill: 640/1280 + original 1920 JPG
