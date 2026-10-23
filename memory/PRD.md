@@ -268,3 +268,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Halaman Pillars (landscape 16:9): aset baru pillars_page_01/02/03 (section pillars_page), 01 & 02 = foto landscape user, 03 sementara portrait lama; Pillars.jsx pakai pillarsPageXX; preview crop 16:9 utk key baru; safe-delete keys ditambah
 
 - Modal Edit Crop bisa ditutup dgn Escape; cookie banner tidak tampil di /admin. Verified iteration_20
+
+- CMS Images: Home Pillar dipisah jadi "Home — Pillar 01–03 · Foto Pillar (portrait)" (home_pillar_sections: foundation/core/future_slide) dan "Home — Pillar 01–03 · Background" (home_pillar_bg: home_pillar_0X_bg)
