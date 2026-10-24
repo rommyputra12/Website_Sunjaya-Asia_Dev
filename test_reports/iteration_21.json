@@ -1,0 +1,19 @@
+{
+  "summary": "Subsidiaries photo-loading fix VERIFIED. Measured from navigation commit until sub-card-sac and sub-card-sae imgs were complete with naturalWidth>0 and card/wrapper opacity 1. Desktop 1920x800: first visit with localStorage cleared took 1.48s, 3 refreshes took 0.79/0.69/0.78s (1280w webp). Mobile 390x844: first visit took 1.22s, 3 refreshes took 0.77/0.68/0.66s (640w webp). Both images have loading=eager and fetchpriority=high. They never stayed blank. The sunjaya_assets_v1 cache gets written. All 9 cards (sac, sae, sti, agi, ecs, sm, tsn, san, kgi) render their images after scrolling, with opacity 1 and correct name/city/role/sector text. No raw markers ({{, **, undefined, NaN, subsidiary.*). The headings 'An Integrated Ecosystem / of Industry Pioneers' and 'Operational / footprint.' are fully visible (opacity 1, no transform or clip on children). Client-side navigation Home -> navbar SUBSIDIARIES -> back -> forward: images show each time. Regression: the Home hero cover_sunjaya@2560 loads and all 9 About page images load. No console errors or warnings.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "AssetImg still renders an empty <span> while !ready on a true first visit, so first paint depends on /api/assets (up to the 6s timeout). Acceptable, but rendering fallback URLs immediately when there is no cache would remove that dependency.",
+    "The ASSET_CACHE has no version or TTL. After a CMS change, returning visitors briefly see the stale URL before the background refresh swaps it (minor flash).",
+    "'First visit' means localStorage was cleared; the HTTP image cache was warm from the initial page load in the same context, so a fully cold CDN load may be slightly slower."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Subsidiary cards are [data-testid=sub-card-<id>] with ids sac, sae, sti, agi, ecs, sm, tsn, san, kgi. The asset cache is in localStorage key sunjaya_assets_v1. 'Operational footprint.' is an h2 containing a line break, so use locator('h2', has_text='Operational').",
+  "rca of the issue": "The blank cards came from three things stacked: a framer-motion Reveal wrapper (opacity 0 + blur until in-view), loading=lazy on above-the-fold images, and AssetImg waiting for /api/assets before rendering any <img>. All three are addressed and verified."
+}

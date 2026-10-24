@@ -274,3 +274,6 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 ## 2026-06 Company History image quality
 - Frame tetap 16:9 (aspect-video), tanpa animasi Reveal (blur), sizes 80vw
 - Backend: varian kini WebP q88 (VARIANT_QUALITY); re-encode ukuran asli hanya jika original >1MB (JPG kecil disajikan asli); backfill-variants dapat param key. about_company_history di-backfill: 640/1280 + original 1920 JPG
+
+## 2026-06 Fix: foto Subsidiaries lama muncul
+- Kartu tanpa Reveal; 2 kartu teratas loading eager + fetchPriority high, sizes 50vw; AssetContext cache localStorage sunjaya_assets_v1 + timeout 6s; heading Subsidiaries tanpa LineReveal. Verified iteration_21 (first 1.2-1.5s, refresh ~0.7s)
