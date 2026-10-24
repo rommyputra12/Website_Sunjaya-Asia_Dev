@@ -43,16 +43,21 @@ const FALLBACK_URLS = { ...IMAGES, logo: LOGO };
 
 const AssetContext = createContext({ byKey: {}, ready: false });
 
+const ASSET_CACHE = "sunjaya_assets_v1";
+
 export const AssetProvider = ({ children }) => {
-  const [assets, setAssets] = useState([]);
-  const [ready, setReady] = useState(false);
+  // Cached asset list lets images start loading at first paint on repeat visits (refreshed in background)
+  const cached = (() => { try { return JSON.parse(localStorage.getItem(ASSET_CACHE) || "null"); } catch { return null; } })();
+  const [assets, setAssets] = useState(() => cached || []);
+  const [ready, setReady] = useState(!!cached);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await axios.get(`${API}/assets`);
+        const r = await axios.get(`${API}/assets`, { timeout: 6000 });
         if (!cancelled) setAssets(r.data || []);
+        try { localStorage.setItem(ASSET_CACHE, JSON.stringify(r.data || [])); } catch { /* quota */ }
       } catch {
         // silently fall back to static URLs
       } finally {

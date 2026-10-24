@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Reveal, LineReveal } from "../components/motion/Reveal";
+import { Reveal } from "../components/motion/Reveal";
 import { SUBSIDIARIES, DEFAULT_LOCATIONS, CERTS } from "../data/content";
 import AssetImg from "../components/AssetImg";
 import { InteractiveWorldMap } from "../components/InteractiveWorldMap";
@@ -63,9 +63,9 @@ export default function Subsidiaries() {
             <div className="md:col-span-5">
               <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper">Subsidiaries & Affiliates</span>
               <h1 className="font-serif text-xl md:text-3xl leading-[1.18] tracking-[-0.02em] text-bone mt-8">
-                <LineReveal text="An Integrated Ecosystem" delay={0} />
+                An Integrated Ecosystem
                 <br />
-                <span className="font-italic-accent text-copper"><LineReveal text="of Industry Pioneers" delay={0.3} /></span>
+                <span className="font-italic-accent text-copper">of Industry Pioneers</span>
               </h1>
             </div>
             <div className="md:col-span-7 md:col-start-6 self-start md:pt-[3.75rem]">
@@ -87,11 +87,13 @@ export default function Subsidiaries() {
             const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3", "md:col-span-4", "md:col-span-2"];
             const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[3/2]", "aspect-[3/2]", "aspect-[16/9]", "aspect-[4/5]"];
             return (
-              <Reveal key={s.id} className={spans[i % spans.length]} delay={i * 0.05}>
+              <div key={s.id} className={spans[i % spans.length]}>
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
                   <AssetImg
                     k={s.image}
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    loading={i < 2 ? "eager" : "lazy"}
+                    fetchPriority={i < 2 ? "high" : "auto"}
                     alt={t(`subsidiary.${s.id}.name`, s.name)}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
@@ -122,7 +124,7 @@ export default function Subsidiaries() {
                     </div>
                   </div>
                 </article>
-              </Reveal>
+              </div>
             );
           })}
         </div>
@@ -133,7 +135,7 @@ export default function Subsidiaries() {
             const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2"];
             const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]"];
             return (
-              <Reveal key={s.id} className={spans[i % spans.length]} delay={i * 0.05}>
+              <div key={s.id} className={spans[i % spans.length]}>
                 <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
                   <AssetImg
                     k={s.image}
@@ -165,7 +167,7 @@ export default function Subsidiaries() {
                     </div>
                   </div>
                 </article>
-              </Reveal>
+              </div>
             );
           })}
         </div>
@@ -236,9 +238,9 @@ export default function Subsidiaries() {
           <div className="md:col-span-6">
             <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper">Global Presence</span>
             <h2 className="font-serif text-2xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-bone mt-3">
-              <LineReveal text="Operational" />
+              Operational
               <br />
-              <span className="font-italic-accent text-copper"><LineReveal text="footprint." delay={0.25} /></span>
+              <span className="font-italic-accent text-copper">footprint.</span>
             </h2>
           </div>
           <div className="md:col-span-5 md:col-start-8 self-end">
