@@ -285,3 +285,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - 2026-06: /pillars spacing tightened (header mt-8/10, mb-10/14; pillar sections mb-16/24) + copper fading line under intro paragraph.
 - 2026-06: /pillars sub-activities (01.1…) now vertical rows: number | title | justified desc (desktop 3 cols; mobile number + stacked, left-aligned).
 - 2026-06: About Competitive Edge redesigned: title one sentence one color (edge.title + edge.highlight joined), full-width desc + copper fade line, 3 modern white cards with lucide icons, big faint number, copper top bar on hover, dash bullets (.edge-card in index.css).
+- 2026-06: Edge list items hover = copper + semibold. About The Group header modernised: overline + fading line, subtitle with copper left bar, diamond + copper fade divider, first paragraph brighter (desktop & mobile).

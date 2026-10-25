@@ -22,7 +22,7 @@ const EdgeCard = ({ ci, col }) => {
         {col.items.map((it, i) => (
           <li key={i} data-testid={`edge-item-${ci}-${i}`} className="group/item flex gap-2.5 items-start">
             <ChevronRight aria-hidden="true" size={16} strokeWidth={2.4} className="mt-[3px] flex-shrink-0 text-copper transition-transform duration-300 group-hover/item:translate-x-0.5" />
-            <span className="text-bone text-sm leading-[1.6] transition-colors duration-300 group-hover/item:text-copper">{it.text}</span>
+            <span className="text-bone text-sm leading-[1.6] transition-colors duration-300 group-hover/item:text-copper group-hover/item:font-semibold">{it.text}</span>
           </li>
         ))}
       </ul>
@@ -64,13 +64,19 @@ export default function About() {
             {/* Title + body stacked on the right, aligned vertically */}
             <div className="grid grid-cols-12 gap-10">
               <div className="col-span-5 col-start-8">
-                <span data-testid="about-overline" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
-                <h1 data-testid="about-title" className="tight-reveal font-serif text-lg md:text-xl leading-[1.3] tracking-[-0.02em] text-bone mt-3">
+                <div className="flex items-center gap-5">
+                  <span data-testid="about-overline" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper whitespace-nowrap">{t("about.overline")}</span>
+                  <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-copper/70 to-transparent" />
+                </div>
+                <h1 data-testid="about-title" className="tight-reveal mt-6 pl-5 border-l-2 border-copper font-serif text-lg md:text-xl leading-[1.4] tracking-[-0.015em] text-bone">
                   {t("about.title")}
                 </h1>
-                {/* Body text pushed down so title has breathing room */}
-                <div data-testid="about-body" className="mt-10 space-y-8 text-bone/90 text-sm md:text-base leading-[1.75]">
-                  {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-${i}`} className={para.align === "justify" ? "text-left md:text-justify" : ""} style={para.align === "justify" ? undefined : { textAlign: para.align }}><Fmt text={para.text} /></p>)}
+                <div aria-hidden="true" className="mt-8 flex items-center gap-3">
+                  <span className="w-2 h-2 rotate-45 border border-copper" />
+                  <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-copper via-copper/40 to-transparent" />
+                </div>
+                <div data-testid="about-body" className="mt-8 space-y-6 text-bone/85 text-sm md:text-base leading-[1.8]">
+                  {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-${i}`} className={`${i === 0 ? "text-bone" : ""} ${para.align === "justify" ? "text-left md:text-justify" : ""}`} style={para.align === "justify" ? undefined : { textAlign: para.align }}><Fmt text={para.text} /></p>)}
                 </div>
               </div>
             </div>
@@ -96,12 +102,19 @@ export default function About() {
 
         {/* Mobile: text section below banner */}
         <div className="md:hidden px-6 pt-10 pb-12 bg-obsidian">
-          <span data-testid="about-overline-mobile" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.overline")}</span>
-          <h1 data-testid="about-title-mobile" className="tight-reveal font-serif text-base leading-[1.3] tracking-[-0.02em] text-bone mt-3">
+          <div className="flex items-center gap-4">
+            <span data-testid="about-overline-mobile" className="font-mono text-lg font-bold tracking-[0.24em] uppercase text-copper whitespace-nowrap">{t("about.overline")}</span>
+            <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-copper/70 to-transparent" />
+          </div>
+          <h1 data-testid="about-title-mobile" className="tight-reveal mt-5 pl-4 border-l-2 border-copper font-serif text-base leading-[1.4] tracking-[-0.015em] text-bone">
             {t("about.title")}
           </h1>
-          <div data-testid="about-body-mobile" className="mt-6 space-y-6 text-bone/85 text-sm leading-[1.75]">
-            {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-mobile-${i}`} className={para.align === "justify" ? "text-left md:text-justify" : ""} style={para.align === "justify" ? undefined : { textAlign: para.align }}><Fmt text={para.text} /></p>)}
+          <div aria-hidden="true" className="mt-6 flex items-center gap-3">
+            <span className="w-2 h-2 rotate-45 border border-copper" />
+            <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-copper via-copper/40 to-transparent" />
+          </div>
+          <div data-testid="about-body-mobile" className="mt-6 space-y-5 text-bone/85 text-sm leading-[1.8]">
+            {(contentReady ? bodyParas : []).map((para, i) => <p key={i} data-testid={`about-para-mobile-${i}`} className={`${i === 0 ? "text-bone" : ""} ${para.align === "justify" ? "text-left md:text-justify" : ""}`} style={para.align === "justify" ? undefined : { textAlign: para.align }}><Fmt text={para.text} /></p>)}
           </div>
           {/* Mobile corporate identity */}
           <Reveal>
