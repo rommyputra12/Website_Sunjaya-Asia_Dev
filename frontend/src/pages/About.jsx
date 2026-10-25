@@ -4,8 +4,25 @@ import { Reveal } from "../components/motion/Reveal";
 import AssetImg from "../components/AssetImg";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
 import { Fmt, splitAlign } from "../components/FormattedText";
-import { Building2, ChevronRight, Layers, ShieldCheck, Workflow } from "lucide-react";
+import { BadgeCheck, Building2, CalendarDays, ChevronRight, Fingerprint, Layers, RefreshCcw, ShieldCheck, Workflow } from "lucide-react";
 import { CERTS } from "../data/content";
+
+const IDENTITY_ICONS = [CalendarDays, RefreshCcw, BadgeCheck, Fingerprint];
+
+const IdentityItem = ({ k, i, compact, divider, topLine }) => {
+  const Icon = IDENTITY_ICONS[i % IDENTITY_ICONS.length];
+  return (
+    <div data-testid={`about-identity-item-${i}`} className={`group relative flex items-start gap-3 md:gap-4 ${compact ? "p-4" : "px-7 py-6"} ${divider ? "border-l border-white/10" : ""} ${topLine ? "border-t border-white/10" : ""} transition-colors duration-300 hover:bg-white/[0.04]`}>
+      <span className={`shrink-0 grid place-items-center rounded-full border border-copper/40 text-copper transition-colors duration-300 group-hover:bg-copper group-hover:text-white ${compact ? "w-8 h-8" : "w-11 h-11"}`}>
+        <Icon size={compact ? 15 : 19} strokeWidth={1.7} />
+      </span>
+      <div className="min-w-0">
+        <div className={`font-mono uppercase text-ash ${compact ? "text-[8px] tracking-[0.18em]" : "text-[10px] tracking-[0.22em]"}`}>{k.label}</div>
+        <div className={`font-serif text-bone tracking-tight mt-1 break-words ${compact ? "text-sm" : "text-lg md:text-xl"}`}>{k.value}</div>
+      </div>
+    </div>
+  );
+};
 
 const EDGE_ICONS = [Building2, Layers, Workflow];
 
@@ -86,13 +103,9 @@ export default function About() {
           {/* Corporate identity — anchored to the bottom edge of the banner */}
           <Reveal>
             <div className="relative max-w-[1600px] mx-auto px-10 pb-0 mt-24">
-              <div id="about-identity" className={`grid gap-px bg-white/10 border border-white/10 translate-y-1/2 ${["grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4"][Math.min(identity.length, 4) - 1]}`}>
-                {identity.map((k) => (
-                  <div key={k.label} className="bg-obsidian/95 backdrop-blur-sm p-6">
-                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper mb-2">{k.label}</div>
-                    <div className="font-serif text-xl md:text-2xl text-bone tracking-tight">{k.value}</div>
-                  </div>
-                ))}
+              <div id="about-identity" data-testid="about-identity" className={`identity-glass relative grid translate-y-1/2 rounded-[12px] overflow-hidden ${["grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4"][Math.min(identity.length, 4) - 1]}`}>
+                <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-copper via-copper/40 to-transparent" />
+                {identity.map((k, i) => <IdentityItem key={k.label} k={k} i={i} divider={i > 0} />)}
               </div>
             </div>
           </Reveal>
@@ -119,13 +132,9 @@ export default function About() {
           </div>
           {/* Mobile corporate identity */}
           <Reveal>
-            <div className="mt-10 grid grid-cols-2 gap-px bg-white/10 border border-white/10">
-              {identity.map((k) => (
-                <div key={k.label} className="bg-obsidian p-4">
-                  <div className="font-mono text-[9px] tracking-[0.22em] uppercase text-copper mb-1">{k.label}</div>
-                  <div className="font-serif text-base text-bone tracking-tight">{k.value}</div>
-                </div>
-              ))}
+            <div data-testid="about-identity-mobile" className="identity-glass relative mt-10 grid grid-cols-2 rounded-[12px] overflow-hidden">
+              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-copper via-copper/40 to-transparent" />
+              {identity.map((k, i) => <IdentityItem key={k.label} k={k} i={i} compact divider={i % 2 === 1} topLine={i > 1} />)}
             </div>
           </Reveal>
         </div>
