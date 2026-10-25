@@ -221,10 +221,12 @@ export default function Subsidiaries() {
             {/* Parent Company */}
             <div data-testid="parent-company-block" className="relative">
               <SumHeading title="Parent Company" />
-              <div className="group/pc inline-flex flex-col md:flex-row md:items-center gap-2 md:gap-5">
-                <p className="font-serif text-lg md:text-2xl text-bone tracking-tight leading-tight uppercase transition-colors duration-300 group-hover/pc:text-copper">SUNJAYA ASIA GROUP PTE. LTD.</p>
-                <span aria-hidden="true" className="hidden md:block w-8 h-px bg-copper/60" />
-                <span className="font-mono text-[10px] md:text-[11px] tracking-[0.24em] uppercase text-copper/90">Singapore · Holding</span>
+              <div className="group/pc flex flex-col gap-2">
+                <p className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight uppercase transition-colors duration-300 group-hover/pc:text-copper">SUNJAYA ASIA GROUP PTE. LTD.</p>
+                <div className="flex items-center gap-3">
+                  <span aria-hidden="true" className="w-6 h-px bg-copper/60" />
+                  <span className="font-mono text-[10px] md:text-[11px] tracking-[0.24em] uppercase text-copper/90">Singapore · Holding</span>
+                </div>
               </div>
             </div>
 
