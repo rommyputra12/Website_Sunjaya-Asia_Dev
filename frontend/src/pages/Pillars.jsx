@@ -72,7 +72,7 @@ export default function Pillars() {
 
             <div data-testid={`pillar-divisions-${p.num}`} className="mt-10 md:mt-14 border-t border-white/10">
               {divisionsFor(p.num).map((d, i) => (
-                <article key={`${p.num}-${i}`} data-testid={`pillar-division-${p.num}-${i}`} className="grid grid-cols-[3.5rem_1fr] md:grid-cols-[6rem_minmax(0,4fr)_minmax(0,7fr)] gap-x-4 md:gap-x-10 gap-y-2 py-6 md:py-8 border-b border-white/10 transition-colors duration-300 hover:bg-white/[0.03]">
+                <article key={`${p.num}-${i}`} data-testid={`pillar-division-${p.num}-${i}`} className="grid grid-cols-[3.5rem_1fr] md:grid-cols-[5rem_minmax(0,4fr)_minmax(0,7fr)] gap-x-4 md:gap-x-12 gap-y-2 py-6 md:py-8 pl-2 md:pl-8 border-b border-white/10 transition-colors duration-300 hover:bg-white/[0.03]">
                   <span className="font-mono text-xs md:text-sm tracking-[0.18em] text-copper pt-1">{p.num}.{i + 1}</span>
                   <h3 className="font-serif text-lg md:text-xl text-bone tracking-tight leading-snug">{d.name}</h3>
                   <p className="col-start-2 md:col-start-3 md:row-start-1 text-bone/70 text-sm leading-[1.75] text-left md:text-justify hyphens-auto"><Fmt text={d.desc} /></p>
