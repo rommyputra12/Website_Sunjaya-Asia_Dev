@@ -4,7 +4,8 @@ import { Reveal } from "../components/motion/Reveal";
 import AssetImg from "../components/AssetImg";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
 import { Fmt, splitAlign } from "../components/FormattedText";
-import { Building2, ChevronRight, Layers, Workflow } from "lucide-react";
+import { Building2, ChevronRight, Layers, ShieldCheck, Workflow } from "lucide-react";
+import { CERTS } from "../data/content";
 
 const EDGE_ICONS = [Building2, Layers, Workflow];
 
@@ -148,16 +149,11 @@ export default function About() {
               <p data-testid="about-journey-text" className="font-serif text-base md:text-xl text-bone tracking-tight mt-1 leading-snug">{t("about.history.journey")}</p>
             </div>
           </div>
-          <div className="relative p-2 md:p-3">
-            {["top-0 left-0 border-t-2 border-l-2", "top-0 right-0 border-t-2 border-r-2", "bottom-0 left-0 border-b-2 border-l-2", "bottom-0 right-0 border-b-2 border-r-2"].map((c) => (
-              <span key={c} aria-hidden="true" className={`absolute w-6 h-6 md:w-9 md:h-9 border-copper ${c}`} />
-            ))}
-            <div data-testid="about-history-image" className="relative aspect-video overflow-hidden border border-white/10 bg-ink">
+          <div className="history-glow relative rounded-[10px] p-[1px]">
+            <div data-testid="about-history-image" className="relative aspect-video overflow-hidden rounded-[9px] bg-ink">
               <AssetImg k="aboutCompanyHistory" sizes="(max-width: 768px) 100vw, 1440px" fetchPriority="high" alt="Sunjaya Asia Group company history timeline" className="absolute inset-0 w-full h-full object-cover" />
-              <span aria-hidden="true" className="history-scan absolute inset-x-0 h-px" />
             </div>
           </div>
-          <div aria-hidden="true" className="history-ruler mt-3 h-2 mx-2 md:mx-3" />
         </div>
       </section>
 
@@ -200,6 +196,22 @@ export default function About() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             {edgeCols.map((col, ci) => <EdgeCard key={ci} ci={ci} col={col} />)}
+          </div>
+        </div>
+
+        {/* Certifications */}
+        <div id="certifications" data-testid="about-certifications" className="mt-20 md:mt-24 scroll-mt-24">
+          <div className="flex items-center gap-5 mb-8">
+            <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper whitespace-nowrap">Certifications</span>
+            <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-copper/70 to-transparent" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {CERTS.map((c, i) => (
+              <div key={c} data-testid={`about-cert-${i}`} className="group flex items-center gap-3 rounded-[10px] border border-white/10 bg-ink/40 px-4 py-4 transition-colors duration-300 hover:border-copper/60">
+                <ShieldCheck aria-hidden="true" size={20} strokeWidth={1.7} className="shrink-0 text-copper" />
+                <span className="font-mono text-[11px] md:text-xs tracking-[0.16em] uppercase text-bone/85 transition-colors duration-300 group-hover:text-bone">{c}</span>
+              </div>
+            ))}
           </div>
         </div>
 

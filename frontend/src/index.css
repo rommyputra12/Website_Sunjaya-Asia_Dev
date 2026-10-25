@@ -414,7 +414,7 @@ input, textarea, select {
 /* About Company History: whole section (kicker + 16:9 image + caption) fits one desktop screen */
 .history-fit { max-width: 1440px; }
 @media (min-width: 768px) {
-  .history-fit { width: min(calc(100% - 5rem), 1440px, max(1120px, calc((100svh - 200px) * 16 / 9))); }
+  .history-fit { width: min(calc(100% - 5rem), 1440px); }
 }
 .history-tech { background: rgb(var(--bg-2)); border-block: 1px solid rgba(255,255,255,0.06); }
 .history-grid {
@@ -425,19 +425,10 @@ input, textarea, select {
   mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
   -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
 }
-.history-scan {
-  top: 0;
-  background: linear-gradient(90deg, transparent, rgba(200,98,48,0.55), transparent);
-  box-shadow: 0 0 12px rgba(200,98,48,0.45);
-  animation: history-scan 7s cubic-bezier(.6,0,.4,1) infinite;
+.history-glow {
+  background: linear-gradient(135deg, rgba(224,123,72,0.9), rgba(200,98,48,0.25) 40%, rgba(255,255,255,0.08) 60%, rgba(224,123,72,0.7));
+  box-shadow: 0 0 0 1px rgba(200,98,48,0.15), 0 0 28px -4px rgba(200,98,48,0.35), 0 30px 60px -30px rgba(0,0,0,0.6);
 }
-@keyframes history-scan { 0% { top: 0; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-.history-ruler {
-  background-image: repeating-linear-gradient(90deg, rgba(200,98,48,0.55) 0 1px, transparent 1px 24px);
-  mask-image: linear-gradient(90deg, #000, rgba(0,0,0,0.25));
-  -webkit-mask-image: linear-gradient(90deg, #000, rgba(0,0,0,0.25));
-}
-@media (prefers-reduced-motion: reduce) { .history-scan { display: none; } }
 
 /* About · Competitive Edge cards */
 .edge-card { background: #fff; border: 1px solid rgba(12, 25, 34, 0.08); box-shadow: 0 1px 2px rgba(12, 25, 34, 0.04); }

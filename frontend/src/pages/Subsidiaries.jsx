@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Reveal } from "../components/motion/Reveal";
-import { SUBSIDIARIES, DEFAULT_LOCATIONS, CERTS } from "../data/content";
+import { SUBSIDIARIES, DEFAULT_LOCATIONS } from "../data/content";
 import AssetImg from "../components/AssetImg";
 import { InteractiveWorldMap } from "../components/InteractiveWorldMap";
 import { useLang } from "../i18n/LanguageContext";
@@ -257,20 +257,6 @@ export default function Subsidiaries() {
           </div>
         </Reveal>
       </div>
-      </div>
-
-      {/* Certifications */}
-      <div className="section-light border-t border-white/10 overflow-hidden">
-        <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-16">
-          <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper shrink-0">Certifications</span>
-          <div className="flex-1 flex flex-wrap gap-x-8 gap-y-2 md:pl-8">
-            {CERTS.map((c) => (
-              <span key={c} className="font-mono text-[11px] md:text-xs tracking-[0.2em] uppercase text-ash">
-                {c}
-              </span>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
