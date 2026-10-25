@@ -4,7 +4,7 @@ import { Reveal } from "../components/motion/Reveal";
 import AssetImg from "../components/AssetImg";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
 import { Fmt, splitAlign } from "../components/FormattedText";
-import { Building2, Layers, Workflow } from "lucide-react";
+import { Building2, ChevronRight, Layers, Workflow } from "lucide-react";
 
 const EDGE_ICONS = [Building2, Layers, Workflow];
 
@@ -20,8 +20,8 @@ const EdgeCard = ({ ci, col }) => {
       <h3 data-testid={`edge-col-title-${ci}`} className="relative mt-6 font-serif text-xl md:text-2xl text-bone tracking-tight leading-snug">{col.title}</h3>
       <ul className="relative mt-5 pt-5 border-t edge-divider space-y-3">
         {col.items.map((it, i) => (
-          <li key={i} data-testid={`edge-item-${ci}-${i}`} className="flex gap-3 items-start">
-            <span aria-hidden="true" className="mt-[7px] h-[2px] w-3 flex-shrink-0 bg-copper" />
+          <li key={i} data-testid={`edge-item-${ci}-${i}`} className="group/item flex gap-2.5 items-start">
+            <ChevronRight aria-hidden="true" size={16} strokeWidth={2.4} className="mt-[3px] flex-shrink-0 text-copper transition-transform duration-300 group-hover/item:translate-x-0.5" />
             <span className="text-bone text-sm leading-[1.6]">{it.text}</span>
           </li>
         ))}
