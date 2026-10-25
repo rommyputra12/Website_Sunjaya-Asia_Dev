@@ -43,21 +43,34 @@ const groupByCountry = (items, countryOf = (s) => extractCountry(s.city)) => {
 };
 
 
-const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => {
+const SumHeading = ({ index, title, count }) => (
+  <div className="flex items-center gap-4 md:gap-5 mb-8">
+    <span className="relative grid place-items-center w-10 h-10 md:w-11 md:h-11 shrink-0 ml-1.5">
+      <span aria-hidden="true" className="absolute inset-0 rotate-45 rounded-[6px] border border-copper/60" />
+      <span aria-hidden="true" className="absolute inset-[5px] rotate-45 rounded-[4px] bg-copper/10" />
+      <span className="relative font-mono text-[11px] md:text-xs font-bold tracking-[0.1em] text-copper">{index}</span>
+    </span>
+    <h2 className="font-mono text-base md:text-xl font-bold tracking-[0.24em] uppercase text-copper whitespace-nowrap">{title}</h2>
+    <span aria-hidden="true" className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-copper via-copper/40 to-transparent" />
+    {count != null && <span className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-copper/80 whitespace-nowrap">{String(count).padStart(2, "0")} {count === 1 ? "entity" : "entities"}</span>}
+  </div>
+);
+
+const CompanyGroups = ({ id, testid, index, title, groups, cols, prefix, placeOf }) => {
   const { t } = useLang();
   const total = groups.reduce((n, g) => n + g.companies.length, 0);
   return (
-    <div id={id} data-testid={testid || id} className="mt-12 md:mt-14 scroll-mt-20">
-      <div className="flex items-baseline gap-4 mb-8">
-        <h2 className="font-mono text-base md:text-xl font-bold tracking-[0.24em] uppercase text-copper">{title}</h2>
-        <span className="font-mono text-[10px] md:text-xs tracking-[0.2em] text-ash">{String(total).padStart(2, "0")}</span>
-      </div>
+    <div id={id} data-testid={testid || id} className="mt-14 md:mt-16 scroll-mt-20">
+      <SumHeading index={index} title={title} count={total} />
       <div className={`grid grid-cols-1 ${cols} gap-x-10 gap-y-10`}>
         {groups.map((group) => (
           <div key={group.country} data-testid={`${prefix}-${group.country}`}>
-            <div className="flex items-baseline justify-between gap-3 pb-3 mb-5 border-b sum-line">
-              <h3 className="font-serif text-lg md:text-2xl text-bone tracking-tight">{group.country}</h3>
+            <div className="relative flex items-baseline justify-between gap-3 pb-3 mb-5">
+              <h3 className="flex items-center gap-2.5 font-serif text-lg md:text-xl text-bone tracking-tight">
+                <span aria-hidden="true" className="w-1.5 h-1.5 rotate-45 bg-copper" />{group.country}
+              </h3>
               <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">{group.companies.length} {group.companies.length === 1 ? "company" : "companies"}</span>
+              <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-copper/70 via-copper/20 to-transparent" />
             </div>
             <ul className="space-y-4">
               {group.companies.map((s) => (
@@ -212,18 +225,17 @@ export default function Subsidiaries() {
         <Reveal>
           <div className="mt-20 md:mt-24" data-testid="subsidiaries-summary">
             {/* Parent Company */}
-            <div data-testid="parent-company-block" className="relative pb-10 md:pb-12 border-b sum-line">
-              <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">Parent Company</span>
-              <div className="mt-4 flex flex-col md:flex-row md:items-end gap-3 md:gap-6">
-                <p className="font-serif text-2xl md:text-4xl text-bone tracking-tight leading-tight uppercase">SUNJAYA ASIA GROUP PTE. LTD.</p>
-                <span className="sum-chip self-start md:self-auto md:mb-1.5 inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-ash">
-                  <span className="w-1.5 h-1.5 rounded-full bg-copper" />Singapore · Holding
-                </span>
+            <div data-testid="parent-company-block" className="relative">
+              <SumHeading index="01" title="Parent Company" />
+              <div className="group/pc inline-flex flex-col md:flex-row md:items-center gap-2 md:gap-5 pl-[3.5rem] md:pl-[4rem]">
+                <p className="font-serif text-lg md:text-2xl text-bone tracking-tight leading-tight uppercase transition-colors duration-300 group-hover/pc:text-copper">SUNJAYA ASIA GROUP PTE. LTD.</p>
+                <span aria-hidden="true" className="hidden md:block w-8 h-px bg-copper/60" />
+                <span className="font-mono text-[10px] md:text-[11px] tracking-[0.24em] uppercase text-copper/90">Singapore · Holding</span>
               </div>
             </div>
 
-            <CompanyGroups id="subsidiaries-list" title="Subsidiaries" groups={COUNTRY_GROUPS} cols="md:grid-cols-3" prefix="country-group" placeOf={placeOf} />
-            <CompanyGroups title="Affiliates" testid="affiliates-list" groups={AFFILIATE_GROUPS} cols="md:grid-cols-2" prefix="affiliate-group" placeOf={placeOf} />
+            <CompanyGroups id="subsidiaries-list" index="02" title="Subsidiaries" groups={COUNTRY_GROUPS} cols="md:grid-cols-3" prefix="country-group" placeOf={placeOf} />
+            <CompanyGroups index="03" title="Affiliates" testid="affiliates-list" groups={AFFILIATE_GROUPS} cols="md:grid-cols-2" prefix="affiliate-group" placeOf={placeOf} />
           </div>
         </Reveal>
       </div>
