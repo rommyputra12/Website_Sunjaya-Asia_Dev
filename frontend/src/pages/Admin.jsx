@@ -803,7 +803,7 @@ const ImagesPanel = ({ client }) => {
             </div>
           )}
           <SortableContext items={sg.items.map((a) => a.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {sg.id && sg.items.length === 0 && <p className="col-span-full font-mono text-[10px] text-ash">Belum ada logo di kelompok ini.</p>}
             {sg.items.map((a, idx) => (
               <AssetCard key={a.id} a={a} draggable={!q && (secId === "home_subsidiaries" || secId === "home_partners")}>
@@ -815,7 +815,7 @@ const ImagesPanel = ({ client }) => {
                   className="relative aspect-[4/3] bg-obsidian overflow-hidden flex items-center justify-center group cursor-pointer">
                   {a.section === "home_partners"
                     ? <div className="absolute inset-8"><LogoImg asset={{ ...a, focal_x: 50, focal_y: 50, zoom: 1 }} /></div>
-                    : <img src={toCdnUrl(a.url)} alt={a.alt || a.key} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />}
+                    : <img src={toCdnUrl(a.url)} alt={a.alt || a.key} className={`w-full h-full transition-transform duration-500 group-hover:scale-[1.03] ${a.key === "pillars_page_banner" ? "object-contain" : "object-cover"}`} loading="lazy" />}
                   <span className="absolute inset-0 bg-obsidian/0 group-hover:bg-obsidian/50 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity font-mono text-[9px] tracking-[0.2em] uppercase text-bone border border-copper bg-obsidian/70 px-3 py-1.5">Edit crop</span>
                   </span>

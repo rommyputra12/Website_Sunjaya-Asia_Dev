@@ -280,3 +280,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 
 - 2026-06: /pillars intro + pillar 01/02/03 body paragraphs now full-width & justified (text-justify, hyphens-auto); screenshot-verified desktop/mobile.
 - 2026-06: /pillars full-bleed header banner 16:3 (asset pillars_page_banner, section pillars_page, CMS focal preview 16:3; temp image = pillars_page_01). Intro text reduced to text-base/md:text-lg.
+- 2026-06: CMS Images grouped per page (Brand/Home/Pillars/Subsidiaries/About/Footer/Lainnya) -> collapsible sections (all closed), search box; Pillars banner split into own section pillars_page_banner. Tested iteration_22 (100%).

@@ -1,0 +1,41 @@
+{
+  "summary": "Frontend-only, read-only test of the CMS Images tab regrouping (page then section collapsible accordions, separate Pillars banner section, search box) and the public /pillars page. All requested checks passed at 1920x800, plus a quick mobile check at 390. Nothing was uploaded, replaced or deleted.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Admin Images (mobile 390)", "issues": ["Asset grid stays at 2 columns (grid-cols-2), so cards are narrow: the 'Used on site' badge is cut off to 'USED', the section select is cut off and the key wraps ('pillars_page_ba / nner'). Consider grid-cols-1 below sm."]},
+      {"screen": "Admin Images card thumbnail", "issues": ["The pillars_page_banner (16:3 panorama) thumbnail uses a 4:3 object-cover box, so the card shows only the middle of the panorama. Optional: use an aspect-[16/3] or object-contain thumbnail for that section."]}
+    ]
+  },
+  "passed_checks": [
+    "Login as superadmin, then the Images tab: page groups image-page-brand/home/pillars/subsidiaries/about/footer render in the correct order (image-page-other is absent because no custom-upload data exists)",
+    "All 12 section toggles have aria-expanded=false and there are 0 asset-card-* on open",
+    "image-section-toggle expands and collapses (pillars_page: 3 cards, then 0 after collapsing)",
+    "Pillars group contains image-section-pillars_page_banner (only asset-card-pillars_page_banner) and image-section-pillars_page (pillars_page_01/02/03 only)",
+    "Clicking the banner thumbnail opens the focal editor; focal-pillar-banner-preview ratio is 5.333 (16:3); Cancel closes it",
+    "asset-replace-pillars_page_banner input is present",
+    "home_partners shows logo-group-vendor(7)/partner(2)/customer(4) and 13 drag handles when not searching",
+    "Searching 'banner' auto-expands only the matching sections (pillars_page_banner, about_page/about_banner) with only matching cards and 0 drag handles",
+    "A nonsense query shows images-search-empty with 0 page groups; images-search-clear resets the value and all sections collapse again (0 cards, 6 pages)",
+    "Searching 'pillar' matches the 5 pillar-related sections",
+    "Public /pillars: pillars-banner is 1920x360 (16:3, full width) and its image loaded (Banner Header_Pillar_Page webp); pillar-photo-01/02/03 load (naturalWidth 1400) after lazy scroll",
+    "Mobile 390: no horizontal overflow (scrollWidth 390); accordions are usable",
+    "No page errors"
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "Optional: make the Images asset grid 1 column on mobile (<640px) so badges and selects are not cut off"
+  ],
+  "critical_code_review_comments": [
+    "Search also matches the section label (sectionLabel), so searching a word in a label (e.g. 'pillar') shows every card in that section. This is acceptable but worth knowing.",
+    "Admin.jsx is far over 700 lines; consider splitting ImagesPanel, FocalEditorModal and the logo/subsidiary helpers into separate modules."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Images tab uses data-testid image-page-{page}, image-section-{sec}, image-section-toggle-{sec}, images-search, images-search-clear, images-search-empty, asset-card-/asset-thumb-/asset-drag-/asset-replace-{key}. Read-only; prod Supabase data. Creds are in /app/memory/test_credentials.md."
+}
