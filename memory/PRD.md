@@ -301,3 +301,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - 2026-06: CountryFlag: fixed alias table wins over Intl (Safari names CN "China mainland"); Intl names en+id merged; Indonesian country names supported.
 - 2026-06: Favicon fixed: local favicon.ico (16/32/48), favicon-32.png, icon-192.png, apple-touch-icon.png in frontend/public (from Sunjaya 3D logo), index.html links updated (was external .webp URL).
 - 2026-06: Link preview (Open Graph/Twitter) meta in frontend/index.html; og image 1200x630 (logo + tagline on azure grid) stored in Supabase website-images/site/og-image-v1.jpg, served via Worker CDN absolute URL. To change: upload new file with new name and update index.html.
+- 2026-06: OG image v2 (bigger SUNJAYA ASIA GROUP, one-line "The Power of Innovations", GLOBAL INVESTMENT HOLDING, sectors line) -> website-images/site/og-image-v2.jpg; index.html updated.
