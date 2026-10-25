@@ -130,22 +130,34 @@ export default function About() {
         </div>
       </div>
 
-      {/* Company History — light section slice hosting the boardroom photo at 16:9 with dark-azure gradient */}
-      <section id="company-history" className="section-light mt-16">
-        <div data-testid="about-history-frame" className="history-fit mx-auto px-6 md:px-0 py-16 md:py-10">
-          <div className="flex items-baseline justify-between mb-8 md:mb-6">
-            <span data-testid="about-history-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.history.kicker")}</span>
-            <span data-testid="about-history-since" className="hidden md:inline font-mono text-sm tracking-[0.22em] uppercase text-ash">{t("about.history.since")}</span>
-          </div>
-          <div>
-            <div data-testid="about-history-image" className="relative aspect-video overflow-hidden clip-frame border border-black/10 bg-ink">
-              <AssetImg k="aboutCompanyHistory" sizes="(max-width: 768px) 100vw, 80vw" alt="Sunjaya Asia Group company history timeline" className="absolute inset-0 w-full h-full object-cover" />
+      {/* Company History — high-tech framed 16:9 infographic */}
+      <section id="company-history" data-testid="about-history" className="history-tech relative mt-16 overflow-hidden scroll-mt-20">
+        <div aria-hidden="true" className="history-grid absolute inset-0" />
+        <div data-testid="about-history-frame" className="history-fit relative mx-auto px-6 md:px-0 py-14 md:py-10">
+          <div className="flex flex-col md:flex-row md:items-end gap-3 md:gap-8 mb-7 md:mb-6">
+            <div className="shrink-0">
+              <span data-testid="about-history-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.history.kicker")}</span>
+              <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-ash">
+                <span className="relative flex w-2 h-2"><span className="absolute inset-0 rounded-full bg-copper animate-ping opacity-60" /><span className="relative w-2 h-2 rounded-full bg-copper" /></span>
+                <span data-testid="about-history-since">{t("about.history.since")}</span>
+              </div>
             </div>
-            <div className="mt-6 md:mt-5 max-w-lg">
-              <span data-testid="about-journey-kicker" className="font-mono text-xs md:text-sm font-semibold tracking-[0.22em] uppercase text-copper">{t("about.history.journey_kicker")}</span>
-              <p className="font-serif text-lg md:text-xl text-ink tracking-tight mt-2">{t("about.history.journey")}</p>
+            <span aria-hidden="true" className="hidden md:block h-px flex-1 mb-3 bg-gradient-to-r from-copper/70 via-white/15 to-transparent" />
+            <div className="md:text-right md:max-w-[46%]">
+              <span data-testid="about-journey-kicker" className="font-mono text-[10px] md:text-xs font-semibold tracking-[0.24em] uppercase text-copper">{t("about.history.journey_kicker")}</span>
+              <p data-testid="about-journey-text" className="font-serif text-base md:text-xl text-bone tracking-tight mt-1 leading-snug">{t("about.history.journey")}</p>
             </div>
           </div>
+          <div className="relative p-2 md:p-3">
+            {["top-0 left-0 border-t-2 border-l-2", "top-0 right-0 border-t-2 border-r-2", "bottom-0 left-0 border-b-2 border-l-2", "bottom-0 right-0 border-b-2 border-r-2"].map((c) => (
+              <span key={c} aria-hidden="true" className={`absolute w-6 h-6 md:w-9 md:h-9 border-copper ${c}`} />
+            ))}
+            <div data-testid="about-history-image" className="relative aspect-video overflow-hidden border border-white/10 bg-ink">
+              <AssetImg k="aboutCompanyHistory" sizes="(max-width: 768px) 100vw, 1440px" fetchPriority="high" alt="Sunjaya Asia Group company history timeline" className="absolute inset-0 w-full h-full object-cover" />
+              <span aria-hidden="true" className="history-scan absolute inset-x-0 h-px" />
+            </div>
+          </div>
+          <div aria-hidden="true" className="history-ruler mt-3 h-2 mx-2 md:mx-3" />
         </div>
       </section>
 
