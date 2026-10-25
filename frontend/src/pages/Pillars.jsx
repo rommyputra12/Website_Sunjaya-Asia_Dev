@@ -45,15 +45,16 @@ export default function Pillars() {
         <AssetImg k="pillarsPageBanner" sizes="100vw" fetchPriority="high" loading="eager" alt={t("manifesto.overline")} className="absolute inset-0 h-full w-full object-cover" />
       </div>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        <header className="mt-12 md:mt-16 mb-16 md:mb-24">
-          <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("manifesto.overline")}</span>
-          <h1 data-testid="pillars-intro" className="font-serif text-base md:text-lg leading-[1.6] tracking-[-0.01em] text-bone/90 mt-4 w-full text-justify hyphens-auto">
+        <header className="mt-8 md:mt-10 mb-10 md:mb-14">
+          <span data-testid="pillars-overline" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("manifesto.overline")}</span>
+          <h1 data-testid="pillars-intro" className="font-serif text-base md:text-lg leading-[1.6] tracking-[-0.01em] text-bone/90 mt-3 w-full text-justify hyphens-auto">
             <Fmt text={t("manifesto.title")} />
           </h1>
+          <div data-testid="pillars-intro-line" aria-hidden="true" className="mt-6 md:mt-8 h-[2px] w-full rounded-full bg-gradient-to-r from-copper via-copper/60 to-transparent" />
         </header>
 
         {PILLARS.map((p) => (
-          <section key={p.num} id={`pillar-${p.num}`} data-testid={`pillar-section-${p.num}`} className="mb-24 md:mb-36 scroll-mt-24">
+          <section key={p.num} id={`pillar-${p.num}`} data-testid={`pillar-section-${p.num}`} className="mb-16 md:mb-24 scroll-mt-24">
             <div className="flex items-end gap-5 md:gap-8 border-b border-white/10 pb-6 md:pb-8">
               <span className="chapter-num text-[clamp(3rem,7vw,6rem)] leading-none">{p.num}</span>
               <div className="pb-1 md:pb-2">
