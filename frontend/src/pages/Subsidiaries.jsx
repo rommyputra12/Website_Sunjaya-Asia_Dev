@@ -46,7 +46,6 @@ const groupByCountry = (items, countryOf = (s) => extractCountry(s.city)) => {
 const SumHeading = ({ title, count }) => (
   <div className="flex items-center gap-4 md:gap-5 mb-8">
     <h2 className="font-mono text-base md:text-xl font-bold tracking-[0.24em] uppercase text-copper whitespace-nowrap">{title}</h2>
-    <span aria-hidden="true" className="h-px w-16 md:w-28 bg-gradient-to-r from-copper to-copper/10" />
     {count != null && <span className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-ash whitespace-nowrap">{String(count).padStart(2, "0")} {count === 1 ? "entity" : "entities"}</span>}
   </div>
 );
@@ -55,7 +54,8 @@ const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => 
   const { t } = useLang();
   const total = groups.reduce((n, g) => n + g.companies.length, 0);
   return (
-    <div id={id} data-testid={testid || id} className="mt-14 md:mt-16 scroll-mt-20">
+    <div id={id} data-testid={testid || id} className="scroll-mt-20">
+      <div aria-hidden="true" className="my-12 md:my-14 h-px w-full bg-gradient-to-r from-copper/60 via-copper/25 to-transparent" />
       <SumHeading title={title} count={total} />
       <div className={`grid grid-cols-1 ${cols} gap-x-10 gap-y-10`}>
         {groups.map((group) => (
