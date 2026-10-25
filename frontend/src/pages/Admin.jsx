@@ -552,14 +552,22 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
   const def = SUBSIDIARIES.find((x) => x.id === asset.key) || {};
   const cityParts = (def.city || "").split(",");
   const defaults = { tag: def.tag, city: (cityParts[0] || "").trim(), country: (cityParts[1] || "").trim(), role: def.role, name: def.name, sector: def.sector };
+  const [saving, setSaving] = useState(0);
+  useEffect(() => {
+    if (!saving) return undefined;
+    const warn = (e) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [saving]);
   // Saves run one after another, always with the latest meta + alt, so fast edits never overwrite each other
   const commit = (next, extra) => {
     metaRef.current = next;
     if (extra?.alt) altRef.current = extra.alt;
     pending.current += 1;
+    setSaving(pending.current);
     queue.current = queue.current
       .then(() => onSave(next, { alt: altRef.current, ...extra }))
-      .finally(() => { pending.current -= 1; });
+      .finally(() => { pending.current -= 1; setSaving(pending.current); });
   };
   const saveField = (f, lang, value) => {
     const cur = metaRef.current;
@@ -571,7 +579,7 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
   return (
     <div data-testid={`subcard-form-${asset.key}`} className="border-t border-white/10 mt-1 pt-2 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper">Teks kartu</span>
+        <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-copper">Teks kartu{saving > 0 && <span data-testid={`subcard-saving-${asset.key}`} className="ml-2 text-ash normal-case tracking-normal animate-pulse">menyimpan…</span>}</span>
         <button onClick={() => setShowId(!showId)} data-testid={`subcard-id-toggle-${asset.key}`}
           className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper transition-colors">
           {showId ? "− Sembunyikan ID" : "+ Terjemahan ID"}

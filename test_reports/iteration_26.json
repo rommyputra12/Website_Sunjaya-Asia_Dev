@@ -1,0 +1,26 @@
+{
+  "summary": "Frontend-only stress retest of the Admin SubCardTextForm save serialization (from iteration_25). Fix VERIFIED. Each run: add ONE test company via add-company-file, edit name/city/country/tag/role/sector ~150ms apart with a blur after each, then change subcard-tier right away. Run 1 had 2 rounds (round 2 used empty role). Run 2 had 3 rounds (branch, affiliate, subsidiary) and all 3 PASSED. Every round sent exactly 7 PUTs with max concurrency 1, so saves are serialized. Each PUT carried the cumulative meta, and alt always equalled the typed name (never 'NEW COMPANY'). Final GET /api/assets showed all 6 fields, tier = last selected and alt = typed name, and the UI select matched. The one FAIL in run 1 was a timing flaw in my test: I read the API before the last queued PUT had landed (the backend log shows that PUT arriving later). It was not an app bug, and run 2 waited properly and passed every round. Cleanup: the test companies co_mvo8jhl7 (via API), co_mvo8lf56 and co_mvo8mvyb (via asset-delete) were deleted. home_subsidiaries again holds exactly the 9 real companies, which were never touched.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Admin card text fast-edit", "issue": "Saves are slow: each one is PUT + full GET /assets refresh, about 1.6s. 7 quick edits take about 11s to finish, and there is no 'saving…' indicator and no beforeunload guard. If the admin reloads or leaves during that time, the queued edits are lost without warning. LOW priority.", "affected_selectors": ["[data-testid^=subcard-input-]", "[data-testid^=subcard-tier-]"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: show a pending/saving state (pending.current > 0) and add a beforeunload warning while the queue is non-empty",
+    "Optional: skip the full refresh() after each queued save, or refresh once when the queue drains, to cut flush time"
+  ],
+  "critical_code_review_comments": [
+    "The queue in commit() swallows errors, because saveMeta catches and shows a toast. This is fine for continuity, but metaRef keeps the unsaved value after a failed PUT, so the UI and DB can drift until reload.",
+    "Admin.jsx is still about 1158 lines and should be split (SubCardTextForm/ImagesPanel into their own files)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% (5/5 rounds correct; the 1 apparent failure was a test-timing flaw, re-run passed 3/3)"},
+  "seed_data_creation": "Created and deleted co_mvo8jhl7, co_mvo8lf56 and co_mvo8mvyb. Final home_subsidiaries = agi, ecs, kgi, sac, sae, san, sm, sti, tsn.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Login admin@sunjayaasia.com / sunjaya-superadmin-2026. Images tab, then image-section-toggle-home_subsidiaries, then set_input_files on add-company-file to create co_*. Find the new key by diffing GET /api/assets (X-Admin-Token: sunjaya-admin-2026-secret). Saves take about 1.6s each, so wait for all PUT responses plus about 3s before verifying. Delete with asset-delete-{key} (accept the confirm dialog)."
+}
