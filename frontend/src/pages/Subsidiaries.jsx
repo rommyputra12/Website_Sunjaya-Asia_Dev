@@ -42,12 +42,19 @@ const groupByCountry = (items, countryOf = (s) => extractCountry(s.city)) => {
 };
 
 
-const CompanyCard = ({ s, num, priority = false, showRole = false }) => {
+const MOSAIC = [
+  ["md:col-span-3", "aspect-[4/5] md:aspect-[3/2]"], ["md:col-span-3", "aspect-[4/5] md:aspect-[3/2]"],
+  ["md:col-span-2", "aspect-[4/5] md:aspect-[4/5]"], ["md:col-span-2", "aspect-[4/5] md:aspect-[4/5]"], ["md:col-span-2", "aspect-[4/5] md:aspect-[4/5]"],
+  ["md:col-span-3", "aspect-[4/5] md:aspect-[3/2]"], ["md:col-span-3", "aspect-[4/5] md:aspect-[3/2]"], ["md:col-span-4", "aspect-[4/5] md:aspect-[16/9]"], ["md:col-span-2", "aspect-[4/5] md:aspect-[4/5]"],
+];
+
+const CompanyCard = ({ s, num, slot, priority = false, showRole = false }) => {
   const { t } = useLang();
   const color = colorForCity(s.city);
+  const [span, ratio] = MOSAIC[slot % MOSAIC.length];
   return (
-    <article data-testid={`sub-card-${s.id}`} className="sub-card group relative flex flex-col overflow-hidden rounded-[12px] transition-[transform,box-shadow,border-color] duration-500 hover:-translate-y-1">
-      <div className="on-photo relative aspect-[3/2] overflow-hidden bg-obsidian">
+    <div className={span}>
+      <article data-testid={`sub-card-${s.id}`} className={`sub-card on-photo group relative h-full overflow-hidden rounded-[14px] bg-obsidian ${ratio}`}>
         <AssetImg
           k={s.image}
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -56,35 +63,32 @@ const CompanyCard = ({ s, num, priority = false, showRole = false }) => {
           alt={t(`subsidiary.${s.id}.name`, s.name)}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-obsidian/70 to-transparent" />
-        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between text-photo-shadow">
+        <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-obsidian/95 via-obsidian/45 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-obsidian/60 to-transparent" />
+
+        <div className="absolute top-4 left-4 right-4 z-10 flex items-start justify-between gap-3 text-photo-shadow">
           <span className="sub-chip flex items-center gap-2 rounded-full px-3 py-1">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+            <span className="w-1.5 h-1.5 shrink-0 rounded-full" style={{ background: color }} />
             <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
           </span>
-          <span className="sub-chip rounded-full px-2.5 py-1 font-mono text-[10px] tracking-[0.22em]">{String(num).padStart(2, "0")}</span>
+          <span className="sub-chip shrink-0 rounded-full px-2.5 py-1 font-mono text-[10px] tracking-[0.22em]">{String(num).padStart(2, "0")}</span>
         </div>
-      </div>
-      <span aria-hidden="true" className="h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-copper to-copper/30 transition-transform duration-500 group-hover:scale-x-100" />
-      <div className="flex flex-1 flex-col px-6 pt-5 pb-5">
-        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] uppercase text-ash">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-          {t(`subsidiary.${s.id}.city`, s.city)}
-        </div>
-        <h3 className="mt-2 font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase text-bone">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
-        {showRole && (
-          <div className="mt-1.5 font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-ash">
-            {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
-          </div>
-        )}
-        <div className="mt-auto pt-4">
-          <div className="pt-3 border-t sub-divider flex items-center justify-between gap-3">
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-bone/80">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
-            <span className="text-copper transition-transform duration-500 group-hover:translate-x-1" aria-hidden="true">→</span>
+
+        <div className="sub-info absolute bottom-4 left-4 right-4 z-10 rounded-[10px] px-5 py-4 text-photo-shadow">
+          <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color }}>{t(`subsidiary.${s.id}.city`, s.city)}</div>
+          <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
+          {showRole && (
+            <div className="mt-1.5 font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-bone/75">
+              {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
+            </div>
+          )}
+          <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between gap-3">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
+            <span className="grid place-items-center w-7 h-7 shrink-0 rounded-full border border-copper/60 text-copper transition-[transform,background-color,color] duration-500 group-hover:translate-x-1 group-hover:bg-copper group-hover:text-white" aria-hidden="true">→</span>
           </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
   );
 };
 
@@ -102,22 +106,18 @@ export default function Subsidiaries() {
 
   return (
     <div data-testid="subsidiaries-page">
-      {/* Dark Azure intro — heading + paragraph only */}
-      <div data-testid="subsidiaries-intro" className="bg-azure pt-32 pb-16 md:pb-20">
-        <div className="max-w-[1600px] mx-auto px-6 md:px-10">
-          <div className="flex items-center gap-4 md:gap-5">
-            <span className="font-mono text-sm md:text-lg font-bold tracking-[0.2em] md:tracking-[0.28em] uppercase text-copper md:whitespace-nowrap">Subsidiaries & Affiliates</span>
-            <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-copper/70 to-transparent" />
+      {/* Dark Azure intro — two big columns over a faint tech grid */}
+      <div data-testid="subsidiaries-intro" className="relative overflow-hidden bg-azure pt-32 pb-16 md:pt-40 md:pb-24">
+        <div aria-hidden="true" className="history-grid absolute inset-0" />
+        <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
+          <div className="lg:col-span-5">
+            <span className="font-mono text-sm md:text-lg font-bold tracking-[0.2em] md:tracking-[0.28em] uppercase text-copper">Subsidiaries & Affiliates</span>
+            <h1 data-testid="subsidiaries-title" className="mt-5 font-serif text-3xl md:text-5xl leading-[1.08] tracking-[-0.03em] text-bone">
+              An Integrated Ecosystem of Industry Pioneers
+            </h1>
           </div>
-          <h1 data-testid="subsidiaries-title" className="mt-7 pl-5 border-l-2 border-copper font-serif text-xl md:text-3xl leading-[1.25] tracking-[-0.02em] text-bone">
-            An Integrated Ecosystem <span className="text-copper">of Industry Pioneers</span>
-          </h1>
-          <div aria-hidden="true" className="mt-8 flex items-center gap-3">
-            <span className="w-2 h-2 rotate-45 border border-copper" />
-            <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-copper via-copper/40 to-transparent" />
-          </div>
-          <p data-testid="subsidiaries-desc" className="mt-8 text-ash text-base md:text-lg leading-[1.8] w-full text-left md:text-justify">
-                Sunjaya Asia Group powers a diversified network of specialized operating units and strategic affiliates engineered to lead key global markets. From <strong className="font-bold italic text-bone">Capital &amp; Wealth Management</strong> and <strong className="font-bold italic text-bone">Environmental &amp; Green Energy</strong> to <strong className="font-bold italic text-bone">Global Commodities Trade</strong>, <strong className="font-bold italic text-bone">IT Product Development</strong>, and <strong className="font-bold italic text-bone">Defense &amp; Military Technology</strong>, our ecosystem combines strategic capital, cutting-edge technology, and operational excellence to deliver high-impact solutions worldwide.
+          <p data-testid="subsidiaries-desc" className="lg:col-span-7 text-ash text-base md:text-xl leading-[1.7] text-left md:text-justify">
+            Sunjaya Asia Group powers a diversified network of specialized operating units and strategic affiliates engineered to lead key global markets. From <strong className="font-bold italic text-bone">Capital &amp; Wealth Management</strong> and <strong className="font-bold italic text-bone">Environmental &amp; Green Energy</strong> to <strong className="font-bold italic text-bone">Global Commodities Trade</strong>, <strong className="font-bold italic text-bone">IT Product Development</strong>, and <strong className="font-bold italic text-bone">Defense &amp; Military Technology</strong>, our ecosystem combines strategic capital, cutting-edge technology, and operational excellence to deliver high-impact solutions worldwide.
           </p>
         </div>
       </div>
@@ -126,10 +126,14 @@ export default function Subsidiaries() {
       <div className="section-light pb-24">
         <div className="max-w-[1600px] mx-auto px-6 md:px-10 pt-16 md:pt-20">
 
-        {/* Subsidiary + affiliate cards in one grid — auto-sorted: Branch first, affiliates continue numbering */}
-        <div data-testid="subsidiary-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {orderCards(subsidiaryCards).map((s, i) => <CompanyCard key={s.id} s={s} num={i + 1} priority={i < 2} showRole />)}
-          {orderCards(affiliateCards).map((s, i) => <CompanyCard key={s.id} s={s} num={AFF_START + i} />)}
+        {/* Subsidiary mosaic — auto-sorted: Branch first */}
+        <div data-testid="subsidiary-grid" className="grid grid-cols-1 md:grid-cols-6 gap-4 md:gap-5">
+          {orderCards(subsidiaryCards).map((s, i) => <CompanyCard key={s.id} s={s} num={i + 1} slot={i} priority={i < 2} showRole />)}
+        </div>
+
+        {/* Affiliate mosaic — numbering continues */}
+        <div data-testid="affiliate-grid" className="grid grid-cols-1 md:grid-cols-6 gap-4 md:gap-5 mt-4 md:mt-5">
+          {orderCards(affiliateCards).map((s, i) => <CompanyCard key={s.id} s={s} num={AFF_START + i} slot={i} />)}
         </div>
 
         <Reveal>

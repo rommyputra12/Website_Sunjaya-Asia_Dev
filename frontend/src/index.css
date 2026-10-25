@@ -445,8 +445,10 @@ input, textarea, select {
 }
 
 
-/* Subsidiaries · glass company cards */
-.sub-card { background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(12, 25, 34, 0.08); box-shadow: 0 1px 2px rgba(12, 25, 34, 0.05); }
-.sub-card:hover { border-color: rgba(200, 98, 48, 0.45); box-shadow: 0 0 0 1px rgba(200, 98, 48, 0.15), 0 22px 44px -20px rgba(12, 25, 34, 0.3); }
-.sub-divider { border-color: rgba(12, 25, 34, 0.10); }
+/* Subsidiaries · floating-glass mosaic cards */
+.sub-card { box-shadow: 0 1px 2px rgba(12, 25, 34, 0.08); transition: transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s ease; }
+.sub-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 1px solid rgba(255, 255, 255, 0.08); pointer-events: none; transition: border-color .5s ease, box-shadow .5s ease; z-index: 20; }
+.sub-card:hover { transform: translateY(-4px); box-shadow: 0 26px 50px -24px rgba(12, 25, 34, 0.55), 0 0 30px -8px rgba(200, 98, 48, 0.45); }
+.sub-card:hover::after { border-color: rgba(224, 123, 72, 0.7); box-shadow: inset 0 0 0 1px rgba(224, 123, 72, 0.25); }
+.sub-info { background: rgba(5, 30, 43, 0.38); backdrop-filter: blur(12px) saturate(130%); -webkit-backdrop-filter: blur(12px) saturate(130%); border: 1px solid rgba(255, 255, 255, 0.12); }
 .sub-chip { background: rgba(5, 30, 43, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.18); }
