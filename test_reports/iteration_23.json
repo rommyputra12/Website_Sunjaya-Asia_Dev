@@ -1,0 +1,20 @@
+{
+  "summary": "Frontend-only read-only test of the redesigned /subsidiaries header and glass card grid at 1920, 768 and 390px. Every requested item passed. Header: copper overline 'Subsidiaries & Affiliates' with a fading line; the title (subsidiaries-title) has a 2px copper left bar rgb(200,98,48); the diamond+line divider is there; the paragraph text is unchanged and its 5 sector names are bold italic. Grid: 9 cards (7 subsidiaries/branches + 2 affiliates), numbered 01-09 without gaps. Columns are 3 at 1920, 2 at 768 and 1 at 390. Each card has a 3:2 photo with a tag chip (coloured dot) and a number chip, then city dot, name, country · role (subsidiaries only) and sector + arrow. City dot colours are inline as before (Delaware/Dubai green, Indonesia orange, Beijing amber). sac/sae images use eager loading with high fetch priority and loaded ~3.1s after navigation start, measured including page load. All 9 images load the @1280.webp variant with naturalWidth 960, and no card is blank after scrolling through them. Hover lifts the card by 4px, the border turns copper (0.45 alpha) and the copper line scales in. No horizontal overflow at 390 (scrollWidth == clientWidth); at 768 scrollWidth also equals clientWidth. subsidiaries-list, affiliates-list, parent-company-block and #global-presence all render.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Subsidiaries cards", "issues": ["Minor: AssetImg applies an inline transform scale(zoom) when CMS zoom != 1, which overrides the group-hover:scale-105 class, so the photo zoom-on-hover won't work for those images. Not visible with the current assets.", "Minor: at 768px long tag chips wrap onto 2 lines (e.g. 'BRANCH & COMMODITY DISTRIBUTION HUB') - acceptable"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": ["sizes='(max-width: 768px) 100vw, 50vw' is larger than the real 3-column width (~33vw). This is why @1280 is chosen on desktop, which is what's required, so it is fine as is."],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "/subsidiaries has 9 cards: sac, sae, sti, agi, ecs, sm, tsn, san, kgi. The cookie banner appears after a delay of about 1-2s; wait and click Accept All. Images are @1280.webp variants."
+}
