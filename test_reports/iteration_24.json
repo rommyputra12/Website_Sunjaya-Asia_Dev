@@ -1,0 +1,36 @@
+{
+  "summary": "Tested country flags on /subsidiaries, CMS add/edit/tier-change/delete company flow, and locked-asset DELETE protection. Core flow works end-to-end. Fixed 2 small bugs during testing: (1) UAE flag fell back to globe icon because country text is 'United Arab Emirates (UAE)'; (2) CMS slot labels/order were wrong for new companies (TIER_RANK '?? 1' made subsidiaries rank equal to affiliates, giving 'Subsidiaries 10' and placing new cards after affiliates). Found 1 open bug: card text fields lose data when edited in quick succession (stale meta closure).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Admin SubCardTextForm (Images > Subsidiaries)", "issue": "Data loss race: each field's onBlur saves {...asset.meta, [field]} using the meta snapshot from the last render. If the user edits several fields before refresh() comes back, later saves overwrite earlier ones. Reproduced: filled name/city/country/tag/sector ~1.5s apart; 'tag' was missing from DB meta afterwards.", "selector": "[data-testid^=subcard-input-]", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/subsidiaries country lists", "issues": ["Flags with white halves (Indonesia, Singapore) blend into the cream background and look like half circles. Add a thin ring/border (e.g. ring-1 ring-black/10) to span.country-flag", "Card subline shows a dangling 'SINGAPORE ·' when role is empty (Subsidiaries.jsx line ~171 always adds ' · ' when the city contains a comma)"]},
+      {"screen": "/subsidiaries mosaic", "issues": ["With 8 subsidiaries the last row has an empty gap (accepted per request)"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_company_cms.py", "/app/test_reports/pytest/pytest_company_cms.xml"],
+  "action_items": [
+    "Fix the SubCardTextForm stale-meta race: keep a useRef holding the latest meta, update it right away on every save, and send PUTs based on that ref (or merge meta on the server side).",
+    "Optional: add a ring around the round flags so white parts stay visible on the light background.",
+    "Optional: only add the ' · ' separator when both country and role exist.",
+    "Minor: Home.jsx sorts subCards twice. The second sort (by sort_order) overrides the affiliate-last sort, so affiliate-last only holds by accident of sort_order values."
+  ],
+  "critical_code_review_comments": [
+    "Admin.jsx is 1142 lines. Split it into modules, e.g. the Images tab and the user management code.",
+    "buildCompanies prefers static def.name/tag/role/sector over CMS meta for the 9 seeded companies. Public text uses t('subsidiary.id.*') overrides, so it works, but the data flow is confusing.",
+    "Real company cards are now deletable (in_use false). This is intended, and a confirm dialog is shown."
+  ],
+  "updated_files": [
+    "/app/frontend/src/components/CountryFlag.jsx (countryCode now strips parenthetical text and tries the inner text, so 'United Arab Emirates (UAE)' gives 'ae')",
+    "/app/frontend/src/pages/Admin.jsx (TIER_RANK fallback changed from ?? 1 to ?? 0 in slotLabel and the group sort)",
+    "/app/backend/tests/test_company_cms.py"
+  ],
+  "success_rate": {"backend": "100% (5/5)", "frontend": "90% (all flows pass after fixes; 1 open data-loss bug)"},
+  "seed_data_creation": "Created test company co_mvo8921y plus one pytest asset co_qa*. Both were deleted. Verified home_subsidiaries again holds exactly sac, sae, sti, agi, ecs, sm, tsn, san, kgi.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Verified: flags flag-us, flag-ae (after fix), flag-id, flag-cn, flag-sg; add-company upload creates a co_* card with Jenis defaulting to subsidiary and label 'Subsidiaries 8' (after fix); public card and summary item appear; clicking the summary item scrolls to the card; Jenis=Affiliate moves the card to affiliate-grid / affiliates-list ('Affiliate 3'); Home shows 6 cards; Del with confirm removes the card in CMS and on the public page; DELETE of cover/logo returns 409. Retest the meta race fix by filling several fields quickly and then checking /api/assets meta."
+}

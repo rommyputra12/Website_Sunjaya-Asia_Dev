@@ -18,12 +18,16 @@ const NAME_TO_CODE = (() => {
   return map;
 })();
 
-export const countryCode = (name) => NAME_TO_CODE[(name || "").trim().toLowerCase()];
+export const countryCode = (name) => {
+  const n = (name || "").trim().toLowerCase();
+  const inner = (n.match(/\(([^)]+)\)/) || [])[1];
+  return NAME_TO_CODE[n] || NAME_TO_CODE[n.replace(/\s*\([^)]*\)\s*/g, " ").trim()] || (inner && NAME_TO_CODE[inner.trim()]);
+};
 
 export const CountryFlag = ({ country, size = 22 }) => {
   const code = countryCode(country);
   return (
-    <span data-testid={`flag-${code || "unknown"}`} className="country-flag relative inline-grid place-items-center shrink-0 overflow-hidden rounded-full" style={{ width: size, height: size }}>
+    <span data-testid={`flag-${code || "unknown"}`} className="country-flag relative inline-grid place-items-center shrink-0 overflow-hidden rounded-full ring-1 ring-black/15 shadow-[0_1px_3px_rgba(12,25,34,0.18)]" style={{ width: size, height: size }}>
       {code
         ? <img src={`https://flagcdn.com/w80/${code}.png`} alt={`${country} flag`} loading="lazy" className="w-full h-full object-cover" />
         : <Globe2 size={size * 0.6} strokeWidth={1.6} className="text-copper" />}

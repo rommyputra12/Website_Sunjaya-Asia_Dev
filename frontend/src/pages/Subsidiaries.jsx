@@ -168,7 +168,7 @@ export default function Subsidiaries() {
                     <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{t(`subsidiary.${s.id}.city`, s.city)}</div>
                     <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
                     <div className="mt-1.5 font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-bone/75">
-                      {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
+                      {[t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || ""), t(`subsidiary.${s.id}.role`, s.role || "")].filter(Boolean).join(" · ")}
                     </div>
                     <div className="mt-3 pt-3 border-t border-white/25 flex items-center justify-between gap-3">
                       <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>

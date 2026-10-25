@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
 import { LocationsPanel } from "../components/admin/LocationsPanel";
@@ -496,7 +496,7 @@ const TIER_RANK = { affiliate: 1 }; // branches & subsidiaries share one numbere
 const tierOf = (a) => a.meta?.tier || SUBSIDIARIES.find((x) => x.id === a.key)?.tier || "subsidiary";
 const slotLabel = (asset, groupAssets) => {
   const ordered = [...groupAssets].sort((a, b) =>
-    (TIER_RANK[tierOf(a)] ?? 1) - (TIER_RANK[tierOf(b)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100));
+    (TIER_RANK[tierOf(a)] ?? 0) - (TIER_RANK[tierOf(b)] ?? 0) || (a.sort_order ?? 100) - (b.sort_order ?? 100));
   const pos = ordered.findIndex((a) => a.id === asset.id);
   if (pos < 0) return asset.key;
   return tierOf(asset) === "affiliate"
@@ -543,14 +543,20 @@ const CARD_TEXT_FIELDS = [
 
 const SubCardTextForm = ({ asset, inputCls, onSave }) => {
   const [showId, setShowId] = useState(() => Object.values(asset.meta || {}).some((v) => v?.id));
+  const metaRef = useRef(asset.meta || {});
+  useEffect(() => { metaRef.current = asset.meta || {}; }, [asset.meta]);
   const meta = asset.meta || {};
   const def = SUBSIDIARIES.find((x) => x.id === asset.key) || {};
   const cityParts = (def.city || "").split(",");
   const defaults = { tag: def.tag, city: (cityParts[0] || "").trim(), country: (cityParts[1] || "").trim(), role: def.role, name: def.name, sector: def.sector };
+  // Merge into the latest meta (not the render snapshot) so quick successive edits never overwrite each other
+  const commit = (next, extra) => { metaRef.current = next; onSave(next, extra); };
   const saveField = (f, lang, value) => {
-    const next = { ...meta, [f]: { ...meta[f], [lang]: value } };
+    const cur = metaRef.current;
+    if ((cur[f]?.[lang] || "") === value) return;
+    const next = { ...cur, [f]: { ...cur[f], [lang]: value } };
     if (!next[f].en && !next[f].id) delete next[f];
-    onSave(next, f === "name" ? { alt: value || defaults.name || asset.key } : undefined);
+    commit(next, f === "name" ? { alt: value || defaults.name || asset.key } : undefined);
   };
   return (
     <div data-testid={`subcard-form-${asset.key}`} className="border-t border-white/10 mt-1 pt-2 space-y-2">
@@ -563,7 +569,7 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
       </div>
       <div>
         <label className="block font-mono text-[8px] tracking-[0.2em] uppercase text-ash/70 mb-1">Jenis</label>
-        <select value={tierOf(asset)} onChange={(e) => onSave({ ...meta, tier: e.target.value })} data-testid={`subcard-tier-${asset.key}`} className={inputCls}>
+        <select value={tierOf(asset)} onChange={(e) => commit({ ...metaRef.current, tier: e.target.value })} data-testid={`subcard-tier-${asset.key}`} className={inputCls}>
           {TIER_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
       </div>
@@ -747,7 +753,7 @@ const ImagesPanel = ({ client }) => {
   });
   Object.entries(groups).forEach(([sec, arr]) => arr.sort((a, b) =>
     sec === "home_subsidiaries"
-      ? (TIER_RANK[tierOf(a)] ?? 1) - (TIER_RANK[tierOf(b)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
+      ? (TIER_RANK[tierOf(a)] ?? 0) - (TIER_RANK[tierOf(b)] ?? 0) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
       : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
   if (!groups.home_subsidiaries_bg) groups.home_subsidiaries_bg = []; // optional background slot
