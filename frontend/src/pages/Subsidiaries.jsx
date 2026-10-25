@@ -50,6 +50,16 @@ const SumHeading = ({ title, count }) => (
   </div>
 );
 
+const focusCard = (id) => {
+  const el = document.querySelector(`[data-testid="sub-card-${id}"]`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.remove("card-flash");
+  void el.offsetWidth;
+  el.classList.add("card-flash");
+  setTimeout(() => el.classList.remove("card-flash"), 2600);
+};
+
 const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => {
   const { t } = useLang();
   const total = groups.reduce((n, g) => n + g.companies.length, 0);
@@ -68,7 +78,8 @@ const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => 
             </div>
             <ul className="space-y-4">
               {group.companies.map((s) => (
-                <li key={s.id} data-testid={`summary-item-${s.id}`} className="group/co flex items-start gap-3 cursor-default">
+                <li key={s.id}>
+                <button type="button" data-testid={`summary-item-${s.id}`} onClick={() => focusCard(s.id)} title="Lihat kartu perusahaan" className="group/co flex items-start gap-3 text-left cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-copper rounded-sm">
                   <span className="relative mt-[9px] flex w-2 h-2 shrink-0">
                     <span className="absolute inset-0 rounded-full opacity-0 scale-100 transition-[opacity,transform] duration-500 group-hover/co:opacity-40 group-hover/co:scale-[2.2]" style={{ background: colorForCity(s.city) }} />
                     <span className="relative w-2 h-2 rounded-full" style={{ background: colorForCity(s.city) }} />
@@ -80,6 +91,7 @@ const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => 
                     </div>
                     <div className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-ash mt-1.5">{placeOf(s)}</div>
                   </div>
+                </button>
                 </li>
               ))}
             </ul>

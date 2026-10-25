@@ -446,6 +446,10 @@ input, textarea, select {
 
 
 /* Subsidiaries · summary lists */
+.card-flash { animation: card-flash 2.4s ease-out; z-index: 5; }
+.card-flash::before { content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; border: 2px solid #E07B48; animation: card-flash-ring 2.4s ease-out forwards; }
+@keyframes card-flash { 0%, 60% { box-shadow: 0 0 0 0 rgba(224,123,72,0.0), 0 0 46px 4px rgba(224,123,72,0.55); } 100% { box-shadow: none; } }
+@keyframes card-flash-ring { 0%, 65% { opacity: 1; } 100% { opacity: 0; } }
 .sum-line { border-color: rgba(12, 25, 34, 0.12); }
 .sum-chip { background: rgba(12, 25, 34, 0.05); border: 1px solid rgba(12, 25, 34, 0.12); }
 
