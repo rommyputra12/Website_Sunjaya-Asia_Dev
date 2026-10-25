@@ -42,9 +42,9 @@ export default function Pillars() {
   return (
     <div data-testid="pillars-page" className="pt-28 md:pt-32 pb-24">
       <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        <header className="mb-16 md:mb-24 max-w-4xl">
+        <header className="mb-16 md:mb-24">
           <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("manifesto.overline")}</span>
-          <h1 data-testid="pillars-intro" className="font-serif text-lg md:text-2xl leading-[1.45] tracking-[-0.01em] text-bone/90 mt-4">
+          <h1 data-testid="pillars-intro" className="font-serif text-lg md:text-2xl leading-[1.5] tracking-[-0.01em] text-bone/90 mt-4 w-full text-justify hyphens-auto">
             <Fmt text={t("manifesto.title")} />
           </h1>
         </header>
@@ -58,7 +58,7 @@ export default function Pillars() {
                 <h2 data-testid={`pillar-title-${p.num}`} className="font-serif text-3xl md:text-5xl text-bone tracking-tight leading-[1.05]">{t(`pillar.${p.num}.title`, p.title)}</h2>
               </div>
             </div>
-            <p data-testid={`pillar-body-${p.num}`} className="mt-6 md:mt-8 max-w-3xl text-bone/80 text-sm md:text-base leading-[1.8]">
+            <p data-testid={`pillar-body-${p.num}`} className="mt-6 md:mt-8 w-full text-justify hyphens-auto text-bone/80 text-sm md:text-base leading-[1.8]">
               <Fmt text={t(`pillar.${p.num}.body`, p.body)} />
             </p>
 
