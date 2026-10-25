@@ -16,6 +16,21 @@ const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 const CITY_COLOR = Object.fromEntries(DEFAULT_LOCATIONS.map((l) => [l.city, l.color]));
 const colorForCity = (cityField) => CITY_COLOR[cityField.split(",")[0].trim()] || "#C86230";
 
+// Mosaic rows on a 6-col grid: alternate 2-up (wide) and 3-up (tall) rows, never leaving a lone card
+const ROW_CELL = { 1: ["md:col-span-6", "aspect-[3/2] md:aspect-[21/9]"], 2: ["md:col-span-3", "aspect-[3/2]"], 3: ["md:col-span-2", "aspect-[4/5]"] };
+const mosaicLayout = (n) => {
+  const cells = [];
+  let rem = n, next = 2;
+  while (rem > 0) {
+    let size = rem <= 3 ? rem : next;
+    if (rem - size === 1) size = 5 - size;
+    for (let k = 0; k < size; k++) cells.push(ROW_CELL[size]);
+    rem -= size;
+    next = next === 2 ? 3 : 2;
+  }
+  return cells;
+};
+
 const extractCountry = (city) => {
   const parts = city.split(",");
   return parts[parts.length - 1].trim();
@@ -100,6 +115,8 @@ export default function Subsidiaries() {
   const companies = sortByTier(useCompanies());
   const subsidiaryCards = companies.filter((s) => s.tier !== "affiliate");
   const affiliateCards = companies.filter((s) => s.tier === "affiliate");
+  const subLayout = mosaicLayout(subsidiaryCards.length);
+  const affLayout = mosaicLayout(affiliateCards.length);
   const AFF_START = subsidiaryCards.length + 1; // affiliates continue numbering after all branches
   const cmsOrder = (s) => byKey[s.image]?.sort_order ?? 100;
   const orderCards = (arr) => [...arr].sort((a, b) => cmsOrder(a) - cmsOrder(b));
@@ -140,11 +157,10 @@ export default function Subsidiaries() {
         {/* Subsidiary photo boxes — auto-sorted: Branch first, then other subsidiaries */}
         <div data-testid="subsidiary-grid" className="grid grid-cols-1 md:grid-cols-6 gap-px bg-white/10 border border-white/10">
           {orderCards(subsidiaryCards).map((s, i) => {
-            const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3", "md:col-span-4", "md:col-span-2"];
-            const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[3/2]", "aspect-[3/2]", "aspect-[16/9]", "aspect-[4/5]"];
+            const [span, height] = subLayout[i];
             return (
-              <div key={s.id} className={spans[i % spans.length]}>
-                <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
+              <div key={s.id} className={span}>
+                <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${height} h-full`}>
                   <AssetImg
                     k={s.image}
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -188,11 +204,10 @@ export default function Subsidiaries() {
         {/* Affiliate photo boxes — auto-sorted: Sunjaya-named affiliates first */}
         <div data-testid="affiliate-grid" className="grid grid-cols-1 md:grid-cols-6 gap-px bg-white/10 border border-white/10 mt-px">
           {orderCards(affiliateCards).map((s, i) => {
-            const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2"];
-            const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]"];
+            const [span, height] = affLayout[i];
             return (
-              <div key={s.id} className={spans[i % spans.length]}>
-                <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
+              <div key={s.id} className={span}>
+                <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${height} h-full`}>
                   <AssetImg
                     k={s.image}
                     sizes="(max-width: 768px) 100vw, 33vw"
