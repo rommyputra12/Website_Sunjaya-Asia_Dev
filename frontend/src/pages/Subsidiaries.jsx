@@ -42,6 +42,52 @@ const groupByCountry = (items, countryOf = (s) => extractCountry(s.city)) => {
 };
 
 
+const CompanyCard = ({ s, num, priority = false, showRole = false }) => {
+  const { t } = useLang();
+  const color = colorForCity(s.city);
+  return (
+    <article data-testid={`sub-card-${s.id}`} className="sub-card group relative flex flex-col overflow-hidden rounded-[12px] transition-[transform,box-shadow,border-color] duration-500 hover:-translate-y-1">
+      <div className="on-photo relative aspect-[3/2] overflow-hidden bg-obsidian">
+        <AssetImg
+          k={s.image}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          alt={t(`subsidiary.${s.id}.name`, s.name)}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-obsidian/70 to-transparent" />
+        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between text-photo-shadow">
+          <span className="sub-chip flex items-center gap-2 rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+            <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
+          </span>
+          <span className="sub-chip rounded-full px-2.5 py-1 font-mono text-[10px] tracking-[0.22em]">{String(num).padStart(2, "0")}</span>
+        </div>
+      </div>
+      <span aria-hidden="true" className="h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-copper to-copper/30 transition-transform duration-500 group-hover:scale-x-100" />
+      <div className="flex flex-1 flex-col px-6 pt-5 pb-5">
+        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] uppercase text-ash">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+          {t(`subsidiary.${s.id}.city`, s.city)}
+        </div>
+        <h3 className="mt-2 font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase text-bone">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
+        {showRole && (
+          <div className="mt-1.5 font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-ash">
+            {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
+          </div>
+        )}
+        <div className="mt-auto pt-4">
+          <div className="pt-3 border-t sub-divider flex items-center justify-between gap-3">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-bone/80">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
+            <span className="text-copper transition-transform duration-500 group-hover:translate-x-1" aria-hidden="true">→</span>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+};
+
 export default function Subsidiaries() {
   const { t } = useLang();
   const { byKey } = useAssets();
@@ -57,119 +103,33 @@ export default function Subsidiaries() {
   return (
     <div data-testid="subsidiaries-page">
       {/* Dark Azure intro — heading + paragraph only */}
-      <div className="bg-azure pt-32 pb-16">
+      <div data-testid="subsidiaries-intro" className="bg-azure pt-32 pb-16 md:pb-20">
         <div className="max-w-[1600px] mx-auto px-6 md:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-6 items-start">
-            <div className="md:col-span-5">
-              <span className="font-mono text-base md:text-lg tracking-[0.28em] uppercase text-copper">Subsidiaries & Affiliates</span>
-              <h1 className="font-serif text-xl md:text-3xl leading-[1.18] tracking-[-0.02em] text-bone mt-8">
-                An Integrated Ecosystem
-                <br />
-                <span className="font-italic-accent text-copper">of Industry Pioneers</span>
-              </h1>
-            </div>
-            <div className="md:col-span-7 md:col-start-6 self-start md:pt-[3.75rem]">
-              <p className="text-ash text-base md:text-lg leading-[1.75] w-full text-justify">
-                Sunjaya Asia Group powers a diversified network of specialized operating units and strategic affiliates engineered to lead key global markets. From <strong className="font-bold italic text-bone">Capital &amp; Wealth Management</strong> and <strong className="font-bold italic text-bone">Environmental &amp; Green Energy</strong> to <strong className="font-bold italic text-bone">Global Commodities Trade</strong>, <strong className="font-bold italic text-bone">IT Product Development</strong>, and <strong className="font-bold italic text-bone">Defense &amp; Military Technology</strong>, our ecosystem combines strategic capital, cutting-edge technology, and operational excellence to deliver high-impact solutions worldwide.
-              </p>
-            </div>
+          <div className="flex items-center gap-4 md:gap-5">
+            <span className="font-mono text-sm md:text-lg font-bold tracking-[0.2em] md:tracking-[0.28em] uppercase text-copper md:whitespace-nowrap">Subsidiaries & Affiliates</span>
+            <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-copper/70 to-transparent" />
           </div>
+          <h1 data-testid="subsidiaries-title" className="mt-7 pl-5 border-l-2 border-copper font-serif text-xl md:text-3xl leading-[1.25] tracking-[-0.02em] text-bone">
+            An Integrated Ecosystem <span className="text-copper">of Industry Pioneers</span>
+          </h1>
+          <div aria-hidden="true" className="mt-8 flex items-center gap-3">
+            <span className="w-2 h-2 rotate-45 border border-copper" />
+            <span className="h-[2px] flex-1 rounded-full bg-gradient-to-r from-copper via-copper/40 to-transparent" />
+          </div>
+          <p data-testid="subsidiaries-desc" className="mt-8 text-ash text-base md:text-lg leading-[1.8] w-full text-left md:text-justify">
+                Sunjaya Asia Group powers a diversified network of specialized operating units and strategic affiliates engineered to lead key global markets. From <strong className="font-bold italic text-bone">Capital &amp; Wealth Management</strong> and <strong className="font-bold italic text-bone">Environmental &amp; Green Energy</strong> to <strong className="font-bold italic text-bone">Global Commodities Trade</strong>, <strong className="font-bold italic text-bone">IT Product Development</strong>, and <strong className="font-bold italic text-bone">Defense &amp; Military Technology</strong>, our ecosystem combines strategic capital, cutting-edge technology, and operational excellence to deliver high-impact solutions worldwide.
+          </p>
         </div>
       </div>
 
       {/* Light section — cards + summary + global presence */}
       <div className="section-light pb-24">
-        <div className="max-w-[1600px] mx-auto px-6 md:px-10 pt-20">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-10 pt-16 md:pt-20">
 
-        {/* Subsidiary photo boxes — auto-sorted: Branch first, then other subsidiaries */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-px bg-white/10 border border-white/10">
-          {orderCards(subsidiaryCards).map((s, i) => {
-            const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3", "md:col-span-4", "md:col-span-2"];
-            const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[3/2]", "aspect-[3/2]", "aspect-[16/9]", "aspect-[4/5]"];
-            return (
-              <div key={s.id} className={spans[i % spans.length]}>
-                <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
-                  <AssetImg
-                    k={s.image}
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    loading={i < 2 ? "eager" : "lazy"}
-                    fetchPriority={i < 2 ? "high" : "auto"}
-                    alt={t(`subsidiary.${s.id}.name`, s.name)}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-obsidian/90 via-obsidian/40 to-transparent" />
-                  <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-obsidian/70 to-transparent" />
-
-                  <div className="absolute top-5 left-5 right-5 z-10 flex items-center justify-between text-photo-shadow">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorForCity(s.city) }} />
-                      <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
-                    </div>
-                    <span className="font-mono text-[10px] tracking-[0.22em]">{String(s.tier === "affiliate" ? AFF_START + i : i + 1).padStart(2, "0")}</span>
-                  </div>
-
-                  <div className="absolute bottom-5 left-6 right-6 z-10 text-photo-shadow">
-                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{t(`subsidiary.${s.id}.city`, s.city)}</div>
-                    <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
-                    <div className="mt-1.5 font-mono text-[9px] md:text-[10px] tracking-[0.18em] uppercase text-bone/75">
-                      {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-white/25 flex items-center justify-between gap-3">
-                      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
-                      <span
-                        className="text-copper group-hover:translate-x-1 transition-transform duration-500"
-                        style={{ textShadow: "0 1px 4px rgba(5,30,43,0.9)" }}
-                        aria-hidden="true"
-                      >→</span>
-                    </div>
-                  </div>
-                </article>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Affiliate photo boxes — auto-sorted: Sunjaya-named affiliates first */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-px bg-white/10 border border-white/10 mt-px">
-          {orderCards(affiliateCards).map((s, i) => {
-            const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2"];
-            const heights = ["aspect-[3/2]", "aspect-[3/2]", "aspect-[4/5]", "aspect-[4/5]", "aspect-[4/5]"];
-            return (
-              <div key={s.id} className={spans[i % spans.length]}>
-                <article data-testid={`sub-card-${s.id}`} className={`on-photo group relative bg-obsidian overflow-hidden ${heights[i % heights.length]} h-full`}>
-                  <AssetImg
-                    k={s.image}
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    alt={t(`subsidiary.${s.id}.name`, s.name)}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-obsidian/90 via-obsidian/40 to-transparent" />
-                  <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-obsidian/70 to-transparent" />
-
-                  <div className="absolute top-5 left-5 right-5 z-10 flex items-center justify-between text-photo-shadow">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: colorForCity(s.city) }} />
-                      <span className="font-mono text-[10px] tracking-[0.22em] uppercase">{t(`subsidiary.${s.id}.tag`, s.tag)}</span>
-                    </div>
-                    <span className="font-mono text-[10px] tracking-[0.22em]">{String(s.tier === "affiliate" ? AFF_START + i : i + 1).padStart(2, "0")}</span>
-                  </div>
-
-                  <div className="absolute bottom-5 left-6 right-6 z-10 text-photo-shadow">
-                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-1" style={{ color: colorForCity(s.city) }}>{t(`subsidiary.${s.id}.city`, s.city)}</div>
-                    <h3 className="font-mono text-sm md:text-base lg:text-lg tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
-                    <div className="mt-3 pt-3 border-t border-white/25 flex items-center justify-between gap-3">
-                      <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{t(`subsidiary.${s.id}.sector`, s.sector)}</span>
-                      <span
-                        className="text-copper group-hover:translate-x-1 transition-transform duration-500"
-                        style={{ textShadow: "0 1px 4px rgba(5,30,43,0.9)" }}
-                        aria-hidden="true"
-                      >→</span>
-                    </div>
-                  </div>
-                </article>
-              </div>
-            );
-          })}
+        {/* Subsidiary + affiliate cards in one grid — auto-sorted: Branch first, affiliates continue numbering */}
+        <div data-testid="subsidiary-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {orderCards(subsidiaryCards).map((s, i) => <CompanyCard key={s.id} s={s} num={i + 1} priority={i < 2} showRole />)}
+          {orderCards(affiliateCards).map((s, i) => <CompanyCard key={s.id} s={s} num={AFF_START + i} />)}
         </div>
 
         <Reveal>
