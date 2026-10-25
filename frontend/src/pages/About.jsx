@@ -22,7 +22,7 @@ const EdgeCard = ({ ci, col }) => {
         {col.items.map((it, i) => (
           <li key={i} data-testid={`edge-item-${ci}-${i}`} className="group/item flex gap-2.5 items-start">
             <ChevronRight aria-hidden="true" size={16} strokeWidth={2.4} className="mt-[3px] flex-shrink-0 text-copper transition-transform duration-300 group-hover/item:translate-x-0.5" />
-            <span className="text-bone text-sm leading-[1.6]">{it.text}</span>
+            <span className="text-bone text-sm leading-[1.6] transition-colors duration-300 group-hover/item:text-copper">{it.text}</span>
           </li>
         ))}
       </ul>
