@@ -152,7 +152,7 @@ export default function Home() {
             className="mt-8 md:mt-10 flex flex-wrap gap-3"
           >
             <Link
-              to="/pillars#pillar-01"
+              to="/about#company-history"
               data-testid="hero-cta-primary"
               className="group relative inline-flex items-center gap-2 px-5 h-10 md:px-7 md:h-12 rounded-full bg-gradient-to-br from-copper-hi to-copper text-obsidian font-mono text-[10px] md:text-xs tracking-[0.18em] uppercase font-bold shadow-[0_8px_30px_-6px_rgba(184,127,61,0.6)] hover:shadow-[0_12px_40px_-6px_rgba(184,127,61,0.8)] hover:-translate-y-0.5 transition-all duration-500 ease-out overflow-hidden"
             >

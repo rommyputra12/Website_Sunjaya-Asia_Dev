@@ -410,3 +410,9 @@ input, textarea, select {
 .group:hover .logo-mono-proc, .group:focus-within .logo-mono-proc { opacity: 0; }
 .logo-tile { background-color: #0c2635; transition: background-color .35s ease, border-color .35s ease, box-shadow .35s ease; }
 .group:hover .logo-tile, .group:focus-within .logo-tile { background-color: #F9F5EB; border-color: rgba(196,132,82,.6); box-shadow: 0 8px 24px -10px rgba(249,245,235,.35); }
+
+/* About Company History: whole section (kicker + 16:9 image + caption) fits one desktop screen */
+.history-fit { max-width: 1600px; }
+@media (min-width: 768px) {
+  .history-fit { width: min(calc(100% - 5rem), 1600px, max(560px, calc((100svh - 330px) * 16 / 9))); }
+}
