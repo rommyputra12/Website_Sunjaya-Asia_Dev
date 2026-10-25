@@ -70,12 +70,12 @@ export default function Pillars() {
               <AssetImg k={`pillarsPage${p.num}`} sizes="(max-width: 1400px) 100vw, 1400px" alt={t(`pillar.${p.num}.title`, p.title)} className="absolute inset-0 h-full w-full object-cover" />
             </div>
 
-            <div className="mt-10 md:mt-14 grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10">
-              {divisionsFor(p.num).map((d, i, arr) => (
-                <article key={`${p.num}-${i}`} data-testid={`pillar-division-${p.num}-${i}`} className={`bg-obsidian p-6 md:p-8 transition-colors ${arr.length % 2 && i === arr.length - 1 ? "md:col-span-2" : ""} duration-300 hover:bg-ink`}>
-                  <span className="font-mono text-[11px] tracking-[0.22em] text-copper">{p.num}.{i + 1}</span>
-                  <h3 className="mt-2 font-serif text-lg md:text-xl text-bone tracking-tight leading-snug">{d.name}</h3>
-                  <p className="mt-3 text-bone/70 text-sm leading-[1.75]"><Fmt text={d.desc} /></p>
+            <div data-testid={`pillar-divisions-${p.num}`} className="mt-10 md:mt-14 border-t border-white/10">
+              {divisionsFor(p.num).map((d, i) => (
+                <article key={`${p.num}-${i}`} data-testid={`pillar-division-${p.num}-${i}`} className="grid grid-cols-[3.5rem_1fr] md:grid-cols-[6rem_minmax(0,4fr)_minmax(0,7fr)] gap-x-4 md:gap-x-10 gap-y-2 py-6 md:py-8 border-b border-white/10 transition-colors duration-300 hover:bg-white/[0.03]">
+                  <span className="font-mono text-xs md:text-sm tracking-[0.18em] text-copper pt-1">{p.num}.{i + 1}</span>
+                  <h3 className="font-serif text-lg md:text-xl text-bone tracking-tight leading-snug">{d.name}</h3>
+                  <p className="col-start-2 md:col-start-3 md:row-start-1 text-bone/70 text-sm leading-[1.75] text-left md:text-justify hyphens-auto"><Fmt text={d.desc} /></p>
                 </article>
               ))}
             </div>

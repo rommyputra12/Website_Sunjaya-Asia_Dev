@@ -283,3 +283,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - 2026-06: CMS Images grouped per page (Brand/Home/Pillars/Subsidiaries/About/Footer/Lainnya) -> collapsible sections (all closed), search box; Pillars banner split into own section pillars_page_banner. Tested iteration_22 (100%).
 - 2026-06: Home hero "Discover Our Journey" -> /about#company-history. About Company History section sized (.history-fit in index.css) so kicker + full 16:9 image + caption fit one desktop screen. Screenshot-verified 1920x800.
 - 2026-06: /pillars spacing tightened (header mt-8/10, mb-10/14; pillar sections mb-16/24) + copper fading line under intro paragraph.
+- 2026-06: /pillars sub-activities (01.1…) now vertical rows: number | title | justified desc (desktop 3 cols; mobile number + stacked, left-aligned).
