@@ -1,0 +1,30 @@
+{
+  "summary": "Frontend-only retest of the CMS company card fixes from iteration_24. The HIGH data-loss bug is FIXED at the requested pace: I added a test company, then filled name/city/country/tag/role(empty)/sector 0.5-1.5s apart with a blur after each. GET /api/assets showed every field kept in meta. Switching the tier (affiliate, then back to subsidiary) also kept all texts. The public /subsidiaries fixes also pass: span.country-flag has ring-1 ring-black/15 (flag-us, flag-ae, flag-id, flag-cn), and the test card subline shows 'INDONESIA' with no dangling ' · ' when role is empty. Cleanup is done: both test companies (co_mvo8exjg, co_mvo8gv1l) were deleted through asset-delete-{key}. home_subsidiaries holds exactly the 9 real companies again. A stress run (~150ms between edits plus a tier change right after) found 2 remaining issues: saves are not serialized, and alt is sent from a stale value.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Admin SubCardTextForm / ImagesPanel.saveMeta", "issue": "alt gets reset. Saving name sends alt=<name>. The next field saved before refresh() returns sends alt: a.alt from the render closure, which is the old 'NEW COMPANY' value. Reproduced: name, city, country, ... ~150ms apart ended with meta.name='TEST QA RACE' but alt='NEW COMPANY'. Effect: wrong image alt text, and the alt fallback in some labels. At 0.5-1.5s spacing alt was correct.", "selector": "[data-testid^=subcard-input-]", "priority": "MEDIUM"},
+      {"component": "Admin SubCardTextForm commit", "issue": "Saves are not serialized, so data can still be lost under very fast edits. Each PUT now carries the full cumulative meta (metaRef works, confirmed by request logging). But the PUTs run at the same time and can finish on the server out of order. Also, useEffect(() => metaRef.current = asset.meta) can reset the ref to an older snapshot when an earlier refresh() resolves late. Reproduced once with 150ms spacing plus an immediate tier change: the DB lost sector.id and tier='branch'. A second run passed, so the failure is intermittent (about 1 in 2 runs at 150ms). Never seen at the requested 0.5-1.5s pace.", "selector": "[data-testid^=subcard-tier-], [data-testid^=subcard-input-]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/subsidiaries mosaic", "issues": ["With 8 subsidiaries (test company added) the last row has a large empty cream gap next to card 08 (known and accepted earlier)"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix stale alt: keep the latest alt in a ref inside SubCardTextForm and pass it with every save. Or have saveMeta send alt only when it is given in extra, instead of always sending { alt: asset.alt }.",
+    "Optional hardening: chain saves per asset in a promise queue so PUTs are sent one after another. Do not overwrite metaRef from props while a save is pending. Or let the backend merge meta keys ($set meta.<field>) instead of replacing the whole meta."
+  ],
+  "critical_code_review_comments": [
+    "saveMeta(asset, patch) always spreads alt: asset.alt from the render closure. This is the same stale-closure pattern as the meta bug that was just fixed.",
+    "The metaRef sync useEffect on [asset.meta] can roll back fields that are newer but not yet refreshed, because refresh() responses can arrive out of order.",
+    "Admin.jsx is still over 1100 lines and should be split."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% for the requested scenarios; 2 edge-case issues under fast (~150ms) editing"},
+  "seed_data_creation": "Created and deleted co_mvo8exjg and co_mvo8gv1l. After cleanup home_subsidiaries = sac, sae, sti, agi, ecs, sm, tsn, san, kgi.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Login: admin@sunjayaasia.com / sunjaya-superadmin-2026. Steps: Images tab, toggle image-section-toggle-home_subsidiaries, upload with add-company-file, which creates co_*. Inputs are subcard-input-{key}-{field}[-id]. The ID toggle is subcard-id-toggle-{key}, the tier select is subcard-tier-{key}, delete is asset-delete-{key} (confirm dialog). To check the remaining issues, log PUT /api/assets/{id} payloads while editing ~150ms apart, then check the final meta and alt."
+}

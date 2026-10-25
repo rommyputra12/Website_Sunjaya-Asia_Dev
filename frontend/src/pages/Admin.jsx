@@ -544,13 +544,23 @@ const CARD_TEXT_FIELDS = [
 const SubCardTextForm = ({ asset, inputCls, onSave }) => {
   const [showId, setShowId] = useState(() => Object.values(asset.meta || {}).some((v) => v?.id));
   const metaRef = useRef(asset.meta || {});
-  useEffect(() => { metaRef.current = asset.meta || {}; }, [asset.meta]);
+  const altRef = useRef(asset.alt);
+  const queue = useRef(Promise.resolve());
+  const pending = useRef(0);
+  useEffect(() => { if (!pending.current) { metaRef.current = asset.meta || {}; altRef.current = asset.alt; } }, [asset.meta, asset.alt]);
   const meta = asset.meta || {};
   const def = SUBSIDIARIES.find((x) => x.id === asset.key) || {};
   const cityParts = (def.city || "").split(",");
   const defaults = { tag: def.tag, city: (cityParts[0] || "").trim(), country: (cityParts[1] || "").trim(), role: def.role, name: def.name, sector: def.sector };
-  // Merge into the latest meta (not the render snapshot) so quick successive edits never overwrite each other
-  const commit = (next, extra) => { metaRef.current = next; onSave(next, extra); };
+  // Saves run one after another, always with the latest meta + alt, so fast edits never overwrite each other
+  const commit = (next, extra) => {
+    metaRef.current = next;
+    if (extra?.alt) altRef.current = extra.alt;
+    pending.current += 1;
+    queue.current = queue.current
+      .then(() => onSave(next, { alt: altRef.current, ...extra }))
+      .finally(() => { pending.current -= 1; });
+  };
   const saveField = (f, lang, value) => {
     const cur = metaRef.current;
     if ((cur[f]?.[lang] || "") === value) return;
