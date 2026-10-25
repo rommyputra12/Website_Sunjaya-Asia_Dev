@@ -45,7 +45,7 @@ const SCHEMA = [
     { id: "about_history", url: "/about#company-history", label: "Company History", fields: [f("about.history.kicker", "Judul section"), f("about.history.since", "Teks kanan (Since…)"), f("about.history.journey_kicker", "Judul kecil di bawah foto"), f("about.history.journey", "Kalimat di bawah foto")] },
     { id: "about_timeline", url: "/about#timeline", label: "Timeline", fields: [f("about.timeline.kicker", "Judul section"), f("about.timeline.title", "Sub-judul")],
       lists: [lst("about.timeline.items", "Milestone", [["year", "Tahun"], ["title", "Judul"], ["body", "Deskripsi", "textarea", true]], { itemLabel: "Milestone", sortable: true })] },
-    { id: "about_edge", url: "/about#competitive-edge", label: "Competitive Edge", fields: [f("about.edge.kicker", "Judul section"), f("about.edge.title", "Judul baris 1"), f("about.edge.highlight", "Judul baris 2 (oranye)"), { ...rf("about.edge.desc", "Deskripsi"), hintText: ACCENT_HINT },
+    { id: "about_edge", url: "/about#competitive-edge", label: "Competitive Edge", fields: [f("about.edge.kicker", "Judul section"), f("about.edge.title", "Judul (bagian awal)"), f("about.edge.highlight", "Judul (lanjutan, satu kalimat)"), { ...rf("about.edge.desc", "Deskripsi"), hintText: ACCENT_HINT },
       f("about.edge.col1", "Kolom 1 — Judul"), f("about.edge.col2", "Kolom 2 — Judul"), f("about.edge.col3", "Kolom 3 — Judul")],
       lists: [1, 2, 3].map((n) => lst(`about.edge.list${n}`, `Kolom ${n} — Daftar`, [["text", "Teks"]], { itemLabel: "Baris", sortable: true })) },
   ] },

@@ -1,9 +1,34 @@
 import React, { useState } from "react";
 import { useLang } from "../i18n/LanguageContext";
-import { Reveal, LineReveal } from "../components/motion/Reveal";
+import { Reveal } from "../components/motion/Reveal";
 import AssetImg from "../components/AssetImg";
 import { ABOUT_TEXT, ABOUT_LISTS } from "../data/aboutDefaults";
 import { Fmt, splitAlign } from "../components/FormattedText";
+import { Building2, Layers, Workflow } from "lucide-react";
+
+const EDGE_ICONS = [Building2, Layers, Workflow];
+
+const EdgeCard = ({ ci, col }) => {
+  const Icon = EDGE_ICONS[ci % EDGE_ICONS.length];
+  return (
+    <div data-testid={`edge-card-${ci}`} className="edge-card group relative overflow-hidden rounded-[10px] p-7 md:p-8 transition-[transform,box-shadow] duration-500 hover:-translate-y-1">
+      <span aria-hidden="true" className="absolute top-0 left-0 h-[3px] w-full origin-left scale-x-0 bg-gradient-to-r from-copper to-copper/30 transition-transform duration-500 group-hover:scale-x-100" />
+      <span aria-hidden="true" className="absolute right-5 top-3 font-serif text-6xl md:text-7xl leading-none text-copper/15 select-none">{String(ci + 1).padStart(2, "0")}</span>
+      <span className="relative grid place-items-center w-12 h-12 rounded-full border border-copper/40 text-copper transition-colors duration-500 group-hover:bg-copper group-hover:text-white">
+        <Icon size={22} strokeWidth={1.6} />
+      </span>
+      <h3 data-testid={`edge-col-title-${ci}`} className="relative mt-6 font-serif text-xl md:text-2xl text-bone tracking-tight leading-snug">{col.title}</h3>
+      <ul className="relative mt-5 pt-5 border-t edge-divider space-y-3">
+        {col.items.map((it, i) => (
+          <li key={i} data-testid={`edge-item-${ci}-${i}`} className="flex gap-3 items-start">
+            <span aria-hidden="true" className="mt-[7px] h-[2px] w-3 flex-shrink-0 bg-copper" />
+            <span className="text-bone text-sm leading-[1.6]">{it.text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 export default function About() {
   const { t: tr, tl, contentReady } = useLang();
@@ -137,39 +162,19 @@ export default function About() {
         </div>
 
         {/* Competitive Edge (LIGHT SECTION) */}
-        <div id="competitive-edge" className="mt-32 -mx-6 md:-mx-10 px-6 md:px-10 py-24 section-light scroll-mt-20">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-16">
-            <div className="md:col-span-5">
-              <span data-testid="about-edge-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.edge.kicker")}</span>
-              <h2 className="font-serif text-xl md:text-3xl text-bone mt-3 tracking-tight leading-[1.15]">
-                <LineReveal text={t("about.edge.title")} />
-                <br />
-                <span className="font-italic-accent text-copper"><LineReveal text={t("about.edge.highlight")} delay={0.2} /></span>
-              </h2>
-            </div>
-            <div className="md:col-span-6 md:col-start-7 self-end">
-              <p className="text-bone/80 text-lg leading-relaxed">
-                <Fmt text={t("about.edge.desc")} />
-              </p>
-            </div>
+        <div id="competitive-edge" data-testid="about-edge" className="mt-32 -mx-6 md:-mx-10 px-6 md:px-10 py-20 md:py-24 section-light scroll-mt-20">
+          <div className="mb-12 md:mb-16">
+            <span data-testid="about-edge-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("about.edge.kicker")}</span>
+            <h2 data-testid="about-edge-title" className="font-serif text-2xl md:text-4xl text-bone mt-3 tracking-tight leading-[1.15]">
+              {[t("about.edge.title"), t("about.edge.highlight")].filter(Boolean).join(" ")}
+            </h2>
+            <p data-testid="about-edge-desc" className="mt-5 md:mt-6 w-full text-bone/80 text-base md:text-lg leading-relaxed text-left md:text-justify">
+              <Fmt text={t("about.edge.desc")} />
+            </p>
+            <div aria-hidden="true" className="mt-8 h-[2px] w-full rounded-full bg-gradient-to-r from-copper via-copper/50 to-transparent" />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
-            {edgeCols.map((col, ci) => (
-              <div key={ci} className="bg-obsidian p-8">
-                <div data-testid={`edge-col-title-${ci}`} className="font-mono text-sm md:text-base font-bold tracking-[0.18em] uppercase text-copper mb-5">{col.title}</div>
-                <ul className="space-y-3">
-                  {col.items.map((it, i) => (
-                    <li key={i} data-testid={`edge-item-${ci}-${i}`} className="flex gap-3 items-start">
-                      <span className="h-5 flex items-center flex-shrink-0" aria-hidden="true">
-                        <span className="w-1.5 h-1.5 rotate-45 bg-copper" />
-                      </span>
-                      <span className="text-bone text-sm leading-5">{it.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+            {edgeCols.map((col, ci) => <EdgeCard key={ci} ci={ci} col={col} />)}
           </div>
         </div>
 
