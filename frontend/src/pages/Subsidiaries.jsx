@@ -43,6 +43,46 @@ const groupByCountry = (items, countryOf = (s) => extractCountry(s.city)) => {
 };
 
 
+const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => {
+  const { t } = useLang();
+  const total = groups.reduce((n, g) => n + g.companies.length, 0);
+  return (
+    <div id={id} data-testid={testid || id} className="mt-12 md:mt-14 scroll-mt-20">
+      <div className="flex items-baseline gap-4 mb-8">
+        <h2 className="font-mono text-base md:text-xl font-bold tracking-[0.24em] uppercase text-copper">{title}</h2>
+        <span className="font-mono text-[10px] md:text-xs tracking-[0.2em] text-ash">{String(total).padStart(2, "0")}</span>
+      </div>
+      <div className={`grid grid-cols-1 ${cols} gap-x-10 gap-y-10`}>
+        {groups.map((group) => (
+          <div key={group.country} data-testid={`${prefix}-${group.country}`}>
+            <div className="flex items-baseline justify-between gap-3 pb-3 mb-5 border-b sum-line">
+              <h3 className="font-serif text-lg md:text-2xl text-bone tracking-tight">{group.country}</h3>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">{group.companies.length} {group.companies.length === 1 ? "company" : "companies"}</span>
+            </div>
+            <ul className="space-y-4">
+              {group.companies.map((s) => (
+                <li key={s.id} data-testid={`summary-item-${s.id}`} className="group/co flex items-start gap-3 cursor-default">
+                  <span className="relative mt-[9px] flex w-2 h-2 shrink-0">
+                    <span className="absolute inset-0 rounded-full opacity-0 scale-100 transition-[opacity,transform] duration-500 group-hover/co:opacity-40 group-hover/co:scale-[2.2]" style={{ background: colorForCity(s.city) }} />
+                    <span className="relative w-2 h-2 rounded-full" style={{ background: colorForCity(s.city) }} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="relative inline-block font-serif text-base md:text-lg text-bone tracking-tight leading-tight transition-colors duration-300 group-hover/co:text-copper">
+                      {t(`subsidiary.${s.id}.name`, s.name)}
+                      <span aria-hidden="true" className="absolute left-0 -bottom-1 h-[1.5px] w-full origin-left scale-x-0 bg-gradient-to-r from-copper to-copper/30 transition-transform duration-500 group-hover/co:scale-x-100" />
+                    </div>
+                    <div className="font-mono text-[9px] md:text-[10px] tracking-[0.2em] uppercase text-ash mt-1.5">{placeOf(s)}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function Subsidiaries() {
   const { t } = useLang();
   const { byKey } = useAssets();
@@ -170,59 +210,20 @@ export default function Subsidiaries() {
         </div>
 
         <Reveal>
-          <div className="mt-16 pt-8 border-t border-white/10" data-testid="subsidiaries-summary">
+          <div className="mt-20 md:mt-24" data-testid="subsidiaries-summary">
             {/* Parent Company */}
-            <div className="mb-10" data-testid="parent-company-block">
-              <span className="font-mono text-[11px] tracking-[0.28em] uppercase text-copper">Parent Company</span>
-              <p className="font-serif text-base md:text-lg text-bone mt-3 tracking-tight leading-tight uppercase">SUNJAYA ASIA GROUP PTE. LTD.</p>
-              <p className="mt-1 font-mono text-[10px] tracking-[0.2em] uppercase text-ash">Singapore · Holding</p>
-            </div>
-
-            {/* Subsidiaries grouped by country */}
-            <div id="subsidiaries-list" data-testid="subsidiaries-list" className="scroll-mt-20">
-              <h2 className="font-mono text-[11px] tracking-[0.28em] uppercase text-copper mb-6">Subsidiaries</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {COUNTRY_GROUPS.map((group) => (
-                  <div key={group.country} data-testid={`country-group-${group.country}`}>
-                    <h3 className="font-mono text-[10px] tracking-[0.22em] uppercase text-azure-hi mb-4 pb-2 border-b border-white/10">{group.country}</h3>
-                    <ul className="space-y-3">
-                      {group.companies.map((s) => (
-                        <li key={s.id} className="flex items-start gap-2">
-                          <span className="text-copper font-mono text-[10px] tracking-[0.2em] shrink-0 mt-1.5">·</span>
-                          <div>
-                            <div className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight">{t(`subsidiary.${s.id}.name`, s.name)}</div>
-                            <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-0.5">{placeOf(s)}</div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+            <div data-testid="parent-company-block" className="relative pb-10 md:pb-12 border-b sum-line">
+              <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">Parent Company</span>
+              <div className="mt-4 flex flex-col md:flex-row md:items-end gap-3 md:gap-6">
+                <p className="font-serif text-2xl md:text-4xl text-bone tracking-tight leading-tight uppercase">SUNJAYA ASIA GROUP PTE. LTD.</p>
+                <span className="sum-chip self-start md:self-auto md:mb-1.5 inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[10px] md:text-[11px] tracking-[0.2em] uppercase text-ash">
+                  <span className="w-1.5 h-1.5 rounded-full bg-copper" />Singapore · Holding
+                </span>
               </div>
             </div>
 
-            {/* Affiliates grouped by country */}
-            <div className="mt-10" data-testid="affiliates-list">
-              <h2 className="font-mono text-[11px] tracking-[0.28em] uppercase text-copper mb-6">Affiliates</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {AFFILIATE_GROUPS.map((group) => (
-                  <div key={group.country} data-testid={`affiliate-group-${group.country}`}>
-                    <h3 className="font-mono text-[10px] tracking-[0.22em] uppercase text-azure-hi mb-4 pb-2 border-b border-white/10">{group.country}</h3>
-                    <ul className="space-y-3">
-                      {group.companies.map((s) => (
-                        <li key={s.id} className="flex items-start gap-2">
-                          <span className="text-copper font-mono text-[10px] tracking-[0.2em] shrink-0 mt-1.5">·</span>
-                          <div>
-                            <div className="font-serif text-base md:text-lg text-bone tracking-tight leading-tight">{t(`subsidiary.${s.id}.name`, s.name)}</div>
-                            <div className="font-mono text-[9px] tracking-[0.2em] uppercase text-ash mt-0.5">{placeOf(s)}</div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CompanyGroups id="subsidiaries-list" title="Subsidiaries" groups={COUNTRY_GROUPS} cols="md:grid-cols-3" prefix="country-group" placeOf={placeOf} />
+            <CompanyGroups title="Affiliates" testid="affiliates-list" groups={AFFILIATE_GROUPS} cols="md:grid-cols-2" prefix="affiliate-group" placeOf={placeOf} />
           </div>
         </Reveal>
       </div>

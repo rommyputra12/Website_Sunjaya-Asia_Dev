@@ -445,6 +445,10 @@ input, textarea, select {
 }
 
 
+/* Subsidiaries · summary lists */
+.sum-line { border-color: rgba(12, 25, 34, 0.12); }
+.sum-chip { background: rgba(12, 25, 34, 0.05); border: 1px solid rgba(12, 25, 34, 0.12); }
+
 /* Subsidiaries · floating-glass mosaic cards */
 .sub-card { box-shadow: 0 1px 2px rgba(12, 25, 34, 0.08); transition: transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s ease; }
 .sub-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 1px solid rgba(255, 255, 255, 0.08); pointer-events: none; transition: border-color .5s ease, box-shadow .5s ease; z-index: 20; }
