@@ -72,6 +72,10 @@ export const AssetProvider = ({ children }) => {
     const dbByKey = {};
     assets.forEach((a) => { dbByKey[a.key] = a; });
     const map = {};
+    // Any DB asset not in the static map is reachable by its raw key (e.g. new company cards)
+    assets.forEach((a) => {
+      map[a.key] = { url: toCdnUrl(a.url), focal_x: a.focal_x ?? 50, focal_y: a.focal_y ?? 50, zoom: a.zoom ?? 1, width: a.width, alt: a.alt || a.key, meta: a.meta || {}, sort_order: a.sort_order ?? 100 };
+    });
     Object.entries(ASSET_DB_KEYS).forEach(([camelKey, dbKey]) => {
       const a = dbByKey[dbKey];
       map[camelKey] = {

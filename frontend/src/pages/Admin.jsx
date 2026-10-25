@@ -493,15 +493,42 @@ const sectionLabel = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.label || i
 
 // Card slot titles: ordered by tier (branch -> subsidiary -> affiliate), then CMS sort order
 const TIER_RANK = { affiliate: 1 }; // branches & subsidiaries share one numbered group; affiliates always last
-const tierOf = (key) => SUBSIDIARIES.find((x) => x.id === key)?.tier;
+const tierOf = (a) => a.meta?.tier || SUBSIDIARIES.find((x) => x.id === a.key)?.tier || "subsidiary";
 const slotLabel = (asset, groupAssets) => {
   const ordered = [...groupAssets].sort((a, b) =>
-    (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100));
+    (TIER_RANK[tierOf(a)] ?? 1) - (TIER_RANK[tierOf(b)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100));
   const pos = ordered.findIndex((a) => a.id === asset.id);
   if (pos < 0) return asset.key;
-  return tierOf(asset.key) === "affiliate"
-    ? `Affiliate ${pos + 1 - ordered.filter((a) => tierOf(a.key) !== "affiliate").length}`
+  return tierOf(asset) === "affiliate"
+    ? `Affiliate ${pos + 1 - ordered.filter((a) => tierOf(a) !== "affiliate").length}`
     : `Subsidiaries ${pos + 1}`;
+};
+
+const TIER_OPTIONS = [["branch", "Branch (kantor cabang)"], ["subsidiary", "Subsidiary (anak perusahaan)"], ["affiliate", "Affiliate (afiliasi)"]];
+
+// Upload a photo to create a new company card (appears on Home, Subsidiaries cards & list)
+const AddCompanyUpload = ({ client, count, onDone }) => {
+  const [busy, setBusy] = useState(false);
+  const upload = async (file) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file); fd.append("key", `co_${Date.now().toString(36)}`); fd.append("section", "home_subsidiaries");
+      fd.append("sort_order", String(100 + count)); fd.append("alt", "NEW COMPANY");
+      const r = await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      if (r.data?.id) await client.put(`/assets/${r.data.id}`, { alt: "NEW COMPANY", meta: { ...(r.data.meta || {}), tier: "subsidiary" } });
+      toast.success("Perusahaan baru ditambahkan — lengkapi teks kartunya di bawah");
+      await onDone();
+    } catch (err) { toast.error(errMsg(err, "Upload failed")); } finally { setBusy(false); }
+  };
+  return (
+    <label data-testid="add-company-upload" className="mb-5 flex flex-col items-center justify-center gap-2 border border-dashed border-copper/40 bg-ink p-6 cursor-pointer hover:border-copper transition-colors">
+      <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{busy ? "Uploading…" : "+ Tambah perusahaan baru (upload foto)"}</span>
+      <span className="font-mono text-[9px] text-ash text-center">Setelah upload, isi Nama, Kota, Negara, Jenis dan teks lain di kartu barunya. Kartu & daftar perusahaan bertambah otomatis. Hapus perusahaan dengan tombol Del.</span>
+      <input type="file" accept="image/*" className="hidden" disabled={busy} data-testid="add-company-file" onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ""; }} />
+    </label>
+  );
 };
 
 // Editable overlay texts for subsidiary cards (stored in asset.meta)
@@ -533,6 +560,12 @@ const SubCardTextForm = ({ asset, inputCls, onSave }) => {
           className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash hover:text-copper transition-colors">
           {showId ? "− Sembunyikan ID" : "+ Terjemahan ID"}
         </button>
+      </div>
+      <div>
+        <label className="block font-mono text-[8px] tracking-[0.2em] uppercase text-ash/70 mb-1">Jenis</label>
+        <select value={tierOf(asset)} onChange={(e) => onSave({ ...meta, tier: e.target.value })} data-testid={`subcard-tier-${asset.key}`} className={inputCls}>
+          {TIER_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
       </div>
       {CARD_TEXT_FIELDS.map(([f, label]) => (
         <div key={f}>
@@ -616,7 +649,10 @@ const ImagesPanel = ({ client }) => {
   };
 
   const remove = async (asset) => {
-    if (!window.confirm(`Delete image "${asset.key}"? This cannot be undone.`)) return;
+    const isCompany = asset.section === "home_subsidiaries";
+    if (!window.confirm(isCompany
+      ? `Hapus perusahaan "${asset.meta?.name?.en || asset.alt || asset.key}"? Kartu & daftarnya akan hilang dari situs. Tidak bisa dibatalkan.`
+      : `Delete image "${asset.key}"? This cannot be undone.`)) return;
     try {
       await client.delete(`/assets/${asset.id}`);
       toast.success("Image deleted");
@@ -711,7 +747,7 @@ const ImagesPanel = ({ client }) => {
   });
   Object.entries(groups).forEach(([sec, arr]) => arr.sort((a, b) =>
     sec === "home_subsidiaries"
-      ? (TIER_RANK[tierOf(a.key)] ?? 1) - (TIER_RANK[tierOf(b.key)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
+      ? (TIER_RANK[tierOf(a)] ?? 1) - (TIER_RANK[tierOf(b)] ?? 1) || (a.sort_order ?? 100) - (b.sort_order ?? 100)
       : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
   if (!groups.home_subsidiaries_bg) groups.home_subsidiaries_bg = []; // optional background slot
@@ -789,6 +825,7 @@ const ImagesPanel = ({ client }) => {
           </button>
           {isOpen(secId) && (<div className="px-5 pb-6 pt-1">
           {secId === "home_subsidiaries_bg" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} />}
+          {secId === "home_subsidiaries" && <AddCompanyUpload client={client} count={groups[secId].length} onDone={refresh} />}
           {secId === "home_partners" && (
             <div className="mb-5 border border-copper/30 bg-ink p-4">
               <BulkLogoUpload client={client} existingCount={groups[secId].length} onDone={refresh} />

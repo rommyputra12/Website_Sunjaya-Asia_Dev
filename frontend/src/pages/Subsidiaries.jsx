@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Reveal } from "../components/motion/Reveal";
-import { SUBSIDIARIES, DEFAULT_LOCATIONS } from "../data/content";
+import { DEFAULT_LOCATIONS } from "../data/content";
+import { useCompanies, sortByTier } from "../lib/companies";
+import { CountryFlag } from "../components/CountryFlag";
 import AssetImg from "../components/AssetImg";
 import { InteractiveWorldMap } from "../components/InteractiveWorldMap";
 import { useLang } from "../i18n/LanguageContext";
@@ -11,18 +13,8 @@ import { LineArt } from "../components/LineArt";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
-const TIER_ORDER = { branch: 0, subsidiary: 1, affiliate: 2 };
-
 const CITY_COLOR = Object.fromEntries(DEFAULT_LOCATIONS.map((l) => [l.city, l.color]));
 const colorForCity = (cityField) => CITY_COLOR[cityField.split(",")[0].trim()] || "#C86230";
-
-const sortedCompanies = [...SUBSIDIARIES].sort(
-  (a, b) => (TIER_ORDER[a.tier] ?? 9) - (TIER_ORDER[b.tier] ?? 9),
-);
-
-const subsidiaryCards = sortedCompanies.filter((s) => s.tier !== "affiliate");
-const affiliateCards = sortedCompanies.filter((s) => s.tier === "affiliate");
-const AFF_START = subsidiaryCards.length + 1; // affiliates continue numbering after all branches
 
 const extractCountry = (city) => {
   const parts = city.split(",");
@@ -72,7 +64,7 @@ const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => 
           <div key={group.country} data-testid={`${prefix}-${group.country}`}>
             <div className="flex items-baseline justify-between gap-3 pb-3 mb-5 border-b sum-line">
               <h3 className="flex items-center gap-2.5 font-serif text-lg md:text-xl text-bone tracking-tight">
-                <span aria-hidden="true" className="w-1.5 h-1.5 rotate-45 bg-copper" />{group.country}
+                <CountryFlag country={group.country} />{group.country}
               </h3>
               <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">{group.companies.length} {group.companies.length === 1 ? "company" : "companies"}</span>
             </div>
@@ -105,6 +97,10 @@ const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => 
 export default function Subsidiaries() {
   const { t } = useLang();
   const { byKey } = useAssets();
+  const companies = sortByTier(useCompanies());
+  const subsidiaryCards = companies.filter((s) => s.tier !== "affiliate");
+  const affiliateCards = companies.filter((s) => s.tier === "affiliate");
+  const AFF_START = subsidiaryCards.length + 1; // affiliates continue numbering after all branches
   const cmsOrder = (s) => byKey[s.image]?.sort_order ?? 100;
   const orderCards = (arr) => [...arr].sort((a, b) => cmsOrder(a) - cmsOrder(b));
   // Country lists use the CMS card texts (Images tab) so edits show here too

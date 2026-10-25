@@ -881,9 +881,14 @@ def _asset_public_url(object_name: str) -> str:
     return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{_urlquote(object_name, safe='')}"
 
 
+def _is_locked_key(it: dict) -> bool:
+    # Subsidiary company cards can be removed from the CMS; other site slots are locked
+    return it["key"] in SITE_ASSET_KEYS and (it.get("section") or "other") != "home_subsidiaries"
+
+
 def _asset_row_to_out(it: dict, used_urls: set | None = None) -> AssetOut:
     return AssetOut(
-        in_use=it["key"] in SITE_ASSET_KEYS or it.get("url") in (used_urls or set()),
+        in_use=_is_locked_key(it) or it.get("url") in (used_urls or set()),
         meta=it.get("meta") or {},
         id=str(it["id"]), key=it["key"], url=it["url"], alt=it.get("alt"),
         width=it.get("width"), height=it.get("height"),
@@ -1044,7 +1049,7 @@ async def delete_asset(asset_id: str):
     existing = await sb_select_one("assets", {"id": asset_id})
     if not existing:
         raise HTTPException(404, "Asset not found")
-    if existing["key"] in SITE_ASSET_KEYS or existing.get("url") in await _asset_usage():
+    if _is_locked_key(existing) or existing.get("url") in await _asset_usage():
         raise HTTPException(409, "This image is used on the website. Use Replace instead of deleting it.")
     # derive object name from the stored public url
     url = existing.get("url", "")
