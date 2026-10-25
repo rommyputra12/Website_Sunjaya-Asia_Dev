@@ -5,21 +5,33 @@ import { Globe2 } from "lucide-react";
 const FLAG_FILES = import.meta.glob("../../../node_modules/flag-icons/flags/1x1/*.svg", { query: "?no-inline", import: "default", eager: true });
 const FLAG_URL = Object.fromEntries(Object.entries(FLAG_FILES).map(([p, url]) => [p.split("/").pop().replace(".svg", ""), url]));
 
-const ALIASES = { uae: "ae", usa: "us", "united states of america": "us", us: "us", uk: "gb", "great britain": "gb", korea: "kr", "south korea": "kr", "hong kong": "hk", prc: "cn" };
+// Fixed names first (some browsers, e.g. Safari, call CN "China mainland"), incl. common Indonesian names
+const ALIASES = {
+  china: "cn", "china mainland": "cn", "mainland china": "cn", prc: "cn", "people's republic of china": "cn", tiongkok: "cn", cina: "cn",
+  uae: "ae", "united arab emirates": "ae", "uni emirat arab": "ae",
+  usa: "us", us: "us", "united states": "us", "united states of america": "us", "amerika serikat": "us",
+  uk: "gb", "united kingdom": "gb", "great britain": "gb", inggris: "gb",
+  indonesia: "id", singapore: "sg", singapura: "sg", malaysia: "my", japan: "jp", jepang: "jp",
+  korea: "kr", "south korea": "kr", "korea selatan": "kr", "hong kong": "hk", taiwan: "tw", thailand: "th",
+  vietnam: "vn", "viet nam": "vn", philippines: "ph", filipina: "ph", india: "in", australia: "au",
+  germany: "de", jerman: "de", france: "fr", prancis: "fr", netherlands: "nl", belanda: "nl",
+  "saudi arabia": "sa", "arab saudi": "sa", qatar: "qa", turkey: "tr", "türkiye": "tr", turki: "tr", russia: "ru", rusia: "ru",
+};
 
 // Country name → ISO code, built once from the browser's region names
 const NAME_TO_CODE = (() => {
-  const map = { ...ALIASES };
+  const map = {};
   try {
-    const dn = new Intl.DisplayNames(["en"], { type: "region" });
-    const A = 65;
-    for (let i = 0; i < 26; i++) for (let j = 0; j < 26; j++) {
-      const code = String.fromCharCode(A + i, A + j);
-      const name = dn.of(code);
-      if (name && name !== code) map[name.toLowerCase()] = code.toLowerCase();
-    }
+    ["en", "id"].forEach((loc) => {
+      const dn = new Intl.DisplayNames([loc], { type: "region" });
+      for (let i = 0; i < 26; i++) for (let j = 0; j < 26; j++) {
+        const code = String.fromCharCode(65 + i, 65 + j);
+        const name = dn.of(code);
+        if (name && name !== code && !map[name.toLowerCase()]) map[name.toLowerCase()] = code.toLowerCase();
+      }
+    });
   } catch { /* old browsers: aliases only */ }
-  return map;
+  return { ...map, ...ALIASES };
 })();
 
 export const countryCode = (name) => {
