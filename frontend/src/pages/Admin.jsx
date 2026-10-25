@@ -439,19 +439,30 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
 
 /* ================= IMAGES (asset manager, grouped by page section) ================= */
 const IMAGE_SECTIONS = [
-  { id: "nav", label: "Navbar & Brand" },
-  { id: "home_hero", label: "Home — Hero Cover" },
-  { id: "home_pillars_intro", label: "Home — Pillars Intro Background" },
-  { id: "home_pillar_sections", label: "Home — Pillar 01–03 · Foto Pillar (portrait)" },
-  { id: "home_pillar_bg", label: "Home — Pillar 01–03 · Background" },
-  { id: "home_subsidiaries_bg", label: "Home — Subsidiaries Background" },
-  { id: "home_subsidiaries", label: "Home — Subsidiaries Grid" },
-  { id: "home_partners", label: "Home — Partners, Vendors & Customers Logos" },
-  { id: "pillars_page", label: "Pillars Page — Header Banner 16:3 & Foto Landscape 16:9 (01–03)" },
-  { id: "about_page", label: "About Page" },
-  { id: "footer", label: "Footer" },
-  { id: "other", label: "Custom Uploads" },
+  { id: "nav", page: "brand", label: "Navbar & Brand" },
+  { id: "home_hero", page: "home", label: "Home — Hero Cover" },
+  { id: "home_pillars_intro", page: "home", label: "Home — Pillars Intro Background" },
+  { id: "home_pillar_sections", page: "home", label: "Home — Pillar 01–03 · Foto Pillar (portrait)" },
+  { id: "home_pillar_bg", page: "home", label: "Home — Pillar 01–03 · Background" },
+  { id: "home_subsidiaries_bg", page: "home", label: "Home — Subsidiaries Background" },
+  { id: "home_subsidiaries", page: "subsidiaries", label: "Subsidiaries — Foto Kartu (Home & halaman Subsidiaries)" },
+  { id: "home_partners", page: "home", label: "Home — Partners, Vendors & Customers Logos" },
+  { id: "pillars_page_banner", page: "pillars", label: "Pillars Page — Header Banner Panorama (16:3)" },
+  { id: "pillars_page", page: "pillars", label: "Pillars Page — Foto Pillar Landscape 16:9 (01–03)" },
+  { id: "about_page", page: "about", label: "About Page" },
+  { id: "footer", page: "footer", label: "Footer" },
+  { id: "other", page: "other", label: "Custom Uploads" },
 ];
+const IMAGE_PAGES = [
+  { id: "brand", label: "Brand & Navbar" },
+  { id: "home", label: "Home" },
+  { id: "pillars", label: "Pillars" },
+  { id: "subsidiaries", label: "Subsidiaries" },
+  { id: "about", label: "About" },
+  { id: "footer", label: "Footer" },
+  { id: "other", label: "Lainnya" },
+];
+const pageOfSection = (id) => IMAGE_SECTIONS.find((s) => s.id === id)?.page || "other";
 const sectionIndex = (id) => {
   const i = IMAGE_SECTIONS.findIndex((s) => s.id === id);
   return i === -1 ? IMAGE_SECTIONS.length : i;
@@ -564,6 +575,8 @@ const ImagesPanel = ({ client }) => {
   const [newSection, setNewSection] = useState("other");
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(null); // asset being focal-edited
+  const [query, setQuery] = useState("");
+  const [openSecs, setOpenSecs] = useState([]);
 
   const refresh = async () => {
     try {
@@ -703,10 +716,16 @@ const ImagesPanel = ({ client }) => {
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
   if (!groups.home_subsidiaries_bg) groups.home_subsidiaries_bg = []; // optional background slot
   const catOf = (a) => a.meta?.category || "partner";
+  const q = query.trim().toLowerCase();
+  const matches = (a, secId) => !q || [a.key, a.alt, a.meta?.name?.en, sectionLabel(secId)].some((v) => (v || "").toLowerCase().includes(q));
+  const shown = (secId) => groups[secId].filter((a) => matches(a, secId));
   const subGroups = (secId) => secId !== "home_partners"
-    ? [{ id: null, items: groups[secId] }]
-    : PARTNER_CATEGORIES.map((c, i) => ({ id: c.id, n: i + 1, label: c.label, items: groups[secId].filter((a) => catOf(a) === c.id) }));
-  const orderedSections = Object.keys(groups).sort((a, b) => sectionIndex(a) - sectionIndex(b) || a.localeCompare(b));
+    ? [{ id: null, items: shown(secId) }]
+    : PARTNER_CATEGORIES.map((c, i) => ({ id: c.id, n: i + 1, label: c.label, items: shown(secId).filter((a) => catOf(a) === c.id) }));
+  const orderedSections = Object.keys(groups).sort((a, b) => sectionIndex(a) - sectionIndex(b) || a.localeCompare(b))
+    .filter((s) => !q || shown(s).length > 0);
+  const isOpen = (secId) => !!q || openSecs.includes(secId);
+  const toggleSec = (secId) => setOpenSecs((p) => (p.includes(secId) ? p.filter((x) => x !== secId) : [...p, secId]));
 
   const inputCls = "w-full h-8 bg-obsidian border border-white/15 px-2 font-mono text-[11px] text-bone focus:border-copper focus:outline-none";
 
@@ -743,15 +762,32 @@ const ImagesPanel = ({ client }) => {
         </>)}
       </form>
 
-      {/* Grouped by section in page order */}
+      {/* Search + grouped by page, then section (collapsible) */}
+      <div className="relative mb-8">
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari gambar (nama, key, bagian)…"
+          data-testid="images-search" className={`${inputCls} h-11 pl-4 pr-10 text-xs`} />
+        {query && (
+          <button onClick={() => setQuery("")} data-testid="images-search-clear" aria-label="Hapus pencarian"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 text-ash hover:text-copper transition-colors">×</button>
+        )}
+      </div>
+      {q && orderedSections.length === 0 && <p data-testid="images-search-empty" className="text-ash font-mono text-xs mb-6">Tidak ada gambar yang cocok dengan "{query}".</p>}
       <DndContext sensors={sensors} collisionDetection={closestCenter} autoScroll={false} onDragEnd={onDragEnd}>
-      {orderedSections.map((secId) => (
-        <div key={secId} className="mb-10" data-testid={`image-section-${secId}`}>
-          <div className="flex items-center gap-4 mb-4">
-            <h3 className="font-mono text-[11px] tracking-[0.24em] uppercase text-copper">{sectionLabel(secId)}</h3>
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="font-mono text-[9px] text-ash">{groups[secId].length} image{groups[secId].length > 1 ? "s" : ""}</span>
-          </div>
+      {IMAGE_PAGES.map((pg) => ({ pg, secs: orderedSections.filter((s) => pageOfSection(s) === pg.id) })).filter((x) => x.secs.length).map(({ pg, secs }) => (
+      <div key={pg.id} className="mb-10" data-testid={`image-page-${pg.id}`}>
+        <h2 className="font-serif text-xl text-bone tracking-tight mb-3">{pg.label}
+          <span className="ml-3 font-mono text-[9px] tracking-[0.2em] uppercase text-ash">{secs.reduce((n, s) => n + shown(s).length, 0)} gambar</span>
+        </h2>
+        <div className="border border-white/10 divide-y divide-white/10">
+      {secs.map((secId) => (
+        <div key={secId} className="bg-ink/40" data-testid={`image-section-${secId}`}>
+          <button type="button" onClick={() => toggleSec(secId)} data-testid={`image-section-toggle-${secId}`} aria-expanded={isOpen(secId)}
+            className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/5 transition-colors">
+            <span className={`text-copper text-xs transition-transform duration-200 ${isOpen(secId) ? "rotate-90" : ""}`}>▶</span>
+            <h3 className="font-mono text-[11px] tracking-[0.24em] uppercase text-copper flex-1">{sectionLabel(secId)}</h3>
+            <span className="font-mono text-[9px] text-ash">{shown(secId).length} image{shown(secId).length === 1 ? "" : "s"}</span>
+          </button>
+          {isOpen(secId) && (<div className="px-5 pb-6 pt-1">
           {secId === "home_subsidiaries_bg" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} />}
           {secId === "home_partners" && (
             <div className="mb-5 border border-copper/30 bg-ink p-4">
@@ -770,7 +806,7 @@ const ImagesPanel = ({ client }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {sg.id && sg.items.length === 0 && <p className="col-span-full font-mono text-[10px] text-ash">Belum ada logo di kelompok ini.</p>}
             {sg.items.map((a, idx) => (
-              <AssetCard key={a.id} a={a} draggable={secId === "home_subsidiaries" || secId === "home_partners"}>
+              <AssetCard key={a.id} a={a} draggable={!q && (secId === "home_subsidiaries" || secId === "home_partners")}>
                 <button
                   type="button"
                   onClick={() => setEditing(a)}
@@ -857,7 +893,11 @@ const ImagesPanel = ({ client }) => {
           </SortableContext>
           </div>
           ))}
+          </div>)}
         </div>
+      ))}
+        </div>
+      </div>
       ))}
       </DndContext>
       {items.length === 0 && <p className="text-ash font-mono text-xs mt-6">No images yet.</p>}
