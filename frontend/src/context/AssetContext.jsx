@@ -12,6 +12,7 @@ export const ASSET_DB_KEYS = {
   foundationSlide: "foundation_slide",
   coreSlide: "core_slide",
   futureSlide: "future_slide",
+  pillarsPageBanner: "pillars_page_banner",
   pillarsPage01: "pillars_page_01",
   pillarsPage02: "pillars_page_02",
   pillarsPage03: "pillars_page_03",

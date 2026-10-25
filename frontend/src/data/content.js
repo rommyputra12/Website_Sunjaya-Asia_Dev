@@ -14,6 +14,7 @@ export const IMAGES = {
   foundationSlide: img("pillar_foundation.jpg"),
   coreSlide: img("pillar_core.png"),
   futureSlide: img("pillar_future.jpg"),
+  pillarsPageBanner: img("pillar_foundation.jpg"),
   pillarsPage01: img("pillar_foundation.jpg"),
   pillarsPage02: img("pillar_core.png"),
   pillarsPage03: img("pillar_future.jpg"),

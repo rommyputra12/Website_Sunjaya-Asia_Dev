@@ -369,7 +369,13 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
                   <div className="absolute inset-3"><LogoImg asset={{ ...asset, focal_x: fx, focal_y: fy, zoom }} /></div>
                 </div>
               </>
-            ) : ["pillars_page_01", "pillars_page_02", "pillars_page_03"].includes(asset.key) ? (<>
+            ) : asset.key === "pillars_page_banner" ? (<>
+              <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Header banner — halaman Pillars (16:3, tepi ke tepi layar)</p>
+              <div data-testid="focal-pillar-banner-preview" className="relative aspect-[16/3] bg-ink border border-white/10 overflow-hidden">
+                <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
+              </div>
+              <p className="mt-3 font-mono text-[9px] leading-relaxed text-ash">Disarankan foto panorama lebar, minimal 2560×480.</p>
+            </>) : ["pillars_page_01", "pillars_page_02", "pillars_page_03"].includes(asset.key) ? (<>
               <p className="font-mono text-[8px] tracking-[0.18em] uppercase text-ash/70 mb-1">Desktop — halaman Pillars (landscape 16:9, lebar penuh)</p>
               <div data-testid="focal-pillar-desktop-preview" className="relative aspect-video bg-ink border border-white/10 overflow-hidden mb-3">
                 <img src={variantUrl(asset, 1280)} alt="" className="absolute inset-0 w-full h-full object-cover" style={previewStyle} draggable={false} />
@@ -441,7 +447,7 @@ const IMAGE_SECTIONS = [
   { id: "home_subsidiaries_bg", label: "Home — Subsidiaries Background" },
   { id: "home_subsidiaries", label: "Home — Subsidiaries Grid" },
   { id: "home_partners", label: "Home — Partners, Vendors & Customers Logos" },
-  { id: "pillars_page", label: "Pillars Page — Foto Landscape 16:9 (01–03)" },
+  { id: "pillars_page", label: "Pillars Page — Header Banner 16:3 & Foto Landscape 16:9 (01–03)" },
   { id: "about_page", label: "About Page" },
   { id: "footer", label: "Footer" },
   { id: "other", label: "Custom Uploads" },

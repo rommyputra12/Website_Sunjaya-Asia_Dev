@@ -279,3 +279,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Kartu tanpa Reveal; 2 kartu teratas loading eager + fetchPriority high, sizes 50vw; AssetContext cache localStorage sunjaya_assets_v1 + timeout 6s; heading Subsidiaries tanpa LineReveal. Verified iteration_21 (first 1.2-1.5s, refresh ~0.7s)
 
 - 2026-06: /pillars intro + pillar 01/02/03 body paragraphs now full-width & justified (text-justify, hyphens-auto); screenshot-verified desktop/mobile.
+- 2026-06: /pillars full-bleed header banner 16:3 (asset pillars_page_banner, section pillars_page, CMS focal preview 16:3; temp image = pillars_page_01). Intro text reduced to text-base/md:text-lg.

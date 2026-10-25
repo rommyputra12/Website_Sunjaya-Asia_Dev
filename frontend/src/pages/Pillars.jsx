@@ -40,11 +40,14 @@ export default function Pillars() {
     });
   };
   return (
-    <div data-testid="pillars-page" className="pt-28 md:pt-32 pb-24">
+    <div data-testid="pillars-page" className="pt-20 md:pt-24 pb-24">
+      <div data-testid="pillars-banner" className="relative w-full aspect-[16/3] overflow-hidden bg-ink border-b border-white/10">
+        <AssetImg k="pillarsPageBanner" sizes="100vw" fetchPriority="high" loading="eager" alt={t("manifesto.overline")} className="absolute inset-0 h-full w-full object-cover" />
+      </div>
       <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        <header className="mb-16 md:mb-24">
+        <header className="mt-12 md:mt-16 mb-16 md:mb-24">
           <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">{t("manifesto.overline")}</span>
-          <h1 data-testid="pillars-intro" className="font-serif text-lg md:text-2xl leading-[1.5] tracking-[-0.01em] text-bone/90 mt-4 w-full text-justify hyphens-auto">
+          <h1 data-testid="pillars-intro" className="font-serif text-base md:text-lg leading-[1.6] tracking-[-0.01em] text-bone/90 mt-4 w-full text-justify hyphens-auto">
             <Fmt text={t("manifesto.title")} />
           </h1>
         </header>
