@@ -446,6 +446,7 @@ input, textarea, select {
 
 
 /* Subsidiaries · summary lists */
+.taper-line { background: linear-gradient(90deg, #E07B48, rgba(200,98,48,0.55) 55%, rgba(200,98,48,0)); clip-path: polygon(0 0, 100% 45%, 100% 55%, 0 100%); filter: drop-shadow(0 0 4px rgba(224,123,72,0.45)); }
 .card-flash { animation: card-flash 2.4s ease-out; z-index: 5; }
 .card-flash::before { content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; border: 2px solid #E07B48; animation: card-flash-ring 2.4s ease-out forwards; }
 @keyframes card-flash { 0%, 60% { box-shadow: 0 0 0 0 rgba(224,123,72,0.0), 0 0 46px 4px rgba(224,123,72,0.55); } 100% { box-shadow: none; } }

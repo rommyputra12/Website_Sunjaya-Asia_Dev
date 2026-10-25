@@ -76,16 +76,16 @@ const CompanyGroups = ({ id, testid, title, groups, cols, prefix, placeOf }) => 
               </h3>
               <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ash">{group.companies.length} {group.companies.length === 1 ? "company" : "companies"}</span>
             </div>
-            <ul className="space-y-4">
+            <ul className="space-y-4 pl-4 md:pl-5">
               {group.companies.map((s) => (
                 <li key={s.id}>
                 <button type="button" data-testid={`summary-item-${s.id}`} onClick={() => focusCard(s.id)} title="Lihat kartu perusahaan" className="group/co flex items-start gap-3 text-left cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-copper rounded-sm">
-                  <span className="relative mt-[9px] flex w-2 h-2 shrink-0">
+                  <span className="relative mt-[7px] flex w-2 h-2 shrink-0">
                     <span className="absolute inset-0 rounded-full opacity-0 scale-100 transition-[opacity,transform] duration-500 group-hover/co:opacity-40 group-hover/co:scale-[2.2]" style={{ background: colorForCity(s.city) }} />
                     <span className="relative w-2 h-2 rounded-full" style={{ background: colorForCity(s.city) }} />
                   </span>
                   <div className="min-w-0">
-                    <div className="relative inline-block font-serif text-base md:text-lg text-bone tracking-tight leading-tight transition-colors duration-300 group-hover/co:text-copper">
+                    <div className="relative inline-block font-serif text-sm md:text-base text-bone tracking-tight leading-tight transition-colors duration-300 group-hover/co:text-copper">
                       {t(`subsidiary.${s.id}.name`, s.name)}
                       <span aria-hidden="true" className="absolute left-0 -bottom-1 h-[1.5px] w-full origin-left scale-x-0 bg-gradient-to-r from-copper to-copper/30 transition-transform duration-500 group-hover/co:scale-x-100" />
                     </div>
@@ -123,10 +123,14 @@ export default function Subsidiaries() {
         <div className="relative max-w-[1600px] mx-auto px-6 md:px-10">
           <div className="max-w-3xl">
             <span data-testid="subsidiaries-kicker" className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">Subsidiaries & Affiliates</span>
-            <h1 data-testid="subsidiaries-title" className="mt-4 font-serif text-xl md:text-3xl leading-[1.2] tracking-[-0.02em] text-bone">
+            <h1 data-testid="subsidiaries-title" className="mt-4 font-serif text-lg md:text-2xl leading-[1.25] tracking-[-0.02em] text-bone">
               An Integrated Ecosystem of Industry Pioneers
             </h1>
-            <p data-testid="subsidiaries-desc" className="mt-6 md:mt-8 text-ash text-sm md:text-base leading-[1.85] text-left md:text-justify">
+            <div data-testid="subsidiaries-title-line" aria-hidden="true" className="mt-6 md:mt-7 flex items-center gap-2 max-w-xl">
+              <span className="w-1.5 h-1.5 rotate-45 bg-copper shadow-[0_0_10px_rgba(224,123,72,0.8)]" />
+              <span className="taper-line h-[3px] flex-1" />
+            </div>
+            <p data-testid="subsidiaries-desc" className="mt-6 md:mt-7 text-ash text-sm md:text-base leading-[1.85] text-left md:text-justify">
               Sunjaya Asia Group powers a diversified network of specialized operating units and strategic affiliates engineered to lead key global markets. From <strong className="font-bold italic text-bone">Capital &amp; Wealth Management</strong> and <strong className="font-bold italic text-bone">Environmental &amp; Green Energy</strong> to <strong className="font-bold italic text-bone">Global Commodities Trade</strong>, <strong className="font-bold italic text-bone">IT Product Development</strong>, and <strong className="font-bold italic text-bone">Defense &amp; Military Technology</strong>, our ecosystem combines strategic capital, cutting-edge technology, and operational excellence to deliver high-impact solutions worldwide.
             </p>
           </div>
