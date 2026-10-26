@@ -198,12 +198,12 @@ export default function Home() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
               data-testid={`hero-stat-${s.key}`}
-              className="w-full md:max-w-[280px] min-w-0 text-center md:text-left"
+              className="w-full md:max-w-[280px] min-w-0 text-left"
             >
-              <div className="block md:flex items-start md:justify-start gap-1 text-[9px] md:text-xs leading-[1.6] md:leading-normal font-mono uppercase tracking-[0.08em] md:tracking-[0.14em] text-bone font-semibold min-h-[2.6em]">
+              <div className="flex items-start justify-start gap-1 text-[9px] md:text-base leading-snug md:leading-normal font-mono uppercase tracking-[0.08em] md:tracking-[0.14em] text-bone font-semibold min-h-[2.6em]">
                 <span className="shrink-0 text-[9px] md:text-xs text-copper leading-snug">0{i + 1}</span>
                 <span className="shrink-0 text-[9px] md:text-xs text-copper leading-snug"> · </span>
-                <span className="md:flex-1 text-[9px] md:text-xs leading-snug md:line-clamp-2 drop-shadow-[0_1px_6px_rgba(5,30,43,0.9)]"> {t(`stats.${s.key}`)}</span>
+                <span className="flex-1 text-[9px] md:text-xs leading-snug line-clamp-2 drop-shadow-[0_1px_6px_rgba(5,30,43,0.9)]"> {t(`stats.${s.key}`)}</span>
               </div>
               <div className="mt-2 md:mt-3 flex items-baseline justify-center md:justify-start gap-1">
                 <span className="hidden md:inline shrink-0 text-xs leading-snug invisible">0{i + 1}</span>
