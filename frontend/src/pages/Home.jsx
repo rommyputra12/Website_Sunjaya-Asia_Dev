@@ -237,10 +237,10 @@ export default function Home() {
               <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
               <span data-testid="home-pillars-copper-line" className="mt-3 block h-px w-64 md:w-96 bg-gradient-to-r from-copper via-copper/60 to-transparent" />
             </div>
-            <p className="mt-4 md:ml-[42%] font-serif md:font-mono text-bone/90 text-[14px] md:text-base leading-[1.65] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-none">
+            <p className="mt-4 md:ml-[42%] font-serif md:font-mono text-bone/90 stat-shadow text-[14px] md:text-base leading-[1.65] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-none">
               <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
             </p>
-            <p className="mt-4 md:ml-[42%] mb-6 font-serif md:font-mono text-bone/90 text-[14px] md:text-base leading-[1.65] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-none" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
+            <p className="mt-4 md:ml-[42%] mb-6 font-serif md:font-mono text-bone/90 stat-shadow text-[14px] md:text-base leading-[1.65] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-none" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
               <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
