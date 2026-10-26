@@ -6,6 +6,7 @@ import { SmoothScroll } from "./components/motion/SmoothScroll";
 import { Nav } from "./components/layout/Nav";
 import { Footer } from "./components/layout/Footer";
 import { CookieBanner } from "./components/CookieBanner";
+import { RouteSeo } from "./components/RouteSeo";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Pillars from "./pages/Pillars";
@@ -48,6 +49,7 @@ function App() {
         <BrowserRouter>
           <SmoothScroll>
               <ScrollTop />
+              <RouteSeo />
               <Nav />
               <main className="min-h-screen">
               <Routes>

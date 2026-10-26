@@ -1,6 +1,7 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File, Form
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File, Form, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import json
 import logging
@@ -574,14 +575,60 @@ async def _seed_superadmin_if_empty():
     logger.info(f"Seeded super admin: {SUPER_ADMIN_EMAIL}")
 
 
+LOGIN_MAX_FAILS = 5
+LOGIN_LOCK = timedelta(minutes=15)
+_attempts_db = AsyncIOMotorClient(os.environ["MONGO_URL"])[os.environ["DB_NAME"]].login_attempts
+
+
+def _client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "")
+    return fwd.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+
+
+async def _login_locked(ident: str) -> Optional[int]:
+    """Minutes left if this ip:email is locked out, else None. Fails open if the attempts store is down."""
+    try:
+        doc = await _attempts_db.find_one({"identifier": ident})
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"login_attempts unavailable: {e}")
+        return None
+    until = doc and doc.get("locked_until")
+    if until and until.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc):
+        return max(1, int((until.replace(tzinfo=timezone.utc) - datetime.now(timezone.utc)).total_seconds() // 60) + 1)
+    return None
+
+
+async def _record_login_fail(ident: str):
+    now = datetime.now(timezone.utc)
+    try:
+        doc = await _attempts_db.find_one({"identifier": ident}) or {}
+        expired = doc.get("locked_until") and doc["locked_until"].replace(tzinfo=timezone.utc) <= now
+        count = 1 if expired else doc.get("count", 0) + 1
+        upd = {"identifier": ident, "count": count, "last_failed": now, "expires_at": now + LOGIN_LOCK,
+               "locked_until": now + LOGIN_LOCK if count >= LOGIN_MAX_FAILS else None}
+        await _attempts_db.update_one({"identifier": ident}, {"$set": upd}, upsert=True)
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"login_attempts unavailable: {e}")
+
+
 @api_router.post("/auth/login")
-async def auth_login(payload: LoginIn):
+async def auth_login(payload: LoginIn, request: Request):
     await _seed_superadmin_if_empty()
-    user = await sb_select_one("admin_users", {"email": payload.email.strip().lower()}, svc=True)
+    email = payload.email.strip().lower()
+    ident = f"{_client_ip(request)}:{email}"
+    mins = await _login_locked(ident)
+    if mins:
+        raise HTTPException(status_code=429, detail=f"Too many failed attempts. Try again in {mins} minute(s).")
+    user = await sb_select_one("admin_users", {"email": email}, svc=True)
     if not user or not verify_password(payload.password, user.get("password_hash", "")):
+        await _record_login_fail(ident)
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not user.get("active", True):
         raise HTTPException(status_code=403, detail="Account is deactivated")
+    try:
+        await _attempts_db.delete_one({"identifier": ident})
+    except Exception:  # noqa: BLE001
+        pass
     return {"token": create_token(user), "user": _user_to_out(user).model_dump()}
 
 
@@ -1168,10 +1215,40 @@ async def delete_content(content_id: str):
 
 app.include_router(api_router)
 
+
+@app.on_event("startup")
+async def _login_attempt_indexes():
+    try:
+        await _attempts_db.create_index("identifier", unique=True)
+        await _attempts_db.create_index("expires_at", expireAfterSeconds=0)
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"login_attempts index setup skipped: {e}")
+
+
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Cross-Origin-Opener-Policy": "same-origin",
+}
+
+
+@app.middleware("http")
+async def _security_headers(request: Request, call_next):
+    response = await call_next(request)
+    for k, v in SECURITY_HEADERS.items():
+        response.headers.setdefault(k, v)
+    if request.url.path.startswith("/api/auth") or request.url.path.startswith("/api/admin"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[o.strip() for o in os.environ['CORS_ORIGINS'].split(',') if o.strip()],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Admin-Token"],
 )
