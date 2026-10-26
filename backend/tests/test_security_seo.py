@@ -117,7 +117,7 @@ class TestSeoFiles:
         assert r.status_code == 200
         assert "text/plain" in r.headers.get("content-type", "")
         assert "Sitemap: https://sunjayaasia.com/sitemap.xml" in r.text
-        assert "Disallow: /admin" in r.text
+        assert "/admin" not in r.text and "cms-portal" not in r.text
 
     def test_sitemap(self):
         r = requests.get(f"{BASE_URL}/sitemap.xml")

@@ -6,6 +6,7 @@ import { SmoothScroll } from "./components/motion/SmoothScroll";
 import { Nav } from "./components/layout/Nav";
 import { Footer } from "./components/layout/Footer";
 import { CookieBanner } from "./components/CookieBanner";
+import { ADMIN_PATH } from "./lib/adminPath";
 import { RouteSeo } from "./components/RouteSeo";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -59,7 +60,7 @@ function App() {
                 <Route path="/subsidiaries" element={<Subsidiaries />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path={ADMIN_PATH} element={<Admin />} />
                 <Route path="/legal/:type" element={<Legal />} />
                 <Route path="/legal" element={<Legal />} />
                 <Route path="*" element={

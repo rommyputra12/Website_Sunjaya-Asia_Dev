@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /download
 Disallow: /api/
 
 Sitemap: https://sunjayaasia.com/sitemap.xml

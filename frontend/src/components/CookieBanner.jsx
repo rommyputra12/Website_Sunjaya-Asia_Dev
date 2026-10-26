@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { ADMIN_PATH } from "../lib/adminPath";
 
 const STORAGE_KEY = "sunjaya_cookie_consent";
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const consent = localStorage.getItem(STORAGE_KEY);
     if (window.self !== window.top) return; // hidden inside CMS preview iframe
-    if (window.location.pathname.startsWith("/admin")) return; // not shown in the CMS
+    if (window.location.pathname.startsWith(ADMIN_PATH)) return; // not shown in the CMS
     if (!consent) {
       const timer = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(timer);
@@ -32,7 +35,7 @@ export function CookieBanner() {
     setShowSettings(false);
   };
 
-  if (!visible) return null;
+  if (!visible || pathname.startsWith(ADMIN_PATH)) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[9999] px-4 pb-4 md:pb-6 animate-fade-up">

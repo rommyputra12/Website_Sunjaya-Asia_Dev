@@ -1,4 +1,5 @@
 import React from "react";
+import { ADMIN_PATH } from "../../lib/adminPath";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { useLang } from "../../i18n/LanguageContext";
@@ -40,7 +41,7 @@ export const Footer = () => {
     clearTimeout(s.timer);
     if (s.count >= 5) {
       s.count = 0;
-      navigate("/admin");
+      navigate(ADMIN_PATH);
       return;
     }
     s.timer = setTimeout(() => { s.count = 0; }, 2000);

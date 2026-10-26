@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ADMIN_PATH } from "../lib/adminPath";
 import { useLocation } from "react-router-dom";
 
 const SITE = "https://sunjayaasia.com";
@@ -33,9 +34,10 @@ export const RouteSeo = () => {
   useEffect(() => {
     const base = "/" + (pathname.split("/")[1] || "");
     const page = PAGES[base] || PAGES["/"];
-    const isPrivate = base === "/admin" || !PAGES[base];
+    const isAdmin = base === ADMIN_PATH;
+    const isPrivate = isAdmin || !PAGES[base];
     const url = `${SITE}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
-    document.title = isPrivate ? `CMS — ${BRAND}` : page.title;
+    document.title = isAdmin ? `CMS — ${BRAND}` : isPrivate ? `Page not found — ${BRAND}` : page.title;
     setMeta("name", "description", page.desc);
     setMeta("name", "robots", isPrivate ? "noindex, nofollow" : "index, follow, max-image-preview:large");
     setMeta("property", "og:title", isPrivate ? BRAND : page.title.replace(` — The Power of Innovations`, ""));

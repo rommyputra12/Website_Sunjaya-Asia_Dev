@@ -305,3 +305,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - 2026-06: SEO/Security/Perf pass: RouteSeo.jsx (per-route title/desc/canonical/og:url/robots; /admin & /download noindex), public/robots.txt + sitemap.xml (sunjayaasia.com), JSON-LD Organization+WebSite in index.html; Google Fonts moved to <link> + preconnect (fonts, CDN worker). Backend: login brute-force lockout via Mongo login_attempts (5 fails per ip+email, 10 per email -> 15 min 429, TTL index), security headers middleware, no-store on /api/auth, CORS allow-list from CORS_ORIGINS (sunjayaasia.com, www, preview, localhost). Tested iteration_27 + tests/test_security_seo.py 16/16.
 - Backlog security: legacy static X-Admin-Token still accepted; public /download route page links project-code.tar.gz (file absent) — consider removing; JWT in localStorage.
 - 2026-06: Admin hardening: legacy X-Admin-Token removed; CMS session = httpOnly Secure SameSite=None Partitioned cookie sjg_session (Path=/api), /api/auth/logout; Bearer JWT still accepted; CSRF origin guard on cookie-auth unsafe requests (CORS list or same host); JWT_SECRET required; /download page removed, catch-all 404 page (noindex). Tested iteration_28.
+
+## 2026-06 — CMS URL moved
+- CMS login moved from /admin to /cms-portal-admin17 (constant in frontend/src/lib/adminPath.js). /admin now shows 404.
+- Footer 5-click trick now opens the new path. robots.txt no longer lists any admin path.
+- Cookie banner hidden on CMS even after in-app navigation.
