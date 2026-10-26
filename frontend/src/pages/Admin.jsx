@@ -854,7 +854,7 @@ const ImagesPanel = ({ client }) => {
           </button>
           {isOpen(secId) && (<div className="px-5 pb-6 pt-1">
           {secId === "home_subsidiaries_bg" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} />}
-          {secId === "home_pillars_mobile" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} assetKey="home_pillars_mobile_banner" section="home_pillars_mobile" testid="pillars-mobile-banner" title="Upload banner mobile" hint="Tampil tepi ke tepi di HP, di bawah paragraf Business Pillars. Tinggi mengikuti gambar (lebar min. 1080px). Tanpa gambar, HP memakai gambar Desktop." />}
+          {secId === "home_pillars_mobile" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} assetKey="home_pillars_mobile_banner" section="home_pillars_mobile" testid="pillars-mobile-banner" title="Upload banner mobile" hint="Tampil tepi ke tepi di HP, di bawah paragraf Business Pillars, rasio 9:16 (disarankan 1080×1920). Tanpa gambar, HP memakai gambar Desktop (ukuran aslinya)." />}
           {secId === "home_hero_mobile" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} assetKey="home_cover_mobile" section="home_hero_mobile" testid="hero-mobile-cover" title="Upload cover mobile" hint="Foto cover Home khusus HP, memenuhi layar tegak. Disarankan portrait 9:16 (min. 1080×1920). Tanpa gambar, HP memakai cover Desktop." />}
           {secId === "home_subsidiaries" && <AddCompanyUpload client={client} count={groups[secId].length} onDone={refresh} />}
           {secId === "home_partners" && (

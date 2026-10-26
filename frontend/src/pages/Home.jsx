@@ -239,7 +239,7 @@ export default function Home() {
             </p>
           </Reveal>
         </div>
-        <AssetImg k={byKey.homePillarsMobileBanner?.url ? "homePillarsMobileBanner" : "bgBusinessPillars"} alt="Business Pillars" data-testid="home-pillars-mobile-img" sizes="100vw" className="md:hidden relative z-10 block w-full h-auto" />
+        <AssetImg k={byKey.homePillarsMobileBanner?.url ? "homePillarsMobileBanner" : "bgBusinessPillars"} alt="Business Pillars" data-testid="home-pillars-mobile-img" sizes="100vw" className={`md:hidden relative z-10 block w-full ${byKey.homePillarsMobileBanner?.url ? "aspect-[9/16] object-cover" : "h-auto"}`} />
       </section>
 
       {/* PILLARS — each pillar is its own full-viewport section */}
