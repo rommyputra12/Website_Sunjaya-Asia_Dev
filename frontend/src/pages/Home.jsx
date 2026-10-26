@@ -241,7 +241,7 @@ export default function Home() {
               <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
             </p>
             <p className="mt-4 md:ml-[42%] mb-6 font-serif md:font-mono text-bone/90 stat-shadow text-[14px] md:text-base leading-[1.65] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-none" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
-              <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
+              <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span data-testid="home-pillars-highlight" className="font-bold copper-pop">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
         </div>
