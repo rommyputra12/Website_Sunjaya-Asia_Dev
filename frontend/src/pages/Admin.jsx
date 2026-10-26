@@ -441,7 +441,8 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
 /* ================= IMAGES (asset manager, grouped by page section) ================= */
 const IMAGE_SECTIONS = [
   { id: "nav", page: "brand", label: "Navbar & Brand" },
-  { id: "home_hero", page: "home", label: "Home — Hero Cover" },
+  { id: "home_hero", page: "home", label: "Home — Hero Cover (Desktop)" },
+  { id: "home_hero_mobile", page: "home", label: "Home — Hero Cover (Mobile)" },
   { id: "home_pillars_intro", page: "home", label: "Home — Pillars Intro Background (Desktop)" },
   { id: "home_pillars_mobile", page: "home", label: "Home — Pillars Intro Banner (Mobile)" },
   { id: "home_pillar_sections", page: "home", label: "Home — Pillar 01–03 · Foto Pillar (portrait)" },
@@ -778,6 +779,7 @@ const ImagesPanel = ({ client }) => {
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
   if (!groups.home_subsidiaries_bg) groups.home_subsidiaries_bg = []; // optional background slot
   if (!groups.home_pillars_mobile) groups.home_pillars_mobile = []; // optional mobile banner slot
+  if (!groups.home_hero_mobile) groups.home_hero_mobile = []; // optional mobile hero slot
   const catOf = (a) => a.meta?.category || "partner";
   const q = query.trim().toLowerCase();
   const matches = (a, secId) => !q || [a.key, a.alt, a.meta?.name?.en, sectionLabel(secId)].some((v) => (v || "").toLowerCase().includes(q));
@@ -853,6 +855,7 @@ const ImagesPanel = ({ client }) => {
           {isOpen(secId) && (<div className="px-5 pb-6 pt-1">
           {secId === "home_subsidiaries_bg" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} />}
           {secId === "home_pillars_mobile" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} assetKey="home_pillars_mobile_banner" section="home_pillars_mobile" testid="pillars-mobile-banner" title="Upload banner mobile" hint="Tampil tepi ke tepi di HP, di bawah paragraf Business Pillars. Tinggi mengikuti gambar (lebar min. 1080px). Tanpa gambar, HP memakai gambar Desktop." />}
+          {secId === "home_hero_mobile" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} assetKey="home_cover_mobile" section="home_hero_mobile" testid="hero-mobile-cover" title="Upload cover mobile" hint="Foto cover Home khusus HP, memenuhi layar tegak. Disarankan portrait 9:16 (min. 1080×1920). Tanpa gambar, HP memakai cover Desktop." />}
           {secId === "home_subsidiaries" && <AddCompanyUpload client={client} count={groups[secId].length} onDone={refresh} />}
           {secId === "home_partners" && (
             <div className="mb-5 border border-copper/30 bg-ink p-4">

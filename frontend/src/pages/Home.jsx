@@ -103,7 +103,8 @@ export default function Home() {
           style={{ y: parallaxY, scale: parallaxScale, opacity: parallaxOpacity }}
           className="absolute inset-0"
         >
-          <AssetImg k="cover" alt="Sunjaya Asia Group" className="w-full h-full object-cover" loading="eager" />
+          <AssetImg k="cover" alt="Sunjaya Asia Group" className={`w-full h-full object-cover ${byKey.homeCoverMobile?.url ? "hidden md:block" : ""}`} loading="eager" />
+          {byKey.homeCoverMobile?.url && <AssetImg k="homeCoverMobile" alt="Sunjaya Asia Group" data-testid="home-cover-mobile" sizes="100vw" className="md:hidden w-full h-full object-cover" loading="eager" />}
         </motion.div>
         </div>
 
