@@ -262,7 +262,7 @@ export default function Home() {
                   <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-obsidian mb-2 font-bold">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
                   <h3 className="font-serif text-[1.5rem] md:text-[2rem] text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h3>
                 </div>
-                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-left md:text-justify"><Fmt text={t(`pillar.${p.num}.body`, p.body)} /></p>
+                <p className="font-serif md:font-mono text-bone/80 text-[14px] md:text-base leading-[1.65] max-w-2xl text-justify [text-justify:inter-word] hyphens-none"><Fmt text={t(`pillar.${p.num}.body`, p.body)} /></p>
                 <ul className="mt-5 space-y-2.5 [&>li]:text-sm md:[&>li]:text-base [&>li]:tracking-wide">
                   {pillarLines(p).map((l) => (
                     <li key={l} className="flex items-start gap-2.5 font-mono text-[11px] md:text-xs text-bone font-bold">
