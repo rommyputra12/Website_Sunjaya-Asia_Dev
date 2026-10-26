@@ -319,3 +319,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Business Pillars intro: justified text with auto-hyphenation (lang="en") on phones; thin copper fading line under the "Business Pillars" kicker (all sizes, w-64/md:w-96).
 - Mobile Business Pillars banner: own CMS slot "Home — Pillars Intro Banner (Mobile)" (key home_pillars_mobile_banner, section home_pillars_mobile, optional/deletable, falls back to bg_business_pillars). Rendered edge-to-edge under the paragraphs on phones only.
 - Mobile Home hero cover: own CMS slot "Home — Hero Cover (Mobile)" (key home_cover_mobile, section home_hero_mobile, optional/deletable). Phones use it when present, else desktop cover.
+- Hero stats: count-up from 0 when visible (components/CountUp.jsx, parses prefix/number/suffix, respects reduced motion). Mobile: no boxes, labels left with hanging indent (no clamp, 2 lines at 320–430px), values centered & smaller (1rem / 1.1rem ≥400px).

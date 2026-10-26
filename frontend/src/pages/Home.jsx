@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { CountUp } from "../components/CountUp";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Marquee from "react-fast-marquee";
@@ -188,7 +189,7 @@ export default function Home() {
 
         {/* Stats 01–04 — fade up into view on scroll */}
         <div id="stats"
-          className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 pb-8 md:pb-10 grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-7 md:gap-x-5 md:gap-y-8 items-stretch md:items-start justify-items-stretch md:justify-items-center"
+          className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 pb-8 md:pb-10 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-7 md:gap-x-5 md:gap-y-8 items-stretch md:items-start justify-items-stretch md:justify-items-center"
         >
           {STATS.map((s, i) => (
             <motion.div
@@ -200,15 +201,15 @@ export default function Home() {
               data-testid={`hero-stat-${s.key}`}
               className="w-full md:max-w-[280px] min-w-0 text-left"
             >
-              <div className="flex items-start justify-start gap-1 text-[9px] md:text-base leading-snug md:leading-normal font-mono uppercase tracking-[0.08em] md:tracking-[0.14em] text-bone font-semibold min-h-[2.6em]">
+              <div className="flex items-start justify-start gap-1 text-[9px] md:text-base leading-snug md:leading-normal font-mono uppercase tracking-[0.04em] md:tracking-[0.14em] text-bone font-semibold min-h-[2.75em] md:min-h-[2.6em]">
                 <span className="shrink-0 text-[9px] md:text-xs text-copper leading-snug">0{i + 1}</span>
                 <span className="shrink-0 text-[9px] md:text-xs text-copper leading-snug"> · </span>
-                <span className="flex-1 text-[9px] md:text-xs leading-snug line-clamp-2 drop-shadow-[0_1px_6px_rgba(5,30,43,0.9)]"> {t(`stats.${s.key}`)}</span>
+                <span className="flex-1 text-[9px] md:text-xs leading-snug md:line-clamp-2 drop-shadow-[0_1px_6px_rgba(5,30,43,0.9)]"> {t(`stats.${s.key}`)}</span>
               </div>
               <div className="mt-2 md:mt-3 flex items-baseline justify-center md:justify-start gap-1">
                 <span className="hidden md:inline shrink-0 text-xs leading-snug invisible">0{i + 1}</span>
                 <span className="hidden md:inline shrink-0 text-xs leading-snug invisible">·</span>
-                <span className="font-serif text-[1.2rem] sm:text-2xl md:text-3xl text-white tracking-tight leading-none whitespace-nowrap drop-shadow-[0_2px_10px_rgba(5,30,43,0.9)]">{t(`stats.value.${s.key}`, s.value)}</span>
+                <CountUp delay={0.25 + i * 0.12} data-testid={`hero-stat-value-${s.key}`} value={t(`stats.value.${s.key}`, s.value)} className="font-serif text-[1rem] min-[400px]:text-[1.1rem] sm:text-2xl md:text-3xl text-white tracking-tight leading-none whitespace-nowrap tabular-nums drop-shadow-[0_2px_10px_rgba(5,30,43,0.9)]" />
               </div>
             </motion.div>
           ))}
