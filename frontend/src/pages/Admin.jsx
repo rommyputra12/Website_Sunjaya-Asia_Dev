@@ -442,7 +442,8 @@ const FocalEditorModal = ({ asset, client, onClose, onSaved }) => {
 const IMAGE_SECTIONS = [
   { id: "nav", page: "brand", label: "Navbar & Brand" },
   { id: "home_hero", page: "home", label: "Home — Hero Cover" },
-  { id: "home_pillars_intro", page: "home", label: "Home — Pillars Intro Background" },
+  { id: "home_pillars_intro", page: "home", label: "Home — Pillars Intro Background (Desktop)" },
+  { id: "home_pillars_mobile", page: "home", label: "Home — Pillars Intro Banner (Mobile)" },
   { id: "home_pillar_sections", page: "home", label: "Home — Pillar 01–03 · Foto Pillar (portrait)" },
   { id: "home_pillar_bg", page: "home", label: "Home — Pillar 01–03 · Background" },
   { id: "home_subsidiaries_bg", page: "home", label: "Home — Subsidiaries Background" },
@@ -469,23 +470,23 @@ const sectionIndex = (id) => {
   return i === -1 ? IMAGE_SECTIONS.length : i;
 };
 // Empty-state uploader for the optional Home Subsidiaries background
-const SubsBgUpload = ({ client, onDone }) => {
+const SubsBgUpload = ({ client, onDone, assetKey = "home_subsidiaries_bg", section = "home_subsidiaries_bg", title = "Upload background image", hint = "Opsional — tanpa gambar, section memakai warna gading. Gambar otomatis dipudarkan 60% dengan lapisan gading.", testid = "subs-bg" }) => {
   const [busy, setBusy] = useState(false);
   const upload = async (file) => {
     if (!file) return;
     setBusy(true);
     try {
       const fd = new FormData();
-      fd.append("file", file); fd.append("key", "home_subsidiaries_bg"); fd.append("section", "home_subsidiaries_bg"); fd.append("sort_order", "100");
+      fd.append("file", file); fd.append("key", assetKey); fd.append("section", section); fd.append("sort_order", "100");
       await client.post("/assets", fd, { headers: { "Content-Type": "multipart/form-data" } });
       toast.success("Background uploaded"); await onDone();
     } catch (err) { toast.error(errMsg(err, "Upload failed")); } finally { setBusy(false); }
   };
   return (
-    <label data-testid="subs-bg-upload" className="flex flex-col items-center justify-center gap-2 border border-dashed border-copper/40 bg-ink p-8 cursor-pointer hover:border-copper transition-colors">
-      <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{busy ? "Uploading…" : "Upload background image"}</span>
-      <span className="font-mono text-[9px] text-ash">Opsional — tanpa gambar, section memakai warna gading. Gambar otomatis dipudarkan 60% dengan lapisan gading.</span>
-      <input type="file" accept="image/*" className="hidden" disabled={busy} data-testid="subs-bg-file" onChange={(e) => upload(e.target.files?.[0])} />
+    <label data-testid={`${testid}-upload`} className="flex flex-col items-center justify-center gap-2 border border-dashed border-copper/40 bg-ink p-8 cursor-pointer hover:border-copper transition-colors">
+      <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-copper">{busy ? "Uploading…" : title}</span>
+      <span className="font-mono text-[9px] text-ash">{hint}</span>
+      <input type="file" accept="image/*" className="hidden" disabled={busy} data-testid={`${testid}-file`} onChange={(e) => upload(e.target.files?.[0])} />
     </label>
   );
 };
@@ -776,6 +777,7 @@ const ImagesPanel = ({ client }) => {
       : (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.key.localeCompare(b.key)));
   if (!groups.home_partners) groups.home_partners = []; // logo section always available for uploads
   if (!groups.home_subsidiaries_bg) groups.home_subsidiaries_bg = []; // optional background slot
+  if (!groups.home_pillars_mobile) groups.home_pillars_mobile = []; // optional mobile banner slot
   const catOf = (a) => a.meta?.category || "partner";
   const q = query.trim().toLowerCase();
   const matches = (a, secId) => !q || [a.key, a.alt, a.meta?.name?.en, sectionLabel(secId)].some((v) => (v || "").toLowerCase().includes(q));
@@ -850,6 +852,7 @@ const ImagesPanel = ({ client }) => {
           </button>
           {isOpen(secId) && (<div className="px-5 pb-6 pt-1">
           {secId === "home_subsidiaries_bg" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} />}
+          {secId === "home_pillars_mobile" && !groups[secId].length && <SubsBgUpload client={client} onDone={refresh} assetKey="home_pillars_mobile_banner" section="home_pillars_mobile" testid="pillars-mobile-banner" title="Upload banner mobile" hint="Tampil tepi ke tepi di HP, di bawah paragraf Business Pillars. Tinggi mengikuti gambar (lebar min. 1080px). Tanpa gambar, HP memakai gambar Desktop." />}
           {secId === "home_subsidiaries" && <AddCompanyUpload client={client} count={groups[secId].length} onDone={refresh} />}
           {secId === "home_partners" && (
             <div className="mb-5 border border-copper/30 bg-ink p-4">

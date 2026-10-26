@@ -218,11 +218,11 @@ export default function Home() {
         {/* Top gradient for title legibility */}
         <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-obsidian/60 via-obsidian/20 to-transparent pointer-events-none" />
         {/* Title overlay — top center, aligned above the middle pillar box (The Core) */}
-        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-10 pt-14 md:pt-28 pb-10 md:pb-0">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-10 pt-14 md:pt-28 pb-4 md:pb-0">
           <Reveal>
             <div className="md:ml-[42%]">
               <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
-              <span data-testid="home-pillars-copper-line" className="mt-3 block h-px w-28 md:w-40 bg-gradient-to-r from-copper via-copper/60 to-transparent" />
+              <span data-testid="home-pillars-copper-line" className="mt-3 block h-px w-64 md:w-96 bg-gradient-to-r from-copper via-copper/60 to-transparent" />
             </div>
             <p lang="en" className="mt-4 md:ml-[42%] text-bone/90 text-[13px] md:text-base leading-[1.75] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-auto md:hyphens-manual">
               <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
@@ -231,8 +231,8 @@ export default function Home() {
               <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
-          <AssetImg k="bgBusinessPillars" alt="Business Pillars" data-testid="home-pillars-mobile-img" sizes="100vw" className="md:hidden mt-2 w-full h-auto rounded-lg border border-white/10" />
         </div>
+        <AssetImg k={byKey.homePillarsMobileBanner?.url ? "homePillarsMobileBanner" : "bgBusinessPillars"} alt="Business Pillars" data-testid="home-pillars-mobile-img" sizes="100vw" className="md:hidden relative z-10 block w-full h-auto" />
       </section>
 
       {/* PILLARS — each pillar is its own full-viewport section */}

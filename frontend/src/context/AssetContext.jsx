@@ -30,6 +30,7 @@ export const ASSET_DB_KEYS = {
   homePillar02Bg: "home_pillar_02_bg",
   homePillar03Bg: "home_pillar_03_bg",
   bgBusinessPillars: "bg_business_pillars",
+  homePillarsMobileBanner: "home_pillars_mobile_banner",
   bgFooter: "bg_footer",
   aboutBanner: "about_banner",
   aboutCompanyHistory: "about_company_history",

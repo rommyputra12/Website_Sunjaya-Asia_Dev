@@ -316,4 +316,5 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Sections size to content on phones (no forced 100vh), scroll-snap disabled on phones → same look on iPhone 11 / 16 Pro Max.
 - Footer (<640px): auto height, office glass cards with copper edge, 2-col legal links, bigger socials.
 - Hero: left-aligned body, full-width stacked CTAs, stats as glass cards. Business Pillars: infographic shown whole below text. Pillars: text always before image. Subs teaser: fixed 210px card rows.
-- Business Pillars intro: justified text with auto-hyphenation (lang="en") on phones; thin copper fading line under the "Business Pillars" kicker (all sizes).
+- Business Pillars intro: justified text with auto-hyphenation (lang="en") on phones; thin copper fading line under the "Business Pillars" kicker (all sizes, w-64/md:w-96).
+- Mobile Business Pillars banner: own CMS slot "Home — Pillars Intro Banner (Mobile)" (key home_pillars_mobile_banner, section home_pillars_mobile, optional/deletable, falls back to bg_business_pillars). Rendered edge-to-edge under the paragraphs on phones only.
