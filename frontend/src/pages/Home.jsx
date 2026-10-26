@@ -141,7 +141,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <div className="mt-5 md:mt-6 grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="mt-8 md:mt-6 grid grid-cols-1 md:grid-cols-12 gap-6">
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -156,7 +156,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.7, duration: 0.9 }}
-            className="mt-8 md:mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-3"
+            className="mt-14 md:mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-3"
           >
             <Link
               to="/about#company-history"
@@ -178,7 +178,7 @@ export default function Home() {
           </motion.div>
 
           {/* Gap so the white line sits below the Discover button, stats start just under it */}
-          <div className="mt-8 md:mt-12" />
+          <div className="mt-12 md:mt-12" />
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
