@@ -311,3 +311,8 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - Footer 5-click trick now opens the new path. robots.txt no longer lists any admin path.
 - Cookie banner hidden on CMS even after in-app navigation.
 - 404 page is bare: no header, footer (so no secret trigger), cookie banner or "back to home" link. Known routes list in App.jsx (KNOWN).
+
+## 2026-06 — Home mobile redesign (<768px only, desktop untouched)
+- Sections size to content on phones (no forced 100vh), scroll-snap disabled on phones → same look on iPhone 11 / 16 Pro Max.
+- Footer (<640px): auto height, office glass cards with copper edge, 2-col legal links, bigger socials.
+- Hero: left-aligned body, full-width stacked CTAs, stats as glass cards. Business Pillars: infographic shown whole below text. Pillars: text always before image. Subs teaser: fixed 210px card rows.

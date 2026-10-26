@@ -15,8 +15,8 @@ const SOCIALS = [
 ];
 
 const OfficeBlock = ({ o, i }) => (
-  <div data-testid={`footer-office-${i}`} className="min-w-0">
-    <div data-testid={`footer-office-label-${i}`} className="mb-1 font-mono text-[11px] tracking-[0.16em] sm:tracking-[0.1em] lg:tracking-[0.16em] uppercase text-copper sm:whitespace-nowrap sm:text-xs">{o.label}</div>
+  <div data-testid={`footer-office-${i}`} className="min-w-0 rounded-lg border border-white/10 border-l-2 border-l-copper bg-white/[0.04] p-4 backdrop-blur-md sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+    <div data-testid={`footer-office-label-${i}`} className="mb-1 font-mono text-[11px] tracking-[0.12em] sm:tracking-[0.1em] lg:tracking-[0.16em] uppercase text-copper sm:whitespace-nowrap sm:text-xs">{o.label}</div>
     {o.line1 && <p>{o.line1}</p>}
     {o.line2 && <p>{o.line2}</p>}
     {o.country && <p>{o.country}</p>}
@@ -48,7 +48,7 @@ export const Footer = () => {
   };
 
   return (
-    <footer id="site-footer" data-testid="site-footer" className="snap-section relative h-[100svh] overflow-hidden bg-[#071d27] text-bone">
+    <footer id="site-footer" data-testid="site-footer" className="snap-section relative overflow-hidden bg-[#071d27] text-bone sm:h-[100svh]">
       <AssetImg
         k="bgFooter"
         alt=""
@@ -56,23 +56,23 @@ export const Footer = () => {
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto flex h-full w-full max-w-[1920px] flex-col px-5 pt-4 pb-4 sm:px-8 sm:pt-5 sm:pb-5 md:px-10 md:pt-6 md:pb-6 lg:px-14 lg:pt-7 lg:pb-7">
+      <div className="relative mx-auto flex h-full w-full max-w-[1920px] flex-col px-5 pt-28 pb-6 sm:px-8 sm:pt-5 sm:pb-5 md:px-10 md:pt-6 md:pb-6 lg:px-14 lg:pt-7 lg:pb-7">
         <div className="grid min-h-0 flex-1 grid-cols-1 items-end gap-4 sm:gap-5 md:gap-6 lg:gap-10">
           <div className="flex min-h-0 flex-col justify-end pb-1">
             <div>
-              <h2 className="max-w-none font-elegant-serif text-[clamp(2.4rem,5vw,6rem)] leading-[0.95] tracking-[-0.02em] text-bone">
+              <h2 className="max-w-none font-elegant-serif text-[2.75rem] sm:text-[clamp(2.4rem,5vw,6rem)] leading-[0.95] tracking-[-0.02em] text-bone">
                 {t("footer.tagline")}
               </h2>
-              <p className="mt-3 ml-32 max-w-[min(100%,540px)] border-l border-copper/70 pl-5 text-[11px] leading-[1.5] text-white/70 sm:ml-36 sm:pl-6 sm:text-xs lg:ml-40 lg:pl-7 lg:text-sm">
+              <p className="mt-5 ml-6 max-w-[min(100%,540px)] border-l border-copper/70 pl-4 text-[13px] leading-[1.6] text-white/70 sm:mt-3 sm:pl-5 sm:leading-[1.5] sm:ml-36 sm:pl-6 sm:text-xs lg:ml-40 lg:pl-7 lg:text-sm">
                 <Fmt text={t("footer.description", "Empowering global industries by bridging essential resources with next-generation technology, sustainable infrastructure, and transformative enterprise solutions.")} />
               </p>
 
-              <div className="mt-8 w-fit max-w-full border-t border-white/15 pt-3 md:mt-10 md:pt-4 lg:mt-12 lg:pt-5">
+              <div className="mt-10 w-full sm:w-fit max-w-full border-t border-white/15 pt-5 sm:pt-3 md:mt-10 md:pt-4 lg:mt-12 lg:pt-5">
                 <div className="mb-3 font-mono text-[15px] tracking-[0.2em] uppercase text-white font-bold sm:mb-4 sm:text-base">{t("footer.company", "Sunjaya Asia Group Limited")}</div>
-                <div className="text-[11px] leading-[1.4] text-white/80 sm:text-xs">
+                <div className="text-[12px] leading-[1.5] text-white/80 sm:text-xs sm:leading-[1.4]">
                   {hq && <OfficeBlock o={hq} i={0} />}
                   {branches.length > 0 && (
-                    <div className={`mt-10 grid grid-cols-1 gap-4 sm:gap-8 ${branches.length === 1 ? "" : branches.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+                    <div className={`mt-3 sm:mt-10 grid grid-cols-1 gap-3 sm:gap-8 ${branches.length === 1 ? "" : branches.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
                       {branches.map((o, i) => <OfficeBlock key={i} o={o} i={i + 1} />)}
                     </div>
                   )}
@@ -82,18 +82,18 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-end justify-between gap-4 pt-6 sm:pt-7 md:pt-8 lg:pt-10">
-          <div className="w-fit">
+        <div className="flex shrink-0 flex-col gap-6 pt-8 sm:flex-row sm:items-end sm:justify-between sm:gap-4 sm:pt-7 md:pt-8 lg:pt-10">
+          <div className="w-full sm:w-fit">
             <Link
               to="/contact"
-              className="group inline-flex items-center gap-1.5 rounded-full bg-copper px-3.5 py-1.5 font-mono text-[9px] font-bold tracking-[0.16em] uppercase text-[#071d27] shadow-[0_0_0_0_rgba(200,126,51,0.5)] transition-all duration-300 hover:shadow-[0_0_0_4px_rgba(200,126,51,0.25)] hover:brightness-110 sm:px-4 sm:py-2 sm:text-[10px]"
+              className="group inline-flex items-center gap-1.5 rounded-full bg-copper px-5 py-2.5 font-mono text-[10px] font-bold tracking-[0.16em] uppercase text-[#071d27] shadow-[0_0_0_0_rgba(200,126,51,0.5)] transition-all duration-300 hover:shadow-[0_0_0_4px_rgba(200,126,51,0.25)] hover:brightness-110 sm:px-4 sm:py-2 sm:text-[10px]"
             >
               Contact Us
               <ArrowUpRight className="h-3 w-3 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={2} />
             </Link>
-            <div className="mt-4 border-t border-white/15 pt-3 sm:pt-4">
+            <div className="mt-6 border-t border-white/15 pt-4 sm:mt-4 sm:pt-4">
               <div className="font-mono text-[11px] tracking-[0.2em] uppercase text-white/55 font-bold sm:text-xs">Legal</div>
-              <nav className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 sm:gap-x-5">
+              <nav className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 sm:mt-2 sm:flex sm:flex-wrap sm:gap-y-1.5 sm:gap-x-5">
                 {[
                   { slug: "data-protection", label: "Data Protection Policy" },
                   { slug: "cookie-statement", label: "Cookie Statement" },
@@ -113,9 +113,9 @@ export const Footer = () => {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div data-testid="footer-socials" className="flex shrink-0 items-center gap-3">
             {SOCIALS.map((s) => {
-              const cls = "group flex h-6 w-6 items-center justify-center rounded-full overflow-hidden transition-all duration-300 hover:scale-110 sm:h-7 sm:w-7";
+              const cls = "group flex items-center justify-center rounded-full overflow-hidden transition-all duration-300 hover:scale-110 h-9 w-9 sm:h-7 sm:w-7";
               const inner = (
                 <AssetImg
                   k={s.imageKey}
@@ -147,7 +147,7 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-3 flex shrink-0 flex-col gap-1.5 border-t border-white/15 pt-3 font-mono text-[8px] tracking-[0.13em] uppercase text-white/50 sm:flex-row sm:items-center sm:justify-between sm:pt-4 sm:text-[9px]">
+        <div className="mt-6 sm:mt-3 flex shrink-0 flex-col gap-1.5 border-t border-white/15 pt-3 font-mono text-[9px] tracking-[0.13em] uppercase text-white/50 sm:flex-row sm:items-center sm:justify-between sm:pt-4 sm:text-[9px]">
           <p>{t("footer.copy")}</p>
           <p
             onClick={handleSecret}

@@ -139,7 +139,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              className="md:col-span-6 md:col-start-6 text-bone text-[13px] md:text-xl leading-[1.45] tracking-[-0.005em] max-w-xl min-h-[5.8em] md:min-h-[5.8em] font-serif font-light hero-body-glow text-justify md:text-left"
+              className="md:col-span-6 md:col-start-6 text-bone text-[15px] md:text-xl leading-[1.55] md:leading-[1.45] tracking-[-0.005em] max-w-xl min-h-[5.8em] md:min-h-[5.8em] font-serif font-light hero-body-glow text-left"
             >
               <Fmt text={t("hero.sub")} />
             </motion.p>
@@ -149,12 +149,12 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.7, duration: 0.9 }}
-            className="mt-8 md:mt-10 flex flex-wrap gap-3"
+            className="mt-8 md:mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-3"
           >
             <Link
               to="/about#company-history"
               data-testid="hero-cta-primary"
-              className="group relative inline-flex items-center gap-2 px-5 h-10 md:px-7 md:h-12 rounded-full bg-gradient-to-br from-copper-hi to-copper text-obsidian font-mono text-[10px] md:text-xs tracking-[0.18em] uppercase font-bold shadow-[0_8px_30px_-6px_rgba(184,127,61,0.6)] hover:shadow-[0_12px_40px_-6px_rgba(184,127,61,0.8)] hover:-translate-y-0.5 transition-all duration-500 ease-out overflow-hidden"
+              className="group relative inline-flex items-center justify-center gap-2 px-5 h-12 md:px-7 rounded-full bg-gradient-to-br from-copper-hi to-copper text-obsidian font-mono text-[10px] md:text-xs tracking-[0.18em] uppercase font-bold shadow-[0_8px_30px_-6px_rgba(184,127,61,0.6)] hover:shadow-[0_12px_40px_-6px_rgba(184,127,61,0.8)] hover:-translate-y-0.5 transition-all duration-500 ease-out overflow-hidden"
             >
               <span className="relative z-10">{t("hero.cta_primary")}</span>
               <span className="relative z-10 transition-transform duration-500 group-hover:translate-x-1">→</span>
@@ -163,7 +163,7 @@ export default function Home() {
             <Link
               to="/contact"
               data-testid="hero-cta-secondary"
-              className="group inline-flex items-center gap-2 px-5 h-10 md:px-7 md:h-12 rounded-full bg-obsidian/70 backdrop-blur-md border border-white/40 text-bone font-mono text-[10px] md:text-xs tracking-[0.18em] uppercase font-semibold shadow-[0_2px_12px_rgba(5,30,43,0.5)] hover:border-copper hover:text-copper hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-8px_rgba(184,127,61,0.4)] transition-all duration-500 ease-out"
+              className="group inline-flex items-center justify-center gap-2 px-5 h-12 md:px-7 rounded-full bg-obsidian/70 backdrop-blur-md border border-white/40 text-bone font-mono text-[10px] md:text-xs tracking-[0.18em] uppercase font-semibold shadow-[0_2px_12px_rgba(5,30,43,0.5)] hover:border-copper hover:text-copper hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-8px_rgba(184,127,61,0.4)] transition-all duration-500 ease-out"
             >
               {t("hero.cta_secondary")}
               <span className="transition-transform duration-500 group-hover:translate-x-1">→</span>
@@ -182,7 +182,7 @@ export default function Home() {
 
         {/* Stats 01–04 — fade up into view on scroll */}
         <div id="stats"
-          className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 pb-8 md:pb-10 grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-8 items-start justify-items-center"
+          className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full pt-6 md:pt-8 pb-8 md:pb-10 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-x-5 md:gap-y-8 items-stretch md:items-start justify-items-stretch md:justify-items-center"
         >
           {STATS.map((s, i) => (
             <motion.div
@@ -191,17 +191,18 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full max-w-[280px] min-w-0"
+              data-testid={`hero-stat-${s.key}`}
+              className="w-full md:max-w-[280px] min-w-0 rounded-lg border border-white/15 bg-obsidian/45 backdrop-blur-md p-3.5 md:p-0 md:rounded-none md:border-0 md:bg-transparent md:backdrop-blur-none"
             >
               <div className="flex items-start gap-1 font-mono uppercase tracking-[0.14em] text-bone font-semibold min-h-[2.6em]">
                 <span className="shrink-0 text-[10px] md:text-xs text-copper leading-snug">0{i + 1}</span>
                 <span className="shrink-0 text-[10px] md:text-xs text-copper leading-snug">·</span>
-                <span className="flex-1 text-[10px] md:text-xs leading-snug line-clamp-2">{t(`stats.${s.key}`)}</span>
+                <span className="flex-1 text-[10px] md:text-xs leading-snug line-clamp-3 md:line-clamp-2">{t(`stats.${s.key}`)}</span>
               </div>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="shrink-0 text-[10px] md:text-xs leading-snug invisible">0{i + 1}</span>
-                <span className="shrink-0 text-[10px] md:text-xs leading-snug invisible">·</span>
-                <span className="font-serif text-[1.3rem] sm:text-2xl md:text-3xl text-white tracking-tight leading-none whitespace-nowrap drop-shadow-[0_2px_10px_rgba(5,30,43,0.9)]">{t(`stats.value.${s.key}`, s.value)}</span>
+              <div className="mt-2 md:mt-3 flex items-baseline gap-1">
+                <span className="hidden md:inline shrink-0 text-xs leading-snug invisible">0{i + 1}</span>
+                <span className="hidden md:inline shrink-0 text-xs leading-snug invisible">·</span>
+                <span className="font-serif text-[1.35rem] sm:text-2xl md:text-3xl text-white tracking-tight leading-tight md:leading-none md:whitespace-nowrap drop-shadow-[0_2px_10px_rgba(5,30,43,0.9)]">{t(`stats.value.${s.key}`, s.value)}</span>
               </div>
             </motion.div>
           ))}
@@ -209,26 +210,27 @@ export default function Home() {
       </section>
 
       {/* BUSINESS PILLAR INTRO — min full viewport, grows if content is taller */}
-      <section id="business-pillars" className="snap-section relative min-h-screen overflow-hidden bg-azure border-t border-copper/40">
+      <section id="business-pillars" className="snap-section relative md:min-h-screen overflow-hidden bg-azure border-t border-copper/40">
         <AssetImg
           k="bgBusinessPillars"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="hidden md:block absolute inset-0 h-full w-full object-cover"
         />
         {/* Top gradient for title legibility */}
         <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-obsidian/60 via-obsidian/20 to-transparent pointer-events-none" />
         {/* Title overlay — top center, aligned above the middle pillar box (The Core) */}
-        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-10 pt-24 md:pt-28">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-10 pt-14 md:pt-28 pb-10 md:pb-0">
           <Reveal>
             <div className="md:ml-[42%]">
-              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
+              <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
             </div>
-            <p className="mt-3 md:ml-[42%] text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify">
+            <p className="mt-3 md:ml-[42%] text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-left md:text-justify">
               <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
             </p>
-            <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-justify" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
+            <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-left md:text-justify" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
               <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
+          <AssetImg k="bgBusinessPillars" alt="Business Pillars" data-testid="home-pillars-mobile-img" sizes="100vw" className="md:hidden mt-2 w-full h-auto rounded-lg border border-white/10" />
         </div>
       </section>
 
@@ -236,7 +238,7 @@ export default function Home() {
       {PILLARS.map((p, i) => {
         const flip = i % 2 === 1;
         const TextCol = (
-          <Reveal className="md:col-span-6" delay={0}>
+          <Reveal className="order-1 md:order-none md:col-span-6" delay={0}>
             <div className="flex items-start gap-4 md:gap-6 mt-2 md:mt-6">
               <span className="chapter-num text-[clamp(2.5rem,5vw,4.5rem)]">{p.num}</span>
               <div className="pt-1 flex-1 min-w-0">
@@ -244,7 +246,7 @@ export default function Home() {
                   <div className="font-mono text-[10px] md:text-xs tracking-[0.22em] uppercase text-obsidian mb-2 font-bold">{t(`pillar.${p.num}.kicker`, p.kicker)}</div>
                   <h3 className="font-serif text-[1.5rem] md:text-[2rem] text-bone tracking-tight leading-[1.15]">{t(`pillar.${p.num}.title`, p.title)}</h3>
                 </div>
-                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-justify"><Fmt text={t(`pillar.${p.num}.body`, p.body)} /></p>
+                <p className="text-bone/80 text-sm md:text-base leading-[1.65] max-w-2xl text-left md:text-justify"><Fmt text={t(`pillar.${p.num}.body`, p.body)} /></p>
                 <ul className="mt-5 space-y-2.5 [&>li]:text-sm md:[&>li]:text-base [&>li]:tracking-wide">
                   {pillarLines(p).map((l) => (
                     <li key={l} className="flex items-start gap-2.5 font-mono text-[11px] md:text-xs text-bone font-bold">
@@ -258,7 +260,7 @@ export default function Home() {
           </Reveal>
         );
         const ImageCol = (
-          <Reveal className="md:col-span-6" delay={0.15}>
+          <Reveal className="order-2 md:order-none md:col-span-6" delay={0.15}>
             <div className="w-full flex flex-col items-center">
               {/* Full image visible — no cropping, chapter + button sit below */}
               <div className="relative w-full h-[36vh] md:h-[calc(100vh-11.5rem)] max-w-full overflow-hidden flex items-center justify-center">
@@ -301,7 +303,7 @@ export default function Home() {
           </Reveal>
         );
         return (
-          <section key={p.num} id={`pillar-${p.num}`} className="snap-section section-light relative min-h-screen pt-20 md:pt-24 pb-8 md:pb-0 flex items-center overflow-hidden border-t border-copper/40">
+          <section key={p.num} id={`pillar-${p.num}`} className="snap-section section-light relative md:min-h-screen pt-14 md:pt-24 pb-12 md:pb-0 flex items-center overflow-hidden border-t border-copper/40">
             {(p.num === "01" || p.num === "02" || p.num === "03") && (
               <>
                 <AssetImg
@@ -328,7 +330,7 @@ export default function Home() {
       })}
 
       {/* SUBSIDIARIES TEASER — grid fills available space (big photos) with a min-height floor so cards never squash or spill over the button */}
-      <section id="subsidiaries-teaser" className="snap-section section-light relative border-t border-copper/40 min-h-screen pt-20 md:pt-24 pb-0 flex flex-col overflow-hidden">
+      <section id="subsidiaries-teaser" className="snap-section section-light relative border-t border-copper/40 md:min-h-screen pt-14 md:pt-24 pb-10 md:pb-0 flex flex-col overflow-hidden">
         {byKey.homeSubsBg?.url && (
           <>
             <AssetImg k="homeSubsBg" alt="" data-testid="home-subs-bg" className="absolute inset-0 h-full w-full object-cover opacity-[0.5] pointer-events-none" />
@@ -338,7 +340,7 @@ export default function Home() {
         <div className="relative z-10 max-w-[1700px] mx-auto px-4 md:px-8 w-full flex-1 flex flex-col justify-center pt-4 md:pt-6 pb-2 md:pb-4">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4 mb-5 md:mb-6">
             <Reveal className="max-w-4xl">
-              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.subs.kicker", SUBS_TEASER.kicker)}</span>
+              <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("home.subs.kicker", SUBS_TEASER.kicker)}</span>
               <h2 className="font-serif text-base md:text-xl leading-[1.15] tracking-[-0.02em] text-bone mt-1.5">{t("home.subs.title", SUBS_TEASER.title)}</h2>
             </Reveal>
             <Reveal delay={0.1}>
@@ -348,7 +350,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          <div className="grid flex-1 min-h-[340px] md:min-h-[480px] grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 [grid-auto-rows:1fr]">
+          <div className="grid flex-1 md:min-h-[480px] grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[210px] md:[grid-auto-rows:1fr]">
             {subCards.slice(0, 6).map((s, i) => (
               <Reveal key={s.id} delay={i * 0.05} className="h-full">
                 <Link to="/subsidiaries" data-testid={`home-sub-card-${s.id}`} className="on-photo group relative block bg-obsidian h-full overflow-hidden rounded-sm cursor-pointer ring-0 hover:ring-2 hover:ring-copper/70 transition-shadow duration-300">
@@ -369,7 +371,7 @@ export default function Home() {
 
                     <div className="text-photo-shadow">
                       <div className="font-mono text-[8px] md:text-[9px] tracking-[0.22em] uppercase text-copper mb-0.5">{t(`subsidiary.${s.id}.city`, s.city)}</div>
-                      <h3 className="font-mono text-[10px] md:text-xs tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
+                      <h3 className="font-mono text-[11px] md:text-xs tracking-[0.06em] md:tracking-[0.08em] leading-snug uppercase">{t(`subsidiary.${s.id}.name`, s.name)}</h3>
                       <div className="mt-1 font-mono text-[7px] md:text-[8px] tracking-[0.16em] uppercase text-bone/70">
                         {t(`subsidiary.${s.id}.country`, s.city.split(",")[1]?.trim() || "")}{s.city.includes(",") ? " · " : ""}{t(`subsidiary.${s.id}.role`, s.role)}
                       </div>
@@ -405,7 +407,7 @@ export default function Home() {
         <div className="relative max-w-[1600px] mx-auto px-6 md:px-10 w-full pt-4 md:pt-6 z-10">
           {/* Kicker — heading position at the top */}
           <Reveal>
-            <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("presence.kicker")}</span>
+            <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("presence.kicker")}</span>
           </Reveal>
           {/* Subtitle + stats aligned in a row below the kicker */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-8 mt-4 md:mt-6">

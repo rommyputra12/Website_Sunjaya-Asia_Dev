@@ -65,6 +65,10 @@ html {
   scroll-snap-align: start;
   scroll-snap-stop: normal;
 }
+/* Phones: free scrolling, sections size to their content */
+@media (max-width: 767px) {
+  html { scroll-snap-type: none; }
+}
 
 body {
   margin: 0;

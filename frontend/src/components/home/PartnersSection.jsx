@@ -181,12 +181,12 @@ export const PartnersSection = () => {
   const rows = Array.from({ length: rowCount }, (_, i) => ({ id: `row${i + 1}`, logos: logos.slice(i * per, (i + 1) * per) })).filter((r) => r.logos.length);
 
   return (
-    <section id="partners" data-testid="home-partners" className="snap-section relative min-h-screen pt-24 md:pt-28 pb-16 flex flex-col justify-center overflow-hidden bg-obsidian border-t border-copper/30">
+    <section id="partners" data-testid="home-partners" className="snap-section relative md:min-h-screen pt-20 md:pt-28 pb-14 md:pb-16 flex flex-col justify-center overflow-hidden bg-obsidian border-t border-copper/30">
       <div className="max-w-[1440px] mx-auto px-6 md:px-10 w-full">
         {rows.length > 0 && (
           <>
             <Reveal>
-              <span className="font-mono text-lg md:text-xl tracking-[0.28em] uppercase text-copper font-bold">{t("home.partners.kicker")}</span>
+              <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("home.partners.kicker")}</span>
               <h2 className="font-serif text-base md:text-xl leading-[1.35] tracking-[-0.02em] text-bone/90 mt-2 max-w-3xl">{t("home.partners.title")}</h2>
             </Reveal>
             <div className="mt-8 md:mt-10 space-y-6 md:space-y-8">
