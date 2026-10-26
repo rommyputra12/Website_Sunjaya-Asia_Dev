@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, matchPath } from "react-router-dom";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { AssetProvider } from "./context/AssetContext";
 import { SmoothScroll } from "./components/motion/SmoothScroll";
@@ -42,6 +42,13 @@ const ScrollTop = () => {
   return null;
 };
 
+const KNOWN = ["/", "/about", "/pillars", "/subsidiaries", "/news", "/contact", ADMIN_PATH, "/legal", "/legal/:type"];
+// Header, footer & cookie banner only on real pages (404 stays bare)
+const OnKnownRoute = ({ children }) => {
+  const { pathname } = useLocation();
+  return KNOWN.some((p) => matchPath(p, pathname)) ? children : null;
+};
+
 function App() {
   return (
     <div className="App grain">
@@ -51,7 +58,7 @@ function App() {
           <SmoothScroll>
               <ScrollTop />
               <RouteSeo />
-              <Nav />
+              <OnKnownRoute><Nav /></OnKnownRoute>
               <main className="min-h-screen">
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -64,16 +71,14 @@ function App() {
                 <Route path="/legal/:type" element={<Legal />} />
                 <Route path="/legal" element={<Legal />} />
                 <Route path="*" element={
-                  <section data-testid="not-found" className="pt-40 pb-32 px-6 md:px-10 max-w-[1600px] mx-auto">
+                  <section data-testid="not-found" className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
                     <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">404</span>
                     <h1 className="mt-4 font-serif text-2xl md:text-4xl text-bone tracking-tight">Page not found</h1>
-                    <a href="/" data-testid="not-found-home" className="mt-8 inline-block font-mono text-xs tracking-[0.22em] uppercase text-copper border-b border-copper/50 pb-1 hover:border-copper transition-colors">Back to home →</a>
                   </section>
                 } />
               </Routes>
             </main>
-            <Footer />
-            <CookieBanner />
+            <OnKnownRoute><Footer /><CookieBanner /></OnKnownRoute>
           </SmoothScroll>
         </BrowserRouter>
       </LanguageProvider>

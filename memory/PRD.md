@@ -310,3 +310,4 @@ See `/app/memory/test_credentials.md` — Admin token `sunjaya-admin-2026-secret
 - CMS login moved from /admin to /cms-portal-admin17 (constant in frontend/src/lib/adminPath.js). /admin now shows 404.
 - Footer 5-click trick now opens the new path. robots.txt no longer lists any admin path.
 - Cookie banner hidden on CMS even after in-app navigation.
+- 404 page is bare: no header, footer (so no secret trigger), cookie banner or "back to home" link. Known routes list in App.jsx (KNOWN).
