@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { CountUp } from "../components/CountUp";
-import { PillarFloatCards } from "../components/home/PillarFloatCards";
+import { PillarFloatCards, PillarTagline } from "../components/home/PillarFloatCards";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Marquee from "react-fast-marquee";
@@ -247,6 +247,7 @@ export default function Home() {
           </Reveal>
           <PillarFloatCards />
         </div>
+        <PillarTagline />
       </section>
 
       {/* PILLARS — each pillar is its own full-viewport section */}
