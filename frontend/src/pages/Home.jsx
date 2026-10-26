@@ -145,7 +145,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              className="md:col-span-6 md:col-start-6 text-bone text-[15px] md:text-xl leading-[1.55] md:leading-[1.45] tracking-[-0.005em] max-w-xl min-h-[5.8em] md:min-h-[5.8em] font-serif font-light hero-body-glow text-left"
+              className="md:col-span-6 md:col-start-6 text-bone text-[13px] md:text-xl leading-[1.55] md:leading-[1.45] tracking-[-0.005em] max-w-xl min-h-[5.8em] md:min-h-[5.8em] font-serif font-light hero-body-glow text-left"
             >
               <Fmt text={t("hero.sub")} />
             </motion.p>
