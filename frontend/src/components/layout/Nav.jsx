@@ -56,10 +56,12 @@ export const Nav = () => {
   return (
     <header
       data-testid="site-nav"
-      className={`fixed top-0 inset-x-0 z-50 transition-[background,border] duration-500 ${
-        chromeActive ? "bg-obsidian/95 backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"
+      className={`fixed top-0 inset-x-0 z-50 pt-[env(safe-area-inset-top)] transition-[background,border] duration-500 ${
+        chromeActive ? "bg-obsidian lg:bg-obsidian/95 lg:backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"
       }`}
     >
+      {/* Solid cap behind the phone status bar / notch so content never shows through */}
+      <div data-testid="nav-safe-area-cap" aria-hidden className="lg:hidden absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-obsidian" />
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 h-20 md:h-24 flex items-center justify-between">
         <Logo />
 

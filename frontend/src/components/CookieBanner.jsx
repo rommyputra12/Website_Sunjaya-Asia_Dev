@@ -38,7 +38,7 @@ export function CookieBanner() {
   if (!visible || pathname.startsWith(ADMIN_PATH)) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] px-4 pb-4 md:pb-6 animate-fade-up">
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 animate-fade-up">
       <div className="mx-auto max-w-3xl rounded-xl border border-copper/30 bg-obsidian/95 backdrop-blur-xl shadow-2xl overflow-hidden">
         {!showSettings ? (
           <div className="p-5 md:p-6">

@@ -56,7 +56,7 @@ export const Footer = () => {
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto flex h-full w-full max-w-[1920px] flex-col px-5 pt-28 pb-6 sm:px-8 sm:pt-5 sm:pb-5 md:px-10 md:pt-6 md:pb-6 lg:px-14 lg:pt-7 lg:pb-7">
+      <div className="relative mx-auto flex h-full w-full max-w-[1920px] flex-col px-5 pt-28 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-5 sm:pb-5 md:px-10 md:pt-6 md:pb-6 lg:px-14 lg:pt-7 lg:pb-7">
         <div className="grid min-h-0 flex-1 grid-cols-1 items-end gap-4 sm:gap-5 md:gap-6 lg:gap-10">
           <div className="flex min-h-0 flex-col justify-end pb-1">
             <div>
