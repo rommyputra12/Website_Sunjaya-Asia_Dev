@@ -575,14 +575,16 @@ async def _seed_superadmin_if_empty():
     logger.info(f"Seeded super admin: {SUPER_ADMIN_EMAIL}")
 
 
-LOGIN_MAX_FAILS = 5
+LOGIN_MAX_FAILS = 5          # per ip+email
+LOGIN_MAX_FAILS_EMAIL = 10   # per email, regardless of ip (stops header/IP rotation)
 LOGIN_LOCK = timedelta(minutes=15)
 _attempts_db = AsyncIOMotorClient(os.environ["MONGO_URL"])[os.environ["DB_NAME"]].login_attempts
 
 
 def _client_ip(request: Request) -> str:
-    fwd = request.headers.get("x-forwarded-for", "")
-    return fwd.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    # Right-most X-Forwarded-For hop is added by our ingress; earlier hops are client-controlled
+    fwd = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    return request.headers.get("x-real-ip") or (fwd[-1] if fwd else None) or (request.client.host if request.client else "unknown")
 
 
 async def _login_locked(ident: str) -> Optional[int]:
@@ -598,14 +600,14 @@ async def _login_locked(ident: str) -> Optional[int]:
     return None
 
 
-async def _record_login_fail(ident: str):
+async def _record_login_fail(ident: str, max_fails: int = LOGIN_MAX_FAILS):
     now = datetime.now(timezone.utc)
     try:
         doc = await _attempts_db.find_one({"identifier": ident}) or {}
         expired = doc.get("locked_until") and doc["locked_until"].replace(tzinfo=timezone.utc) <= now
         count = 1 if expired else doc.get("count", 0) + 1
         upd = {"identifier": ident, "count": count, "last_failed": now, "expires_at": now + LOGIN_LOCK,
-               "locked_until": now + LOGIN_LOCK if count >= LOGIN_MAX_FAILS else None}
+               "locked_until": now + LOGIN_LOCK if count >= max_fails else None}
         await _attempts_db.update_one({"identifier": ident}, {"$set": upd}, upsert=True)
     except Exception as e:  # noqa: BLE001
         logger.warning(f"login_attempts unavailable: {e}")
@@ -616,17 +618,19 @@ async def auth_login(payload: LoginIn, request: Request):
     await _seed_superadmin_if_empty()
     email = payload.email.strip().lower()
     ident = f"{_client_ip(request)}:{email}"
-    mins = await _login_locked(ident)
+    email_ident = f"email:{email}"
+    mins = await _login_locked(ident) or await _login_locked(email_ident)
     if mins:
         raise HTTPException(status_code=429, detail=f"Too many failed attempts. Try again in {mins} minute(s).")
     user = await sb_select_one("admin_users", {"email": email}, svc=True)
     if not user or not verify_password(payload.password, user.get("password_hash", "")):
         await _record_login_fail(ident)
+        await _record_login_fail(email_ident, LOGIN_MAX_FAILS_EMAIL)
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not user.get("active", True):
         raise HTTPException(status_code=403, detail="Account is deactivated")
     try:
-        await _attempts_db.delete_one({"identifier": ident})
+        await _attempts_db.delete_many({"identifier": {"$in": [ident, email_ident]}})
     except Exception:  # noqa: BLE001
         pass
     return {"token": create_token(user), "user": _user_to_out(user).model_dump()}

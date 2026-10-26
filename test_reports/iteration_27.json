@@ -1,0 +1,39 @@
+{
+  "summary": "Tested the SEO, security and performance changes on backend and frontend. Backend: 15 of 16 tests pass in /app/backend/tests/test_security_seo.py. Passing: security headers (nosniff, DENY, Referrer-Policy, HSTS) on public API responses; Cache-Control no-store on /api/auth/*; CORS allows sunjayaasia.com, www and the preview origin and rejects evil.com on GET and preflight; brute-force lockout (5x401 then 429 with the exact message, also for the upper-case email); real superadmin login plus /auth/me; robots.txt is text/plain and sitemap.xml is text/xml with all 7 sunjayaasia.com URLs; index.html has Organization and WebSite JSON-LD. The one failure is a real security gap: the lockout can be bypassed by sending a fake X-Forwarded-For header. Frontend: every route (/, /about, /pillars, /subsidiaries, /news, /contact, /legal) sets its own title, description, canonical, og:url and og:title, each tag appears only once, and a trailing slash is normalised. /admin gets 'noindex, nofollow' and the title 'CMS — Sunjaya Asia Group'. All 5 Google font families load and no images are broken. The only console errors were the expected 401/429 responses from the lockout test. The /admin UI shows the toast 'Too many failed attempts. Try again in 15 minute(s).' on the 6th try with a fake email. The real admin login works (1 attempt, no failures on real accounts), and the Images and Content tabs load. A no-op PUT /api/content/{id} with the same value returned 200 and the value was unchanged.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/auth/login", "issue": "Lockout bypass: _client_ip() takes the FIRST value of X-Forwarded-For, which the client controls. After 5 failures (429 lock), the next request with 'X-Forwarded-For: 1.2.3.4' gets 401 again instead of 429. So an attacker can rotate the header and guess passwords without limit. Fix: take the right-most / trusted-proxy hop (e.g. split(',')[-1], or X-Real-IP from the ingress). Better still, also keep a per-email counter that does not depend on IP.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "_seed_superadmin_if_empty() runs an extra Supabase SELECT on every login. Seeding also only happens when the table is empty, so if SUPER_ADMIN_PASSWORD changes in env the existing admin is not updated (playbook check 5)."},
+      {"endpoint": "Auth model", "issue": "JWT is stored in localStorage as a Bearer token, not an httpOnly cookie (playbook check 2 not applicable). This is acceptable given the CORS allow-list, but an XSS could steal the token."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "index.html", "issues": ["Duplicate preconnect tags for fonts.googleapis.com and fonts.gstatic.com (lines ~22-23 and ~32-33). Harmless but redundant.", "A separate legacy Inter:wght@600 stylesheet link is still loaded alongside the main font link, an extra render-blocking request. Merge it into the main css2 URL if Inter is still used."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_security_seo.py", "/app/test_reports/pytest/pytest_iter27.xml"],
+  "action_items": [
+    "HIGH: Fix _client_ip in server.py so a spoofed X-Forwarded-For cannot bypass the login lockout (use the trusted right-most hop or X-Real-IP, and/or add a per-email failure counter)",
+    "Optional: remove the duplicate preconnect links in index.html and fold the Inter stylesheet into the main Google Fonts link",
+    "Optional: stop running _seed_superadmin_if_empty on every login (do it once at startup)"
+  ],
+  "critical_code_review_comments": [
+    "_client_ip trusts client-controlled XFF[0]: this is the lockout bypass above",
+    "Lockout only counts failures per ip:email pair, so attempts spread across many IPs against one email are never locked. Consider a per-email threshold too.",
+    "RouteSeo: unknown routes fall back to the home title and description but get their own canonical URL. Consider noindex for 404 paths.",
+    "The security headers middleware and CORS config look correct. Cache-Control no-store is applied to /api/auth and /api/admin."
+  ],
+  "updated_files": ["/app/backend/tests/test_security_seo.py"],
+  "success_rate": {"backend": "94% (15/16)", "frontend": "100%"},
+  "test_credentials": "admin@sunjayaasia.com / sunjaya-superadmin-2026 (from /app/memory/test_credentials.md). Used once successfully in pytest, once in the UI and once in the no-op save script. No failed attempts against real accounts.",
+  "seed_data_creation": "Mongo login_attempts docs were created for fake qa-lock-*, qa-xff-*, qa-hdr-*, qa-free-* and qa-lock-ui-* @example.com identities. They expire through the TTL index. No content was changed (the no-op PUT wrote back the same value).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Rerun test_security_seo.py; test_xff_spoof_bypass should pass after the fix. The preview host is behind Cloudflare: many rapid page.goto calls trigger a bot challenge with 429 responses. Use SPA navigation with history.pushState plus a popstate event to visit routes inside one page load.",
+  "rca of the issue": "server.py _client_ip(): fwd.split(',')[0] returns whatever the client sent first in X-Forwarded-For, because the ingress appends the real IP after it. The ident becomes '<spoofed>:email', which is a new lock bucket. Reproduce: 5 bad logins with a fake email, then a 6th with the header 'X-Forwarded-For: 1.2.3.4' returns 401 instead of 429. Mitigation: use the last hop or a trusted header, and add a per-email counter."
+}
