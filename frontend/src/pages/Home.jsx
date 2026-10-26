@@ -118,11 +118,11 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.6, duration: 0.8 }}
-            className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-8 md:gap-0 mb-6 md:mb-8"
+            className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-4 md:gap-0 mb-6 md:mb-8"
           >
-            <span data-testid="hero-overline" className="hero-overline-glow font-mono text-[10px] tracking-[0.24em] uppercase text-white text-center md:text-left">
+            <span data-testid="hero-overline" className="hero-overline-glow font-mono text-[8.5px] md:text-[10px] tracking-[0.2em] md:tracking-[0.24em] uppercase text-white text-center md:text-left">
               <span className="hidden md:inline"><CharReveal text={t("hero.overline")} delay={0.2} /></span>
-              <span className="md:hidden flex flex-col items-center gap-1.5">
+              <span className="md:hidden flex flex-col items-center gap-0.5">
                 {t("hero.overline").split(/\s+[—–-]\s+/).map((line, i) => (
                   <span key={i} className="block"><CharReveal text={line} delay={0.2 + i * 0.3} /></span>
                 ))}
