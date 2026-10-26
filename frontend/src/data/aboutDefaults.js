@@ -1,5 +1,12 @@
 // Default About page content (seeded into CMS; used as fallback)
 export const ABOUT_TEXT = {
+  "home.pillars_intro.card01_title": "The Foundation",
+  "home.pillars_intro.card01_sub": "Macro Capital Investment & Infrastructure",
+  "home.pillars_intro.card02_title": "The Core",
+  "home.pillars_intro.card02_sub": "Global Commodity Trading & Supply Chain Optimization",
+  "home.pillars_intro.card03_title": "The Future",
+  "home.pillars_intro.card03_sub": "Next-Generation Technology Development",
+  "home.pillars_intro.tagline": "STRATEGIC INVESTMENT HOLDING CORPORATION | GLOBAL POWERHOUSE | FUTURE-READY INNOVATION",
   "about.history.kicker": "Company History",
   "about.history.since": "Since 2013",
   "about.history.journey_kicker": "Our Journey",

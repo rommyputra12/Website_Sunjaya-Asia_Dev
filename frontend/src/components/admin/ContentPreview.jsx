@@ -60,6 +60,18 @@ const PillarsIntro = () => (
       <p className="mt-2 text-bone/90"><T k="home.pillars_intro.para2" /> <T k="home.pillars_intro.highlight" className="font-bold text-copper" /></p>
     </div>
     <div className="mt-4 ml-[30%] grid grid-cols-3 gap-1 opacity-50">{["01", "02", "03"].map((n) => <div key={n} className="h-8 rounded bg-sky-400/30 grid place-items-center font-bold">{n}</div>)}</div>
+    <div className="mt-4 border-t border-white/10 pt-3">
+      <div className="font-mono text-[7px] tracking-[0.2em] uppercase text-ash mb-2">Tampilan HP</div>
+      <div className="flex flex-col gap-1.5 max-w-[70%]">
+        {["01", "02", "03"].map((n, i) => (
+          <div key={n} className={`rounded border border-white/15 border-l-2 border-l-copper bg-black/30 px-2 py-1 ${i === 1 ? "ml-6" : ""}`}>
+            <span className="text-copper italic mr-1.5">{n}</span><T k={`home.pillars_intro.card${n}_title`} className="text-white" />
+            <T k={`home.pillars_intro.card${n}_sub`} as="div" className="font-mono text-[7px] uppercase text-bone/70" />
+          </div>
+        ))}
+      </div>
+      <T k="home.pillars_intro.tagline" as="div" className="mt-2 font-mono text-[6px] tracking-[0.05em] text-[#F5C842] whitespace-nowrap overflow-hidden" />
+    </div>
   </Frame>
 );
 

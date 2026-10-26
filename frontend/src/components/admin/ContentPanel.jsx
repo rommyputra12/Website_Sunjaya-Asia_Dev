@@ -25,7 +25,9 @@ const SCHEMA = [
   { page: "home", label: "Home Page", sections: [
     { id: "hero", url: "/#hero", label: "Hero (Banner Utama)", fields: [f("hero.overline", "Teks kecil atas"), f("hero.line1", "Judul baris 1"), f("hero.line2", "Judul baris 2"), rf("hero.sub", "Deskripsi"), f("hero.cta_primary", "Tombol utama"), f("hero.cta_secondary", "Tombol kedua")] },
     { id: "pillars_intro", url: "/#business-pillars", label: "Business Pillars Intro", fields: [f("home.pillars_intro.kicker", "Judul kecil (Business Pillars)"), rf("home.pillars_intro.para1", "Paragraf 1"),
-      rf("home.pillars_intro.para2", "Paragraf 2"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)")] },
+      rf("home.pillars_intro.para2", "Paragraf 2"), f("home.pillars_intro.highlight", "Teks highlight (oranye, akhir paragraf 2)"),
+      ...["01", "02", "03"].flatMap((n) => [f(`home.pillars_intro.card${n}_title`, `Kartu ${n} (HP) — Judul`), f(`home.pillars_intro.card${n}_sub`, `Kartu ${n} (HP) — Keterangan`)]),
+      f("home.pillars_intro.tagline", "Tagline kuning bawah (HP)")] },
     { id: "subsidiaries_teaser", url: "/#subsidiaries-teaser", label: "Subsidiaries & Affiliates (Teaser)", fields: [f("home.subs.kicker", "Judul kecil"), f("home.subs.title", "Judul"), rf("home.subs.desc", "Deskripsi"), f("home.subs.cta", "Tombol")] },
     { id: "stats", url: "/#stats", label: "Statistik", fields: [...stat(1, "modules", "Products"), ...stat(2, "projects", "Projects"), ...stat(3, "countries", "Countries"), ...stat(4, "contract", "Program")] },
     { id: "global_presence", url: "/#global-presence", label: "Global Presence", fields: [f("presence.kicker", "Teks kecil atas"), f("presence.title", "Judul", "textarea"), f("presence.titleHighlight", "Judul (highlight)"), rf("presence.sub", "Deskripsi (tampil di halaman Subsidiaries)"),
