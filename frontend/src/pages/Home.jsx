@@ -111,13 +111,13 @@ export default function Home() {
         {/* Above-the-fold — white line sits just below the hero content */}
         <div className="relative z-10 max-w-[1440px] mx-auto px-6 md:px-10 w-full flex flex-col">
           {/* Top spacer — small proportional gap below the navbar */}
-          <div className="h-[2vh] md:h-[3vh] shrink-0" />
+          <div className="h-0 md:h-[3vh] shrink-0" />
           {/* Top row */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.6, duration: 0.8 }}
-            className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mb-6 md:mb-8"
+            className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-8 md:gap-0 mb-6 md:mb-8"
           >
             <span data-testid="hero-overline" className="hero-overline-glow font-mono text-[10px] tracking-[0.24em] uppercase text-white text-center md:text-left">
               <span className="hidden md:inline"><CharReveal text={t("hero.overline")} delay={0.2} /></span>
