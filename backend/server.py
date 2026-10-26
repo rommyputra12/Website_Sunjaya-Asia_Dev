@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File, Form, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File, Form, Request, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -39,8 +39,7 @@ EMAIL_BASE_URL = "https://integrations.emergentagent.com"
 EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY", "")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Sunjaya Asia Group")
 CONTACT_RECIPIENT = os.environ.get("CONTACT_RECIPIENT", "info@sunjayaasia.com")
-ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "change-me")
-JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-me")
+JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALG = "HS256"
 JWT_EXPIRE_HOURS = 12
 SUPER_ADMIN_EMAIL = os.environ.get("SUPER_ADMIN_EMAIL", "")
@@ -275,19 +274,40 @@ def decode_token(token: str) -> dict | None:
         return None
 
 
-def require_admin(x_admin_token: Optional[str] = Header(default=None), authorization: Optional[str] = Header(default=None)):
-    """Accept a JWT Bearer token (multi-user) OR the legacy X-Admin-Token."""
+SESSION_COOKIE = "sjg_session"
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+
+
+def _allowed_origin(request: Request) -> bool:
+    """CSRF guard for cookie sessions: unsafe requests must come from our own site."""
+    origin = request.headers.get("origin") or ""
+    if not origin:
+        ref = request.headers.get("referer") or ""
+        origin = "/".join(ref.split("/")[:3]) if ref else ""
+    if not origin:
+        return False
+    allowed = {o.strip().rstrip("/") for o in os.environ["CORS_ORIGINS"].split(",") if o.strip()}
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+    return origin.rstrip("/") in allowed or origin.split("://")[-1] == host
+
+
+def require_admin(request: Request, authorization: Optional[str] = Header(default=None)):
+    """JWT from the httpOnly session cookie (browser CMS) or a Bearer header (API clients)."""
+    token, via_cookie = None, False
     if authorization and authorization.startswith("Bearer "):
-        payload = decode_token(authorization[7:])
-        if payload:
-            return payload
-    if x_admin_token and x_admin_token == ADMIN_TOKEN:
-        return {"sub": "legacy-admin", "name": "Legacy Admin", "role": "superadmin", "legacy": True}
-    raise HTTPException(status_code=401, detail="Unauthorized")
+        token = authorization[7:]
+    elif request.cookies.get(SESSION_COOKIE):
+        token, via_cookie = request.cookies.get(SESSION_COOKIE), True
+    payload = decode_token(token) if token else None
+    if not payload:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if via_cookie and request.method not in SAFE_METHODS and not _allowed_origin(request):
+        raise HTTPException(status_code=403, detail="Request origin not allowed")
+    return payload
 
 
-def require_superadmin(x_admin_token: Optional[str] = Header(default=None), authorization: Optional[str] = Header(default=None)):
-    payload = require_admin(x_admin_token, authorization)
+def require_superadmin(request: Request, authorization: Optional[str] = Header(default=None)):
+    payload = require_admin(request, authorization)
     if payload.get("role") != "superadmin":
         raise HTTPException(status_code=403, detail="Superadmin only")
     return payload
@@ -614,7 +634,7 @@ async def _record_login_fail(ident: str, max_fails: int = LOGIN_MAX_FAILS):
 
 
 @api_router.post("/auth/login")
-async def auth_login(payload: LoginIn, request: Request):
+async def auth_login(payload: LoginIn, request: Request, response: Response):
     await _seed_superadmin_if_empty()
     email = payload.email.strip().lower()
     ident = f"{_client_ip(request)}:{email}"
@@ -633,7 +653,22 @@ async def auth_login(payload: LoginIn, request: Request):
         await _attempts_db.delete_many({"identifier": {"$in": [ident, email_ident]}})
     except Exception:  # noqa: BLE001
         pass
-    return {"token": create_token(user), "user": _user_to_out(user).model_dump()}
+    _set_session_cookie(response, create_token(user), JWT_EXPIRE_HOURS * 3600)
+    return {"user": _user_to_out(user).model_dump()}
+
+
+def _set_session_cookie(response: Response, value: str, max_age: int):
+    # Partitioned (CHIPS) keeps the CMS login working when the site is embedded (e.g. preview iframe)
+    response.headers.append(
+        "set-cookie",
+        f"{SESSION_COOKIE}={value}; Max-Age={max_age}; Path=/api; HttpOnly; Secure; SameSite=None; Partitioned",
+    )
+
+
+@api_router.post("/auth/logout")
+async def auth_logout(response: Response):
+    _set_session_cookie(response, "", 0)
+    return {"ok": True}
 
 
 @api_router.get("/auth/me")

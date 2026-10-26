@@ -62,22 +62,6 @@ function App() {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/legal/:type" element={<Legal />} />
                 <Route path="/legal" element={<Legal />} />
-                <Route path="/download" element={
-                  <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', padding: '24px' }}>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>Download Project</h1>
-                    <p style={{ color: '#666', textAlign: 'center', maxWidth: '400px' }}>
-                      Pilih file yang ingin diunduh di bawah ini.
-                    </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '300px' }}>
-                      <a href="/project-code.tar.gz" download style={{ display: 'block', textAlign: 'center', padding: '14px 24px', background: '#0f172a', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>
-                        Kode Saja (101 KB)
-                      </a>
-                      <a href="/project-full.tar.gz" download style={{ display: 'block', textAlign: 'center', padding: '14px 24px', background: '#0f172a', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>
-                        Kode + Gambar (74 MB)
-                      </a>
-                    </div>
-                  </div>
-                } />
               </Routes>
             </main>
             <Footer />

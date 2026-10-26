@@ -12,7 +12,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { toCdnUrl, variantUrl } from "../lib/media";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api`;
-const TOKEN_KEY = "sunjaya_admin_token";
 
 const errMsg = (err, fallback = "Request failed") => {
   const d = err?.response?.data?.detail;
@@ -25,15 +24,15 @@ const errMsg = (err, fallback = "Request failed") => {
 const emptyNews = { title: "", excerpt: "", body: "", category: "Press Release", cover_image: "", published: true, language: "en" };
 
 export default function Admin() {
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
   const [authed, setAuthed] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [me, setMe] = useState(null);
   const [tab, setTab] = useState("news");
 
-  const client = axios.create({ baseURL: API, headers: { Authorization: token ? `Bearer ${token}` : "" } });
+  // Session lives in an httpOnly cookie set by the server — nothing is stored in the browser by this code
+  const client = axios.create({ baseURL: API, withCredentials: true });
 
   useEffect(() => {
-    if (!token) return;
     (async () => {
       try {
         const r = await client.get("/auth/me");
@@ -42,33 +41,35 @@ export default function Admin() {
       } catch {
         setAuthed(false);
         setMe(null);
-        localStorage.removeItem(TOKEN_KEY);
+      } finally {
+        setChecking(false);
       }
     })();
+    localStorage.removeItem("sunjaya_admin_token");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   const login = async (e) => {
     e.preventDefault();
     const email = e.target.email.value.trim();
     const password = e.target.password.value;
     try {
-      const r = await axios.post(`${API}/auth/login`, { email, password });
-      setToken(r.data.token);
+      const r = await axios.post(`${API}/auth/login`, { email, password }, { withCredentials: true });
       setMe(r.data.user);
-      localStorage.setItem(TOKEN_KEY, r.data.token);
+      setAuthed(true);
       toast.success(`Welcome, ${r.data.user.name}`);
     } catch (err) {
       toast.error(errMsg(err, "Invalid email or password"));
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    setToken("");
+  const logout = async () => {
+    try { await client.post("/auth/logout"); } catch { /* session cookie expires anyway */ }
     setMe(null);
     setAuthed(false);
   };
+
+  if (checking) return <div data-testid="admin-checking" className="pt-32 min-h-screen" />;
 
   if (!authed) {
     return (
