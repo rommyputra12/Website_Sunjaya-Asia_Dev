@@ -62,6 +62,13 @@ function App() {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/legal/:type" element={<Legal />} />
                 <Route path="/legal" element={<Legal />} />
+                <Route path="*" element={
+                  <section data-testid="not-found" className="pt-40 pb-32 px-6 md:px-10 max-w-[1600px] mx-auto">
+                    <span className="font-mono text-lg md:text-2xl font-bold tracking-[0.24em] uppercase text-copper">404</span>
+                    <h1 className="mt-4 font-serif text-2xl md:text-4xl text-bone tracking-tight">Page not found</h1>
+                    <a href="/" data-testid="not-found-home" className="mt-8 inline-block font-mono text-xs tracking-[0.22em] uppercase text-copper border-b border-copper/50 pb-1 hover:border-copper transition-colors">Back to home →</a>
+                  </section>
+                } />
               </Routes>
             </main>
             <Footer />

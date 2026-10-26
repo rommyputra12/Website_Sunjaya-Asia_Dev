@@ -243,7 +243,7 @@ def slugify(text: str) -> str:
     return text[:80] or uuid.uuid4().hex[:8]
 
 
-# ============ AUTH (JWT multi-user + legacy admin token) ============
+# ============ AUTH (JWT multi-user, httpOnly session cookie) ============
 
 def hash_password(pw: str) -> str:
     return bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()
@@ -673,7 +673,7 @@ async def auth_logout(response: Response):
 
 @api_router.get("/auth/me")
 async def auth_me(payload: dict = Depends(require_admin)):
-    return {"sub": payload.get("sub"), "name": payload.get("name"), "email": payload.get("email"), "role": payload.get("role"), "legacy": payload.get("legacy", False)}
+    return {"sub": payload.get("sub"), "name": payload.get("name"), "email": payload.get("email"), "role": payload.get("role")}
 
 
 @api_router.get("/auth/users", response_model=List[UserOut], dependencies=[Depends(require_superadmin)])
@@ -1289,5 +1289,5 @@ app.add_middleware(
     allow_credentials=True,
     allow_origins=[o.strip() for o in os.environ['CORS_ORIGINS'].split(',') if o.strip()],
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Admin-Token"],
+    allow_headers=["Authorization", "Content-Type"],
 )

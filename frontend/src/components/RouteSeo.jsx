@@ -33,7 +33,7 @@ export const RouteSeo = () => {
   useEffect(() => {
     const base = "/" + (pathname.split("/")[1] || "");
     const page = PAGES[base] || PAGES["/"];
-    const isPrivate = base === "/admin" || base === "/download";
+    const isPrivate = base === "/admin" || !PAGES[base];
     const url = `${SITE}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
     document.title = isPrivate ? `CMS — ${BRAND}` : page.title;
     setMeta("name", "description", page.desc);

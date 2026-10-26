@@ -1,0 +1,38 @@
+{
+  "summary": "Tested the admin security changes: login now uses an httpOnly cookie, the legacy X-Admin-Token is gone, there is a CSRF origin guard, Bearer tokens still work, brute-force lockout still works, the /download page is gone, and the CMS frontend session behaves correctly. Backend: 26/26 tests in the new test_cookie_session.py pass. Frontend: all of the requested flows work.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "CORS middleware (server.py ~L1292)", "issue": "allow_headers still lists 'X-Admin-Token', which no longer does anything. Remove it to finish the cleanup."},
+      {"endpoint": "GET /api/auth/me", "issue": "The response still includes a 'legacy' field. It is now always false and is no longer used."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "App.jsx Routes", "issue": "/download (and any unknown path) shows only the nav and footer with an empty middle. There is no catch-all 404 / NotFound route.", "selector": "Routes", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_cookie_session.py", "/app/test_reports/pytest/pytest_iter28.xml"],
+  "action_items": [
+    "Optional: add a catch-all <Route path='*'> NotFound page so /download and other unknown URLs don't show an empty body",
+    "Optional: remove 'X-Admin-Token' from the CORS allow_headers and the 'legacy' field from /auth/me",
+    "Optional: update or remove the old tests that use X-Admin-Token (backend_test.py, test_company_cms.py, test_review_request.py, test_read_cache.py). They now fail by design."
+  ],
+  "critical_code_review_comments": [
+    "Login returns only {user}. Set-Cookie is 'sjg_session=...; Max-Age=...; Path=/api; HttpOnly; Secure; SameSite=None; Partitioned'. Logout sets Max-Age=0. Verified.",
+    "The CSRF guard applies only to cookie-authenticated unsafe methods. Requests with no Origin and no Referer are rejected (403). A look-alike origin (<preview>.evil.com) is rejected. A same-site Referer is accepted. Bearer requests skip the origin check, which is fine because a browser cannot attach them cross-site on its own.",
+    "If both a Bearer header and the cookie are sent, the Bearer header is used. Fine.",
+    "Admin.jsx removes the old 'sunjaya_admin_token' from localStorage on mount. No token is written to localStorage or sessionStorage, and document.cookie is empty (the cookie is httpOnly).",
+    "When logged out, /admin logs two 401 console errors from the /auth/me probe (React StrictMode double effect). This is expected and harmless.",
+    "Preview-environment note: in Vite dev mode each page load requests hundreds of separate flag-icons SVGs. Several page loads within about a minute trigger ingress 429s and a blank page. This is an infra/dev-mode artifact (production bundles would avoid it), not caused by this change. Consider importing only the flags you need."
+  ],
+  "updated_files": ["/app/backend/tests/test_cookie_session.py"],
+  "success_rate": {"backend": "100% (26/26)", "frontend": "100% of requested flows"},
+  "test_credentials": "From /app/memory/test_credentials.md: admin@sunjayaasia.com / sunjaya-superadmin-2026 (superadmin), editor@sunjayaasia.com / editorpass123 (editor)",
+  "seed_data_creation": "None. The no-op content save on footer.tagline appended '!' and then removed it, restoring the original value 'The Power of Innovations'. The lockout test used a random fake test_lock_*@example.com email.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use test_cookie_session.py as the auth regression suite (it uses requests.Session for the cookie plus Origin header = REACT_APP_BACKEND_URL). Frontend verified: login with superadmin shows tabs News/Locations/Images/Content/Inquiries/Users (the editor has no Users tab); every tab loads; a content PUT through the cookie session returns 200; reload keeps the session; logout clears the cookie and a reload shows the login form. Space out page loads (about 60s) to avoid preview ingress 429s."
+}

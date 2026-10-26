@@ -102,7 +102,10 @@ class TestRealLogin:
         assert r.status_code == 200, r.text
         d = r.json()
         assert d["user"]["role"] == "superadmin"
-        me = requests.get(f"{BASE_URL}/api/auth/me", headers={"Authorization": f"Bearer {d['token']}"})
+        assert "token" not in d
+        s = requests.Session()
+        s.cookies.update(r.cookies)
+        me = s.get(f"{BASE_URL}/api/auth/me")
         assert me.status_code == 200
         assert me.json()["email"] == "admin@sunjayaasia.com"
 
