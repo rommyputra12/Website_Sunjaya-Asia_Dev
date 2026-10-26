@@ -217,13 +217,19 @@ export default function Home() {
       </section>
 
       {/* BUSINESS PILLAR INTRO — min full viewport, grows if content is taller */}
-      <section id="business-pillars" className="snap-section relative md:min-h-screen overflow-hidden bg-azure border-t border-copper/40">
+      <section id="business-pillars" className="snap-section relative min-h-[177.78vw] md:min-h-screen overflow-hidden bg-azure border-t border-copper/40">
         <AssetImg
           k="bgBusinessPillars"
           className="hidden md:block absolute inset-0 h-full w-full object-cover"
         />
+        <AssetImg
+          k={byKey.homePillarsMobileBanner?.url ? "homePillarsMobileBanner" : "bgBusinessPillars"}
+          data-testid="home-pillars-mobile-bg"
+          sizes="100vw"
+          className="md:hidden absolute inset-0 h-full w-full object-cover"
+        />
         {/* Top gradient for title legibility */}
-        <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-obsidian/60 via-obsidian/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-3/5 md:h-1/3 bg-gradient-to-b from-obsidian/90 via-obsidian/50 md:from-obsidian/60 md:via-obsidian/20 to-transparent pointer-events-none" />
         {/* Title overlay — top center, aligned above the middle pillar box (The Core) */}
         <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-10 pt-14 md:pt-28 pb-4 md:pb-0">
           <Reveal>
@@ -239,7 +245,6 @@ export default function Home() {
             </p>
           </Reveal>
         </div>
-        <AssetImg k={byKey.homePillarsMobileBanner?.url ? "homePillarsMobileBanner" : "bgBusinessPillars"} alt="Business Pillars" data-testid="home-pillars-mobile-img" sizes="100vw" className={`md:hidden relative z-10 block w-full ${byKey.homePillarsMobileBanner?.url ? "aspect-[9/16] object-cover" : "h-auto"}`} />
       </section>
 
       {/* PILLARS — each pillar is its own full-viewport section */}
