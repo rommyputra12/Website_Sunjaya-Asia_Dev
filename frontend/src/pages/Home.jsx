@@ -222,11 +222,12 @@ export default function Home() {
           <Reveal>
             <div className="md:ml-[42%]">
               <span className="font-mono text-base md:text-xl tracking-[0.22em] md:tracking-[0.28em] uppercase text-copper font-bold">{t("home.pillars_intro.kicker", PILLARS_INTRO.kicker)}</span>
+              <span data-testid="home-pillars-copper-line" className="mt-3 block h-px w-28 md:w-40 bg-gradient-to-r from-copper via-copper/60 to-transparent" />
             </div>
-            <p className="mt-3 md:ml-[42%] text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-left md:text-justify">
+            <p lang="en" className="mt-4 md:ml-[42%] text-bone/90 text-[13px] md:text-base leading-[1.75] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-auto md:hyphens-manual">
               <Fmt text={t("home.pillars_intro.para1", PILLARS_INTRO.para1)} />
             </p>
-            <p className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-sm md:text-base leading-[1.7] tracking-wide text-left md:text-justify" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
+            <p lang="en" className="mt-4 md:ml-[42%] mb-6 text-bone/90 text-[13px] md:text-base leading-[1.75] md:leading-[1.7] tracking-normal md:tracking-wide text-justify [text-justify:inter-word] hyphens-auto md:hyphens-manual" style={{ textAlign: splitAlign(t("home.pillars_intro.para2", PILLARS_INTRO.para2)).align }}>
               <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span className="font-bold text-copper">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
