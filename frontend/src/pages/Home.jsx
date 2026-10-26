@@ -119,8 +119,13 @@ export default function Home() {
             transition={{ delay: 1.6, duration: 0.8 }}
             className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mb-6 md:mb-8"
           >
-            <span className="hero-overline-glow font-mono text-[10px] tracking-[0.24em] uppercase text-white text-center md:text-left">
-              <CharReveal text={t("hero.overline")} delay={0.2} />
+            <span data-testid="hero-overline" className="hero-overline-glow font-mono text-[10px] tracking-[0.24em] uppercase text-white text-center md:text-left">
+              <span className="hidden md:inline"><CharReveal text={t("hero.overline")} delay={0.2} /></span>
+              <span className="md:hidden flex flex-col items-center gap-1.5">
+                {t("hero.overline").split(/\s+[—–-]\s+/).map((line, i) => (
+                  <span key={i} className="block"><CharReveal text={line} delay={0.2 + i * 0.3} /></span>
+                ))}
+              </span>
             </span>
             <span className="hero-overline-glow self-end md:self-auto"><HeroClock /></span>
           </motion.div>
