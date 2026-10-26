@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { CountUp } from "../components/CountUp";
+import { PillarFloatCards } from "../components/home/PillarFloatCards";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Marquee from "react-fast-marquee";
@@ -244,6 +245,7 @@ export default function Home() {
               <Fmt inline text={t("home.pillars_intro.para2", PILLARS_INTRO.para2)} /> <span data-testid="home-pillars-highlight" className="font-bold copper-pop">{t("home.pillars_intro.highlight", PILLARS_INTRO.highlight)}</span>
             </p>
           </Reveal>
+          <PillarFloatCards />
         </div>
       </section>
 
